@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Progresso">
+  <meta name="theme-color" content="#1F1B16">
+  <meta name="description" content="Sistema integral de trazabilidad y produccion - Progresso NH S.A.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" href="icon-192.png">
+  <title>Progresso - Trazabilidad</title>
+  <style>
+    :root {
+      --dark: #1F1B16;
+      --dark2: #2A241D;
+      --gold: #C9A227;
+      --gold-light: #E4C766;
+      --cream: #F3ECDC;
+      --card: #FFFFFF;
+      --text-dark: #2A241D;
+      --text-muted: #8A7F6B;
+      --danger: #B3432B;
+      --ok: #3D7A46;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--cream);
+      color: var(--text-dark);
+      -webkit-tap-highlight-color: transparent;
+    }
+    #app { min-height: 100vh; display: flex; flex-direction: column; }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 14px 16px 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 20;
+    }
+    header .left { display: flex; align-items: center; gap: 10px; }
+    header .logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: var(--dark); font-size: 15px;
+    }
+    header .titles { display: flex; flex-direction: column; line-height: 1.15; }
+    header .titles .app-name { font-size: 13px; font-weight: 700; letter-spacing: .3px; opacity: .85; }
+    header .titles .greeting { font-size: 15px; font-weight: 600; }
+    header .icons { display: flex; gap: 14px; align-items: center; }
+    header .icon-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.08); cursor: pointer; font-size: 16px;
+      border: none; color: #fff;
+    }
+    header .icon-btn:active { background: rgba(255,255,255,0.18); }
+    .accent-line { height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold)); }
+
+    main { flex: 1; padding: 16px; padding-bottom: 40px; max-width: 720px; margin: 0 auto; width: 100%; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 14px;
+      margin-top: 6px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 16px 10px 12px 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      box-shadow: 0 2px 6px rgba(42,36,29,0.08);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform .08s ease;
+      text-align: center;
+    }
+    .card:active { transform: scale(0.96); }
+    .card.active { border-color: var(--gold); }
+    .card .badge {
+      width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: #fff;
+    }
+    .card .label { font-size: 12.5px; font-weight: 600; color: var(--text-dark); }
+
+    .badge.b1 { background: #6E8B3D; }
+    .badge.b2 { background: #B3432B; }
+    .badge.b3 { background: #3E6B8A; }
+    .badge.b4 { background: #8A5FB3; }
+    .badge.b5 { background: #C9A227; }
+    .badge.b6 { background: #4A4038; }
+
+    .section-title {
+      font-size: 18px; font-weight: 700; margin: 4px 0 14px 0; color: var(--text-dark);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .back-btn {
+      background: var(--dark); color: #fff; border: none; border-radius: 10px;
+      padding: 7px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+
+    .stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
+    .stat-card {
+      background: var(--card); border-radius: 14px; padding: 14px;
+      box-shadow: 0 2px 6px rgba(42,36,29,0.08);
+    }
+    .stat-card .num { font-size: 26px; font-weight: 800; color: var(--dark); }
+    .stat-card .lbl { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+
+    .alert-item {
+      background: #FDF2EC; border-left: 4px solid var(--danger);
+      border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px;
+    }
+    .alert-item .tipo { font-weight: 700; color: var(--danger); }
+    .alert-item .det { color: var(--text-dark); margin-top: 2px; }
+    .alert-item .fecha { color: var(--text-muted); font-size: 11px; margin-top: 4px; }
+
+    .panel { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(42,36,29,0.08); }
+    .panel h3 { margin: 0 0 12px 0; font-size: 15px; color: var(--dark); }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #E4DBC8;
+      font-size: 14px; background: #FBF8F1; color: var(--text-dark);
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--gold); }
+    .btn-primary {
+      background: var(--dark); color: #fff; border: none; border-radius: 12px;
+      padding: 12px 16px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%;
+    }
+    .btn-primary:active { background: var(--dark2); }
+    .btn-secondary {
+      background: transparent; color: var(--dark); border: 1.5px solid var(--dark);
+      border-radius: 12px; padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .msg { border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-bottom: 12px; }
+    .msg.ok { background: #E8F3E9; color: var(--ok); }
+    .msg.err { background: #FDECEA; color: var(--danger); }
+    .list-item {
+      background: #FBF8F1; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px;
+      display: flex; justify-content: space-between; gap: 8px; align-items: center;
+    }
+    .list-item .meta { color: var(--text-muted); font-size: 11px; }
+    .pill { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; background: #EFE6CB; color: #7A6522; }
+    .loading { text-align: center; color: var(--text-muted); padding: 30px 0; font-size: 13px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
+    .tab { padding: 8px 14px; border-radius: 20px; background: var(--card); font-size: 12.5px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; box-shadow: 0 1px 4px rgba(42,36,29,0.06); }
+    .tab.active { background: var(--dark); color: #fff; }
+    .offline-banner {
+      background: var(--danger); color: #fff; text-align: center; font-size: 12px;
+      font-weight: 700; padding: 6px 10px; display: none;
+    }
+    .offline-banner.show { display: block; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="left">
+        <div class="logo">PN</div>
+        <div class="titles">
+          <div class="app-name">PROGRESSO NH</div>
+          <div class="greeting" id="greeting">Hola</div>
+        </div>
+      </div>
+      <div class="icons">
+        <button class="icon-btn" id="btnAlertas" title="Alertas">&#128276;</button>
+        <button class="icon-btn" id="btnHome" title="Inicio">&#8962;</button>
+      </div>
+    </header>
+    <div class="accent-line"></div>
+    <div class="offline-banner" id="offlineBanner">Sin conexion a internet</div>
+    <main id="main">
+      <div class="loading">Cargando...</div>
+    </main>
+  </div>
+
+  <script>
+    // =========================================================================
+    // Config: API de Apps Script (proyecto standalone, cuenta personal, deploy
+    // "Cualquier usuario" - acceso anonimo real). Esta PWA vive en GitHub Pages,
+    // separada del backend, y habla con el por fetch().
+    //
+    // IMPORTANTE - CORS: Apps Script no responde a preflight OPTIONS, asi que:
+    //   - Lecturas: GET con parametros en la query string.
+    //   - Escrituras: POST con Content-Type: text/plain;charset=utf-8 (nunca
+    //     application/json) y el JSON como texto plano en el body, para que el
+    //     navegador lo trate como "simple request" y no dispare preflight.
+    // =========================================================================
+    var API_URL = 'https://script.google.com/macros/s/AKfycbzVF5CBriXvDsX-IJdKrr52vnWRVGMWBCJ6SAbuEq5pAX6e5I9QqarQAWHBTPtlH4E0/exec';
+
+    function apiGet(action, params) {
+      var url = API_URL + '?action=' + encodeURIComponent(action);
+      if (params) {
+        Object.keys(params).forEach(function (k) {
+          var v = params[k];
+          if (v !== undefined && v !== null && v !== '') {
+            url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(v);
+          }
+        });
+      }
+      return fetch(url, { method: 'GET', credentials: 'omit' })
+        .then(function (res) { return res.json(); })
+        .then(function (json) {
+          if (!json.ok) throw new Error(json.error || 'Error desconocido');
+          return json.data;
+        });
+    }
+
+    function apiPost(action, data) {
+      var body = Object.assign({ action: action, usuario: CURRENT_USER }, data || {});
+      return fetch(API_URL, {
+        method: 'POST',
+        credentials: 'omit',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(body)
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (json) {
+          if (!json.ok) throw new Error(json.error || 'Error desconocido');
+          return json.data;
+        });
+    }
+
+    // =========================================================================
+    // Estado / usuario. La API es anonima (sin login de Google), asi que el
+    // "usuario" que queda registrado en las hojas es un nombre que se pide una
+    // sola vez y se guarda en este dispositivo (localStorage).
+    // =========================================================================
+    var CURRENT_USER = 'Usuario';
+    var MODULES = [
+      { id: 'dashboard', label: 'Resumen', badge: 'b5', icon: '&#128202;' },
+      { id: 'materiaprima', label: 'Materia Prima', badge: 'b1', icon: '&#127806;' },
+      { id: 'produccion', label: 'Producción', badge: 'b2', icon: '&#9881;' },
+      { id: 'laboratorio', label: 'Laboratorio', badge: 'b3', icon: '&#129514;' },
+      { id: 'comex', label: 'COMEX', badge: 'b4', icon: '&#128230;' },
+      { id: 'alertas', label: 'Alertas', badge: 'b6', icon: '&#9888;' }
+    ];
+    var ACTIVE = 'dashboard';
+
+    function el(html) {
+      var d = document.createElement('div');
+      d.innerHTML = html.trim();
+      return d.firstChild;
+    }
+    function esc(s) { return (s === undefined || s === null) ? '' : String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+    function renderHome() {
+      var main = document.getElementById('main');
+      var html = '<div class="grid">';
+      MODULES.forEach(function(m) {
+        html += '<div class="card' + (m.id === ACTIVE ? ' active' : '') + '" data-mod="' + m.id + '">' +
+          '<div class="badge ' + m.badge + '">' + m.icon + '</div>' +
+          '<div class="label">' + m.label + '</div></div>';
+      });
+      html += '</div>';
+      main.innerHTML = html;
+      Array.prototype.forEach.call(main.querySelectorAll('.card'), function(c) {
+        c.addEventListener('click', function() { navigate(c.getAttribute('data-mod')); });
+      });
+    }
+
+    function navigate(mod) {
+      ACTIVE = mod;
+      if (mod === 'dashboard') renderDashboard();
+      else if (mod === 'materiaprima') renderMateriaPrima();
+      else if (mod === 'produccion') renderProduccion();
+      else if (mod === 'laboratorio') renderLaboratorio();
+      else if (mod === 'comex') renderComex();
+      else if (mod === 'alertas') renderAlertas();
+    }
+
+    function sectionHeader(title) {
+      return '<div class="section-title"><button class="back-btn" id="backBtn">&larr; Inicio</button>' + esc(title) + '</div>';
+    }
+    function wireBack() {
+      var b = document.getElementById('backBtn');
+      if (b) b.addEventListener('click', function() { ACTIVE = 'dashboard'; renderHome(); });
+    }
+
+    // ---------- DASHBOARD ----------
+    function renderDashboard() {
+      var main = document.getElementById('main');
+      main.innerHTML = sectionHeader('Resumen') + '<div class="loading">Cargando dashboard...</div>';
+      wireBack();
+      apiGet('dashboard').then(function(data) {
+        var html = sectionHeader('Resumen');
+        html += '<div class="stat-row">' +
+          statCard(data.ordenesAbiertas, 'Órdenes abiertas') +
+          statCard(data.alertasAbiertas, 'Alertas abiertas') +
+          statCard(data.solicitudesActivas, 'Solicitudes COMEX') +
+          statCard(data.silosEnUso, 'Silos en uso') +
+          '</div>';
+        html += '<div class="panel"><h3>Alertas recientes</h3>';
+        if (!data.alertas || data.alertas.length === 0) {
+          html += '<div style="color:var(--text-muted);font-size:13px;">Sin alertas abiertas.</div>';
+        } else {
+          data.alertas.forEach(function(a) {
+            html += '<div class="alert-item"><div class="tipo">' + esc(a.tipo) + '</div>' +
+              '<div class="det">' + esc(a.detalle) + '</div>' +
+              '<div class="fecha">' + esc(a.entidad) + ' ' + esc(a.entidad_id) + ' &middot; ' + esc(a.fecha_deteccion) + '</div></div>';
+          });
+        }
+        html += '</div>';
+        main.innerHTML = html;
+        wireBack();
+      }).catch(showErrorInMain);
+    }
+    function statCard(num, lbl) {
+      return '<div class="stat-card"><div class="num">' + esc(num) + '</div><div class="lbl">' + esc(lbl) + '</div></div>';
+    }
+    function showErrorInMain(err) {
+      var main = document.getElementById('main');
+      main.innerHTML = sectionHeader('Error') + '<div class="msg err">' + esc(err.message || err) + '</div>';
+      wireBack();
+    }
+
+    // ---------- MATERIA PRIMA ----------
+    function renderMateriaPrima() {
+      var main = document.getElementById('main');
+      var html = sectionHeader('Materia Prima');
+      html += tabsHtml(['stock', 'ingreso', 'lote', 'silo'], 'mp');
+      html += '<div id="mpBody"></div>';
+      main.innerHTML = html;
+      wireBack();
+      wireTabs('mp', function(tab) { renderMpTab(tab); });
+      renderMpTab('stock');
+    }
+    function renderMpTab(tab) {
+      var body = document.getElementById('mpBody');
+      if (tab === 'stock') {
+        body.innerHTML = '<div class="loading">Cargando stock...</div>';
+        apiGet('stockLotesMP').then(function(rows) {
+          var html = '';
+          if (!rows || rows.length === 0) html = '<div style="color:var(--text-muted);font-size:13px;">Sin lotes registrados.</div>';
+          rows.forEach(function(r) {
+            html += '<div class="list-item"><div><b>' + esc(r.id_lote_mp) + '</b> &middot; ' + esc(r.producto) +
+              '<div class="meta">Ingreso: ' + esc(r.ingreso_kg) + ' kg &middot; Consumido: ' + esc(r.consumido_kg) + ' kg</div></div>' +
+              '<div><span class="pill">' + esc(r.saldo_kg) + ' kg</span></div></div>';
+          });
+          body.innerHTML = html;
+        }).catch(function(e){ body.innerHTML = '<div class="msg err">' + esc(e.message||e) + '</div>'; });
+      } else if (tab === 'ingreso') {
+        body.innerHTML = formPanel('Registrar ingreso BigBag', [
+          { name: 'lote_mp_id', label: 'ID Lote MP (ej: LOT-0001)' },
+          { name: 'peso_kg', label: 'Peso (kg)', type: 'number' },
+          { name: 'codigo_bigbag', label: 'Código BigBag' }
+        ], function(data) { callServer('registrarIngresoBigBag', data, body); });
+      } else if (tab === 'lote') {
+        body.innerHTML = formPanel('Crear Lote MP', [
+          { name: 'producto', label: 'Producto' },
+          { name: 'proveedor', label: 'Proveedor' },
+          { name: 'orden_lote_id', label: 'ID Orden de Lote (opcional)' }
+        ], function(data) { callServer('crearLoteMP', data, body); });
+      } else if (tab === 'silo') {
+        body.innerHTML = formPanel('Crear Silo / Bolsa', [
+          { name: 'codigo', label: 'Código' },
+          { name: 'capacidad_kg', label: 'Capacidad (kg)', type: 'number' }
+        ], function(data) { callServer('crearSiloBolsa', data, body); });
+      }
+    }
+
+    // ---------- PRODUCCION ----------
+    function renderProduccion() {
+      var main = document.getElementById('main');
+      var html = sectionHeader('Producción');
+      html += tabsHtml(['abrir', 'bigbag', 'merma', 'empaque', 'cerrar'], 'pr');
+      html += '<div id="prBody"></div>';
+      main.innerHTML = html;
+      wireBack();
+      wireTabs('pr', function(tab) { renderPrTab(tab); });
+      renderPrTab('abrir');
+    }
+    function renderPrTab(tab) {
+      var body = document.getElementById('prBody');
+      if (tab === 'abrir') {
+        body.innerHTML = formPanel('Abrir Orden de Producción', [
+          { name: 'producto', label: 'Producto' },
+          { name: 'objetivo_kg', label: 'Objetivo (kg)', type: 'number' },
+          { name: 'lote_mp_id', label: 'ID Lote MP a consumir' }
+        ], function(data) { callServer('abrirOrdenProduccion', data, body); });
+      } else if (tab === 'bigbag') {
+        body.innerHTML = formPanel('Registrar BigBag de Proceso', [
+          { name: 'orden_produccion_id', label: 'ID Orden Producción' },
+          { name: 'peso_kg', label: 'Peso (kg)', type: 'number' },
+          { name: 'codigo_bigbag', label: 'Código BigBag' }
+        ], function(data) { callServer('registrarBigBagProceso', data, body); });
+      } else if (tab === 'merma') {
+        body.innerHTML = formPanel('Registrar Merma', [
+          { name: 'orden_produccion_id', label: 'ID Orden Producción' },
+          { name: 'cantidad_kg', label: 'Cantidad (kg)', type: 'number' },
+          { name: 'motivo', label: 'Motivo' }
+        ], function(data) { callServer('registrarMerma', data, body); });
+      } else if (tab === 'empaque') {
+        body.innerHTML = formPanel('Registrar Empaquetado', [
+          { name: 'orden_produccion_id', label: 'ID Orden Producción' },
+          { name: 'bigbag_proceso_id', label: 'ID BigBag Proceso' },
+          { name: 'cantidad_kg', label: 'Cantidad (kg)', type: 'number' }
+        ], function(data) { callServer('registrarEmpaquetado', data, body); });
+      } else if (tab === 'cerrar') {
+        body.innerHTML = formPanel('Cerrar Orden de Producción', [
+          { name: 'orden_id', label: 'ID Orden Producción' }
+        ], function(data) { callServer('cerrarOrdenProduccion', data, body); });
+      }
+    }
+
+    // ---------- LABORATORIO ----------
+    function renderLaboratorio() {
+      var main = document.getElementById('main');
+      var html = sectionHeader('Laboratorio');
+      html += formPanelStr('Registrar Análisis', [
+        { name: 'entidad_tipo', label: 'Tipo de entidad (ej: BIGBAG_PROCESO)' },
+        { name: 'entidad_id', label: 'ID de entidad' },
+        { name: 'tipo', label: 'Tipo de análisis' },
+        { name: 'laboratorio', label: 'Laboratorio' },
+        { name: 'resultado_general', label: 'Resultado general (APROBADO/RECHAZADO)' }
+      ]);
+      main.innerHTML = html;
+      wireBack();
+      document.getElementById('formSubmit').addEventListener('click', function() {
+        var data = collectForm();
+        callServer('crearAnalisis', data, document.getElementById('formResult'));
+      });
+    }
+
+    // ---------- COMEX ----------
+    function renderComex() {
+      var main = document.getElementById('main');
+      var html = sectionHeader('COMEX / Despacho');
+      html += tabsHtml(['solicitud', 'estiba', 'asignarlote', 'exportacion', 'asignarestiba'], 'cx');
+      html += '<div id="cxBody"></div>';
+      main.innerHTML = html;
+      wireBack();
+      wireTabs('cx', function(tab) { renderCxTab(tab); });
+      renderCxTab('solicitud');
+    }
+    function renderCxTab(tab) {
+      var body = document.getElementById('cxBody');
+      if (tab === 'solicitud') {
+        body.innerHTML = formPanel('Crear Solicitud COMEX', [
+          { name: 'producto', label: 'Producto' },
+          { name: 'cantidad_solicitada', label: 'Cantidad solicitada (kg)', type: 'number' },
+          { name: 'cliente', label: 'Cliente' },
+          { name: 'canal', label: 'Canal (WhatsApp/Email/...)' }
+        ], function(data) { callServer('crearSolicitudComex', data, body); });
+      } else if (tab === 'estiba') {
+        body.innerHTML = formPanel('Crear Estiba', [
+          { name: 'tipo_producto', label: 'Tipo de producto' },
+          { name: 'capacidad_estimada_kg', label: 'Capacidad estimada (kg)', type: 'number' },
+          { name: 'ubicacion', label: 'Ubicación' }
+        ], function(data) { callServer('crearEstiba', data, body); });
+      } else if (tab === 'asignarlote') {
+        body.innerHTML = formPanel('Asignar Lote a Estiba', [
+          { name: 'estiba_id', label: 'ID Estiba' },
+          { name: 'lote_mp_id', label: 'ID Lote MP' },
+          { name: 'cantidad_kg', label: 'Cantidad (kg)', type: 'number' }
+        ], function(data) { callServer('asignarLoteAEstiba', data, body); });
+      } else if (tab === 'exportacion') {
+        body.innerHTML = formPanel('Crear Exportación', [
+          { name: 'solicitud_comex_id', label: 'ID Solicitud COMEX (opcional)' },
+          { name: 'tipo_bolsa', label: 'Tipo de bolsa' },
+          { name: 'tipo_contenerizado', label: 'Tipo contenerizado' }
+        ], function(data) { callServer('crearExportacion', data, body); });
+      } else if (tab === 'asignarestiba') {
+        body.innerHTML = formPanel('Asignar Estiba a Exportación', [
+          { name: 'exportacion_id', label: 'ID Exportación' },
+          { name: 'estiba_lote_id', label: 'ID Estiba-Lote' },
+          { name: 'cantidad_kg', label: 'Cantidad (kg)', type: 'number' }
+        ], function(data) { callServer('asignarEstibaAExportacion', data, body); });
+      }
+    }
+
+    // ---------- ALERTAS ----------
+    function renderAlertas() {
+      var main = document.getElementById('main');
+      main.innerHTML = sectionHeader('Alertas') + '<div class="loading">Cargando alertas...</div>';
+      wireBack();
+      apiGet('alertas', {}).then(function(rows) {
+        var html = sectionHeader('Alertas');
+        if (!rows || rows.length === 0) {
+          html += '<div style="color:var(--text-muted);font-size:13px;">Sin alertas.</div>';
+        } else {
+          rows.forEach(function(a) {
+            html += '<div class="alert-item"><div class="tipo">' + esc(a.tipo) + ' &middot; ' + esc(a.estado) + '</div>' +
+              '<div class="det">' + esc(a.detalle) + '</div>' +
+              '<div class="fecha">' + esc(a.entidad) + ' ' + esc(a.entidad_id) + ' &middot; ' + esc(a.fecha_deteccion) + '</div>';
+            if (a.estado === 'ABIERTA') {
+              html += '<button class="btn-secondary" style="margin-top:8px;" data-id="' + esc(a.id_alerta) + '" onclick="resolverAlerta(\'' + esc(a.id_alerta) + '\')">Marcar revisada</button>';
+            }
+            html += '</div>';
+          });
+        }
+        main.innerHTML = html;
+        wireBack();
+      }).catch(showErrorInMain);
+    }
+    function resolverAlerta(id) {
+      apiPost('resolverAlerta', { id_alerta: id, estado: 'REVISADA' }).then(function() {
+        renderAlertas();
+      }).catch(function(e){ alert(e.message || e); });
+    }
+
+    // ---------- Helpers: forms & tabs ----------
+    function tabsHtml(tabs, group) {
+      var labels = { stock:'Stock', ingreso:'Ingreso BigBag', lote:'Nuevo Lote', silo:'Nuevo Silo',
+        abrir:'Abrir Orden', bigbag:'BigBag', merma:'Merma', empaque:'Empaque', cerrar:'Cerrar',
+        solicitud:'Solicitud', estiba:'Estiba', asignarlote:'Asignar Lote', exportacion:'Exportación', asignarestiba:'Asignar Estiba' };
+      var html = '<div class="tabs">';
+      tabs.forEach(function(t, i) {
+        html += '<div class="tab' + (i === 0 ? ' active' : '') + '" data-tab="' + t + '" data-group="' + group + '">' + (labels[t] || t) + '</div>';
+      });
+      html += '</div>';
+      return html;
+    }
+    function wireTabs(group, cb) {
+      var tabs = document.querySelectorAll('.tab[data-group="' + group + '"]');
+      Array.prototype.forEach.call(tabs, function(t) {
+        t.addEventListener('click', function() {
+          Array.prototype.forEach.call(tabs, function(x) { x.classList.remove('active'); });
+          t.classList.add('active');
+          cb(t.getAttribute('data-tab'));
+        });
+      });
+    }
+    function formPanel(title, fields, onSubmit) {
+      var html = '<div class="panel"><h3>' + esc(title) + '</h3><div id="dynForm">';
+      fields.forEach(function(f) {
+        html += '<div class="field"><label>' + esc(f.label) + '</label><input type="' + (f.type || 'text') + '" data-field="' + f.name + '"></div>';
+      });
+      html += '</div><div id="dynResult"></div><button class="btn-primary" id="dynSubmit">Guardar</button></div>';
+      setTimeout(function() {
+        var btn = document.getElementById('dynSubmit');
+        if (btn) btn.addEventListener('click', function() {
+          var data = {};
+          Array.prototype.forEach.call(document.querySelectorAll('#dynForm [data-field]'), function(inp) {
+            data[inp.getAttribute('data-field')] = inp.value;
+          });
+          onSubmit(data);
+        });
+      }, 0);
+      return html;
+    }
+    function formPanelStr(title, fields) {
+      var html = '<div class="panel"><h3>' + esc(title) + '</h3><div id="dynForm">';
+      fields.forEach(function(f) {
+        html += '<div class="field"><label>' + esc(f.label) + '</label><input type="text" data-field="' + f.name + '"></div>';
+      });
+      html += '</div><div id="formResult"></div><button class="btn-primary" id="formSubmit">Guardar</button></div>';
+      return html;
+    }
+    function collectForm() {
+      var data = {};
+      Array.prototype.forEach.call(document.querySelectorAll('#dynForm [data-field]'), function(inp) {
+        data[inp.getAttribute('data-field')] = inp.value;
+      });
+      return data;
+    }
+    function callServer(fnName, data, targetEl) {
+      var resultDiv = targetEl.querySelector ? targetEl.querySelector('#dynResult') : null;
+      if (!resultDiv) resultDiv = document.getElementById('dynResult') || document.getElementById('formResult');
+      if (resultDiv) resultDiv.innerHTML = '<div class="loading">Guardando...</div>';
+      apiPost(fnName, data).then(function(res) {
+        if (resultDiv) resultDiv.innerHTML = '<div class="msg ok">Guardado correctamente.</div>';
+      }).catch(function(err) {
+        if (resultDiv) resultDiv.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>';
+      });
+    }
+
+    document.getElementById('btnHome').addEventListener('click', function() { ACTIVE = 'dashboard'; renderHome(); });
+    document.getElementById('btnAlertas').addEventListener('click', function() { navigate('alertas'); });
+
+    // ---------- Banner de sin conexion ----------
+    function updateOfflineBanner() {
+      var b = document.getElementById('offlineBanner');
+      if (!b) return;
+      b.classList.toggle('show', !navigator.onLine);
+    }
+    window.addEventListener('online', updateOfflineBanner);
+    window.addEventListener('offline', updateOfflineBanner);
+    updateOfflineBanner();
+
+    // ---------- Service worker (instalable / offline) ----------
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').catch(function() {});
+      });
+    }
+
+    // ---------- Init: pedir nombre de usuario (una sola vez, guardado local) ----------
+    function ensureUsuario(cb) {
+      var saved = null;
+      try { saved = localStorage.getItem('pn_usuario'); } catch (e) {}
+      if (saved) { CURRENT_USER = saved; cb(); return; }
+      showUsuarioPrompt(cb);
+    }
+    function showUsuarioPrompt(cb) {
+      var main = document.getElementById('main');
+      main.innerHTML = '<div class="panel"><h3>¿Cómo te llamás?</h3>' +
+        '<div style="color:var(--text-muted);font-size:12.5px;margin-bottom:12px;">Se usa para registrar quién hizo cada movimiento. Se guarda solo en este dispositivo.</div>' +
+        '<div class="field"><input type="text" id="usuarioInput" placeholder="Tu nombre"></div>' +
+        '<button class="btn-primary" id="usuarioSubmit">Continuar</button></div>';
+      var input = document.getElementById('usuarioInput');
+      function submit() {
+        var val = input.value.trim();
+        if (!val) { input.focus(); return; }
+        CURRENT_USER = val;
+        try { localStorage.setItem('pn_usuario', val); } catch (e) {}
+        cb();
+      }
+      document.getElementById('usuarioSubmit').addEventListener('click', submit);
+      input.addEventListener('keydown', function(e) { if (e.key === 'Enter') submit(); });
+      input.focus();
+    }
+
+    ensureUsuario(function() {
+      document.getElementById('greeting').textContent = 'Hola, ' + CURRENT_USER.split(' ')[0];
+      renderHome();
+    });
+  </script>
+</body>
+</html>
