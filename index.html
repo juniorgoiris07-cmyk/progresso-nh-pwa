@@ -90,6 +90,8 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 24px; color: #fff;
     }
+    .card .badge svg { width: 26px; height: 26px; }
+    header .icon-btn svg { width: 18px; height: 18px; }
     .card .label { font-size: 12.5px; font-weight: 600; color: var(--text-dark); }
 
     .badge.b1 { background: #6E8B3D; }
@@ -212,8 +214,8 @@
         </div>
       </div>
       <div class="icons">
-        <button class="icon-btn" id="btnAlertas" title="Alertas">&#128276;</button>
-        <button class="icon-btn" id="btnHome" title="Inicio">&#8962;</button>
+        <button class="icon-btn" id="btnAlertas" title="Alertas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+        <button class="icon-btn" id="btnHome" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
       </div>
     </header>
     <div class="accent-line"></div>
@@ -279,12 +281,12 @@
     var CATEGORIAS_PROCESAMIENTO = ['Organico', 'Organico BNN', 'Convencional UE'];
     var PENDING_PARTIDAS = [];
     var MODULES = [
-      { id: 'dashboard', label: 'Resumen', badge: 'b5', icon: '&#128202;' },
-      { id: 'materiaprima', label: 'Materia Prima', badge: 'b1', icon: '&#127806;' },
-      { id: 'produccion', label: 'Producción', badge: 'b2', icon: '&#9881;' },
-      { id: 'laboratorio', label: 'Laboratorio', badge: 'b3', icon: '&#129514;' },
-      { id: 'comex', label: 'COMEX', badge: 'b4', icon: '&#128230;' },
-      { id: 'alertas', label: 'Alertas', badge: 'b6', icon: '&#9888;' }
+      { id: 'dashboard', label: 'Resumen', badge: 'b5', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>' },
+      { id: 'materiaprima', label: 'Materia Prima', badge: 'b1', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>' },
+      { id: 'produccion', label: 'Producción', badge: 'b2', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
+      { id: 'laboratorio', label: 'Laboratorio', badge: 'b3', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6L4.5 18.5A2 2 0 0 0 6.3 21h11.4a2 2 0 0 0 1.8-2.5L15 8V2"/><path d="M8.5 2h7"/><path d="M6.5 15h11"/></svg>' },
+      { id: 'comex', label: 'COMEX', badge: 'b4', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' },
+      { id: 'alertas', label: 'Alertas', badge: 'b6', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' }
     ];
     var ACTIVE = 'dashboard';
 
