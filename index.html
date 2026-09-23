@@ -155,6 +155,45 @@
     .tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
     .tab { padding: 8px 14px; border-radius: 20px; background: var(--card); font-size: 12.5px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; box-shadow: 0 1px 4px rgba(42,36,29,0.06); }
     .tab.active { background: var(--dark); color: #fff; }
+
+    /* ---- Procesamiento (logica de procesamiento-chia) ---- */
+    h4 { font-size: 13px; color: var(--dark); margin: 16px 0 8px 0; }
+    hr { border: none; border-top: 1px solid #EFE6CB; margin: 16px 0; }
+    .stat-mini-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+    .stat-mini { background: #FBF8F1; border-radius: 12px; padding: 10px 14px; flex: 1; min-width: 110px; }
+    .stat-mini .lbl { font-size: 10.5px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+    .stat-mini .num { font-size: 17px; font-weight: 800; color: var(--dark); margin-top: 2px; }
+    .field input.readonly, .field input[readonly] { background: #EFE6CB; font-weight: 700; color: var(--dark); }
+    .partida-table { margin-bottom: 10px; }
+    .partida-empty { color: var(--text-muted); font-size: 12.5px; padding: 8px 0; }
+    .partida-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 10px; }
+    .partida-tbl th { background: var(--dark); color: #fff; text-align: left; padding: 6px 8px; font-size: 10.5px; text-transform: uppercase; }
+    .partida-tbl td { padding: 6px 8px; border-bottom: 1px solid #EFE6CB; }
+    .partida-del { background: none; border: none; color: var(--danger); font-size: 16px; cursor: pointer; line-height: 1; padding: 0 4px; }
+    .obs-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .obs-chip { display: flex; align-items: center; gap: 6px; background: #FBF8F1; border: 1.5px solid #E4DBC8; border-radius: 20px; padding: 6px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+    .hist-search input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #E4DBC8; font-size: 14px; background: #fff; margin-bottom: 12px; }
+    .hist-tbl-wrap { overflow-x: auto; }
+    .hist-tbl { width: 100%; border-collapse: collapse; font-size: 12px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 6px rgba(42,36,29,0.08); }
+    .hist-tbl th { background: var(--dark); color: #fff; padding: 8px 6px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .2px; white-space: nowrap; }
+    .hist-tbl td { padding: 8px 6px; border-bottom: 1px solid #F1ECDD; white-space: nowrap; }
+    .hist-row { cursor: pointer; }
+    .hist-row:active { background: #FBF3DC; }
+    .badge-estado { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .badge-proceso { background: #FCEED2; color: #8A6A0A; }
+    .badge-terminado { background: #DCEFE0; color: var(--ok); }
+    .chart-wrap { overflow-x: auto; margin: 10px 0; }
+    .chart-svg { width: 100%; min-width: 260px; height: auto; display: block; }
+    .chart-svg .chart-axis-label { font-size: 10px; fill: var(--text-muted); }
+    .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-dark); font-weight: 600; }
+    .legend-swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+    .hbar-list { display: flex; flex-direction: column; gap: 10px; }
+    .hbar-row { display: grid; grid-template-columns: 110px 1fr 74px; align-items: center; gap: 8px; font-size: 12px; }
+    .hbar-lbl { color: var(--text-dark); font-weight: 600; }
+    .hbar-track { background: #F1ECDD; border-radius: 20px; height: 12px; overflow: hidden; }
+    .hbar-fill { height: 100%; border-radius: 20px; }
+    .hbar-val { text-align: right; color: var(--text-muted); font-weight: 700; }
     .offline-banner {
       background: var(--danger); color: #fff; text-align: center; font-size: 12px;
       font-weight: 700; padding: 6px 10px; display: none;
@@ -237,6 +276,8 @@
     // sola vez y se guarda en este dispositivo (localStorage).
     // =========================================================================
     var CURRENT_USER = 'Usuario';
+    var CATEGORIAS_PROCESAMIENTO = ['Organico', 'Organico BNN', 'Convencional UE'];
+    var PENDING_PARTIDAS = [];
     var MODULES = [
       { id: 'dashboard', label: 'Resumen', badge: 'b5', icon: '&#128202;' },
       { id: 'materiaprima', label: 'Materia Prima', badge: 'b1', icon: '&#127806;' },
@@ -369,48 +410,329 @@
       }
     }
 
-    // ---------- PRODUCCION ----------
+    // ---------- PRODUCCION (carga de lote de procesamiento, igual a procesamiento-chia) ----------
     function renderProduccion() {
       var main = document.getElementById('main');
       var html = sectionHeader('Producción');
-      html += tabsHtml(['abrir', 'bigbag', 'merma', 'empaque', 'cerrar'], 'pr');
+      html += tabsHtml(['cargar', 'historial', 'resumen'], 'pr');
       html += '<div id="prBody"></div>';
       main.innerHTML = html;
       wireBack();
       wireTabs('pr', function(tab) { renderPrTab(tab); });
-      renderPrTab('abrir');
+      renderPrTab('cargar');
+    }
+    function switchPrTab(tab) {
+      var tabs = document.querySelectorAll('.tab[data-group="pr"]');
+      Array.prototype.forEach.call(tabs, function(t) { t.classList.toggle('active', t.getAttribute('data-tab') === tab); });
+      renderPrTab(tab);
     }
     function renderPrTab(tab) {
       var body = document.getElementById('prBody');
-      if (tab === 'abrir') {
-        body.innerHTML = formPanel('Abrir Orden de Producción', [
-          { name: 'producto', label: 'Producto' },
-          { name: 'objetivo_kg', label: 'Objetivo (kg)', type: 'number' },
-          { name: 'lote_mp_id', label: 'ID Lote MP a consumir' }
-        ], function(data) { callServer('abrirOrdenProduccion', data, body); });
-      } else if (tab === 'bigbag') {
-        body.innerHTML = formPanel('Registrar BigBag de Proceso', [
-          { name: 'orden_produccion_id', label: 'ID Orden Producción' },
-          { name: 'peso_kg', label: 'Peso (kg)', type: 'number' },
-          { name: 'codigo_bigbag', label: 'Código BigBag' }
-        ], function(data) { callServer('registrarBigBagProceso', data, body); });
-      } else if (tab === 'merma') {
-        body.innerHTML = formPanel('Registrar Merma', [
-          { name: 'orden_produccion_id', label: 'ID Orden Producción' },
-          { name: 'cantidad_kg', label: 'Cantidad (kg)', type: 'number' },
-          { name: 'motivo', label: 'Motivo' }
-        ], function(data) { callServer('registrarMerma', data, body); });
-      } else if (tab === 'empaque') {
-        body.innerHTML = formPanel('Registrar Empaquetado', [
-          { name: 'orden_produccion_id', label: 'ID Orden Producción' },
-          { name: 'bigbag_proceso_id', label: 'ID BigBag Proceso' },
-          { name: 'cantidad_kg', label: 'Cantidad (kg)', type: 'number' }
-        ], function(data) { callServer('registrarEmpaquetado', data, body); });
-      } else if (tab === 'cerrar') {
-        body.innerHTML = formPanel('Cerrar Orden de Producción', [
-          { name: 'orden_id', label: 'ID Orden Producción' }
-        ], function(data) { callServer('cerrarOrdenProduccion', data, body); });
+      if (tab === 'cargar') renderCargarLote(body);
+      else if (tab === 'historial') renderHistorialProcesamiento(body);
+      else if (tab === 'resumen') renderResumenProcesamiento(body);
+    }
+    function categoriaOptionsHtml(incluirUsarDelLote) {
+      var html = incluirUsarDelLote ? '<option value="">(usar la del lote)</option>' : '<option value="">Seleccionar...</option>';
+      CATEGORIAS_PROCESAMIENTO.forEach(function(c) { html += '<option value="' + esc(c) + '">' + esc(c) + '</option>'; });
+      return html;
+    }
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function fmtKg(n) { n = Number(n) || 0; return n.toLocaleString('es-PY', { maximumFractionDigits: 1 }) + ' kg'; }
+    function statMini(lbl, val) { return '<div class="stat-mini"><div class="lbl">' + esc(lbl) + '</div><div class="num">' + esc(val) + '</div></div>'; }
+    function catColor(c) {
+      var map = { 'Organico': '#1baf7a', 'Organico BNN': '#2a78d6', 'Convencional UE': '#eb6834' };
+      return map[c] || '#898781';
+    }
+    function fmtPeriodo(p) {
+      var meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+      var parts = String(p).split('-');
+      var y = parts[0], m = parseInt(parts[1], 10);
+      return (meses[m - 1] || p) + ' ' + y;
+    }
+
+    // ---- Cargar lote ----
+    function renderCargarLote(body) {
+      PENDING_PARTIDAS = [];
+      body.innerHTML =
+        '<div class="panel">' +
+        '<h3>Nuevo lote de procesamiento</h3>' +
+        '<div style="color:var(--text-muted);font-size:12.5px;margin-bottom:14px;">Cargá los datos generales del lote. El producto terminado se agrega por partidas, con su fecha, abajo.</div>' +
+        '<div class="field"><label>Fecha</label><input type="date" id="cl_fecha"></div>' +
+        '<div class="field"><label>Lote</label><input type="text" id="cl_lote" placeholder="Ej. PROCHSC 021-26"></div>' +
+        '<div class="field"><label>Silo bolsa</label><input type="text" id="cl_silo" placeholder="Ej. SB-14"></div>' +
+        '<div class="field"><label>Categoría</label><select id="cl_categoria">' + categoriaOptionsHtml(false) + '</select></div>' +
+        '<div class="field"><label>Humedad (%)</label><input type="number" step="0.01" id="cl_humedad" placeholder="Ej. 7.8"></div>' +
+        '<div class="field"><label>Temperatura (°C)</label><input type="number" step="0.1" id="cl_temp" placeholder="Ej. 24"></div>' +
+        '<div class="field"><label>Volumen Materia Prima Silo Bolsa (kg)</label><input type="number" step="0.1" id="cl_volmp" value="0"></div>' +
+        '<div class="field"><label>Vol. producto terminado (kg)</label><input type="text" class="readonly" id="cl_volterm" value="0" readonly></div>' +
+        '<div class="field"><label>Estado del Proceso</label><select id="cl_estado"><option value="EN_PROCESO">En Proceso</option><option value="TERMINADO">Terminado</option></select></div>' +
+        '<hr>' +
+        '<h4>Producto terminado (por partidas / fechas)</h4>' +
+        '<div style="color:var(--text-muted);font-size:12px;margin-bottom:8px;">Cargá cada partida de producto terminado con su fecha y categoría. El total de arriba se calcula solo.</div>' +
+        '<div class="partida-table" id="cl_partidas"><div class="partida-empty">Sin partidas cargadas.</div></div>' +
+        '<div class="field"><label>Fecha</label><input type="date" id="pt_fecha"></div>' +
+        '<div class="field"><label>Cantidad (kg)</label><input type="number" step="0.1" id="pt_cantidad" value="0"></div>' +
+        '<div class="field"><label>Categoría</label><select id="pt_categoria">' + categoriaOptionsHtml(true) + '</select></div>' +
+        '<button class="btn-secondary" id="pt_agregar" type="button">+ Agregar partida</button>' +
+        '<div class="stat-mini-row" style="margin-top:14px;">' +
+        statMini('Rendimiento', '—') + statMini('Merma (kg)', '—') +
+        '</div>' +
+        '<hr>' +
+        '<h4>Ajuste de empaquetado</h4>' +
+        '<div class="field"><label>Ajuste de Empaquetado (kg)</label><input type="number" step="0.1" id="cl_ajuste" value="0" placeholder="Ej. -500"></div>' +
+        '<div class="field"><label>Motivo del ajuste</label><input type="text" id="cl_motivo" placeholder="Ej. Diferencia de humedad al embolsar"></div>' +
+        '<div class="field"><label>Producto Terminado Ajustado (kg)</label><input type="text" class="readonly" id="cl_ajustado" value="0" readonly></div>' +
+        '<h4>Observación</h4>' +
+        '<div class="obs-row">' +
+        '<label class="obs-chip"><input type="checkbox" id="cl_calado"> Calado</label>' +
+        '<label class="obs-chip"><input type="checkbox" id="cl_lacrado"> Lacrado</label>' +
+        '<label class="obs-chip"><input type="checkbox" id="cl_fumigado"> Fumigado</label>' +
+        '</div>' +
+        '<div class="field" style="margin-top:10px;"><label>Otras observaciones</label><input type="text" id="cl_otros" placeholder="Opcional"></div>' +
+        '<div id="cl_result"></div>' +
+        '<div style="display:flex;gap:10px;margin-top:14px;">' +
+        '<button class="btn-secondary" id="cl_limpiar" type="button" style="flex:1;">Limpiar</button>' +
+        '<button class="btn-primary" id="cl_guardar" type="button" style="flex:2;">Guardar lote</button>' +
+        '</div>' +
+        '</div>';
+      wireCargarLote(body);
+    }
+    function wireCargarLote(body) {
+      body.querySelector('#cl_fecha').value = todayStr();
+      body.querySelector('#pt_fecha').value = todayStr();
+
+      function recalc() {
+        var volMP = Number(body.querySelector('#cl_volmp').value) || 0;
+        var volTerm = PENDING_PARTIDAS.reduce(function(s, p) { return s + Number(p.cantidad_kg || 0); }, 0);
+        body.querySelector('#cl_volterm').value = volTerm.toFixed(1);
+        var minis = body.querySelectorAll('.stat-mini .num');
+        var rend = volMP > 0 ? (volTerm / volMP * 100) : null;
+        minis[0].textContent = rend === null ? '—' : rend.toFixed(1) + '%';
+        minis[1].textContent = volMP > 0 ? (volMP - volTerm).toFixed(1) + ' kg' : '—';
+        var ajuste = Number(body.querySelector('#cl_ajuste').value) || 0;
+        body.querySelector('#cl_ajustado').value = (volTerm + ajuste).toFixed(1);
+        renderPartidasList(body, recalc);
       }
+
+      body.querySelector('#cl_volmp').addEventListener('input', recalc);
+      body.querySelector('#cl_ajuste').addEventListener('input', recalc);
+      body.querySelector('#pt_agregar').addEventListener('click', function() {
+        var cant = Number(body.querySelector('#pt_cantidad').value);
+        if (!cant || cant <= 0) { alert('Ingresá una cantidad válida'); return; }
+        PENDING_PARTIDAS.push({
+          fecha: body.querySelector('#pt_fecha').value || todayStr(),
+          cantidad_kg: cant,
+          categoria: body.querySelector('#pt_categoria').value || ''
+        });
+        body.querySelector('#pt_cantidad').value = 0;
+        recalc();
+      });
+      body.querySelector('#cl_limpiar').addEventListener('click', function() { renderCargarLote(body); });
+      body.querySelector('#cl_guardar').addEventListener('click', function() { guardarLote(body); });
+
+      recalc();
+    }
+    function renderPartidasList(body, recalc) {
+      var wrap = body.querySelector('#cl_partidas');
+      if (!PENDING_PARTIDAS.length) { wrap.innerHTML = '<div class="partida-empty">Sin partidas cargadas.</div>'; return; }
+      var html = '<table class="partida-tbl"><thead><tr><th>Fecha</th><th>Cantidad (kg)</th><th>Categoría</th><th></th></tr></thead><tbody>';
+      PENDING_PARTIDAS.forEach(function(p, i) {
+        html += '<tr><td>' + esc(p.fecha) + '</td><td>' + fmtKg(p.cantidad_kg) + '</td><td>' + esc(p.categoria || '(del lote)') + '</td>' +
+          '<td><button class="partida-del" data-i="' + i + '" type="button">&times;</button></td></tr>';
+      });
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+      Array.prototype.forEach.call(wrap.querySelectorAll('.partida-del'), function(btn) {
+        btn.addEventListener('click', function() {
+          PENDING_PARTIDAS.splice(Number(btn.getAttribute('data-i')), 1);
+          recalc();
+        });
+      });
+    }
+    function guardarLote(body) {
+      var lote = body.querySelector('#cl_lote').value.trim();
+      if (!lote) { alert('El campo Lote es obligatorio'); return; }
+      var resultDiv = body.querySelector('#cl_result');
+      resultDiv.innerHTML = '<div class="loading">Guardando...</div>';
+      var data = {
+        fecha: body.querySelector('#cl_fecha').value,
+        lote: lote,
+        silo_bolsa: body.querySelector('#cl_silo').value,
+        categoria: body.querySelector('#cl_categoria').value,
+        humedad_pct: body.querySelector('#cl_humedad').value,
+        temperatura_c: body.querySelector('#cl_temp').value,
+        volumen_mp_kg: body.querySelector('#cl_volmp').value,
+        estado_proceso: body.querySelector('#cl_estado').value,
+        ajuste_empaquetado_kg: body.querySelector('#cl_ajuste').value,
+        motivo_ajuste: body.querySelector('#cl_motivo').value,
+        obs_calado: body.querySelector('#cl_calado').checked,
+        obs_lacrado: body.querySelector('#cl_lacrado').checked,
+        obs_fumigado: body.querySelector('#cl_fumigado').checked,
+        obs_otros: body.querySelector('#cl_otros').value
+      };
+      var partidasACargar = PENDING_PARTIDAS.slice();
+      apiPost('crearProcesamiento', data).then(function(row) {
+        var id = row.id_procesamiento;
+        return Promise.all(partidasACargar.map(function(p) {
+          return apiPost('agregarPartidaProcesamiento', { procesamiento_id: id, fecha: p.fecha, cantidad_kg: p.cantidad_kg, categoria: p.categoria });
+        })).then(function() { return id; });
+      }).then(function(id) {
+        resultDiv.innerHTML = '<div class="msg ok">Lote ' + esc(lote) + ' guardado correctamente (' + esc(id) + ').</div>';
+        PENDING_PARTIDAS = [];
+      }).catch(function(err) {
+        resultDiv.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>';
+      });
+    }
+
+    // ---- Historial ----
+    function renderHistorialProcesamiento(body) {
+      body.innerHTML = '<div class="hist-search"><input type="text" id="hist_buscar" placeholder="Buscar lote, silo bolsa, categoría..."></div><div id="hist_list" class="loading">Cargando historial...</div>';
+      var buscar = body.querySelector('#hist_buscar');
+      var timer;
+      buscar.addEventListener('input', function() {
+        clearTimeout(timer);
+        timer = setTimeout(function() { cargarHistorial(body, buscar.value); }, 300);
+      });
+      cargarHistorial(body, '');
+    }
+    function cargarHistorial(body, texto) {
+      var list = body.querySelector('#hist_list');
+      list.innerHTML = '<div class="loading">Cargando historial...</div>';
+      apiGet('listarProcesamientos', texto ? { texto: texto } : {}).then(function(rows) {
+        if (!rows.length) { list.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">Sin lotes cargados todavía.</div>'; return; }
+        var html = '<div class="hist-tbl-wrap"><table class="hist-tbl"><thead><tr><th>Fecha</th><th>Lote</th><th>Silo</th><th>Categoría</th><th>Humedad</th><th>Temp.</th><th>Vol. MP</th><th>Vol. terminado</th><th>Estado</th></tr></thead><tbody>';
+        rows.forEach(function(r) {
+          var esTerminado = r.estado_proceso === 'TERMINADO';
+          html += '<tr class="hist-row" data-id="' + esc(r.id_procesamiento) + '">' +
+            '<td>' + esc(r.fecha) + '</td><td>' + esc(r.lote) + '</td><td>' + esc(r.silo_bolsa) + '</td>' +
+            '<td>' + esc(r.categoria) + '</td><td>' + esc(r.humedad_pct) + (r.humedad_pct !== '' ? '%' : '') + '</td>' +
+            '<td>' + esc(r.temperatura_c) + (r.temperatura_c !== '' ? '°C' : '') + '</td>' +
+            '<td>' + fmtKg(r.volumen_mp_kg) + '</td><td>' + fmtKg(r.vol_producto_terminado_kg) + '</td>' +
+            '<td><span class="badge-estado ' + (esTerminado ? 'badge-terminado' : 'badge-proceso') + '">' + (esTerminado ? 'Terminado' : 'En Proceso') + '</span></td></tr>';
+        });
+        html += '</tbody></table></div>';
+        list.innerHTML = html;
+        Array.prototype.forEach.call(list.querySelectorAll('.hist-row'), function(tr) {
+          tr.addEventListener('click', function() { renderDetalleProcesamiento(body, tr.getAttribute('data-id')); });
+        });
+      }).catch(function(err) { list.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>'; });
+    }
+    function renderDetalleProcesamiento(body, id) {
+      body.innerHTML = '<div class="loading">Cargando lote...</div>';
+      apiGet('procesamientoDetalle', { id_procesamiento: id }).then(function(det) {
+        var p = det.procesamiento;
+        var html = '<div class="panel">';
+        html += '<button class="btn-secondary" id="det_volver" type="button" style="margin-bottom:12px;">&larr; Volver al historial</button>';
+        html += '<h3>' + esc(p.lote) + '</h3>';
+        html += '<div class="stat-mini-row">' +
+          statMini('Vol. materia prima', fmtKg(p.volumen_mp_kg)) +
+          statMini('Vol. producto terminado', fmtKg(det.vol_producto_terminado_kg)) +
+          statMini('Rendimiento', det.rendimiento_pct === null ? '—' : det.rendimiento_pct.toFixed(1) + '%') +
+          statMini('Merma', fmtKg(det.merma_kg)) +
+          '</div>';
+        html += '<div class="list-item"><div>Silo bolsa: <b>' + esc(p.silo_bolsa || '—') + '</b></div></div>';
+        html += '<div class="list-item"><div>Categoría: <b>' + esc(p.categoria || '—') + '</b></div></div>';
+        html += '<div class="list-item"><div>Humedad / Temp.: <b>' + esc(p.humedad_pct || '—') + '% / ' + esc(p.temperatura_c || '—') + '°C</b></div></div>';
+        html += '<div class="list-item"><div>Estado: <b>' + (p.estado_proceso === 'TERMINADO' ? 'Terminado' : 'En Proceso') + '</b></div></div>';
+        if (Number(p.ajuste_empaquetado_kg)) {
+          html += '<div class="list-item"><div>Ajuste de empaquetado: <b>' + fmtKg(p.ajuste_empaquetado_kg) + '</b>' + (p.motivo_ajuste ? ' — ' + esc(p.motivo_ajuste) : '') +
+            '<br>Producto terminado ajustado: <b>' + fmtKg(det.producto_terminado_ajustado_kg) + '</b></div></div>';
+        }
+        var obs = [p.obs_calado ? 'Calado' : '', p.obs_lacrado ? 'Lacrado' : '', p.obs_fumigado ? 'Fumigado' : '', p.obs_otros || ''].filter(Boolean).join(' · ');
+        if (obs) html += '<div class="list-item"><div>Observación: <b>' + esc(obs) + '</b></div></div>';
+
+        html += '<h4 style="margin-top:16px;">Partidas de producto terminado</h4>';
+        if (!det.partidas.length) {
+          html += '<div style="color:var(--text-muted);font-size:13px;">Sin partidas cargadas.</div>';
+        } else {
+          html += '<table class="partida-tbl"><thead><tr><th>Fecha</th><th>Cantidad (kg)</th><th>Categoría</th></tr></thead><tbody>';
+          det.partidas.forEach(function(pt) { html += '<tr><td>' + esc(pt.fecha) + '</td><td>' + fmtKg(pt.cantidad_kg) + '</td><td>' + esc(pt.categoria) + '</td></tr>'; });
+          html += '</tbody></table>';
+        }
+        html += '<div class="field" style="margin-top:12px;"><label>Agregar partida — Fecha</label><input type="date" id="ndp_fecha"></div>';
+        html += '<div class="field"><label>Cantidad (kg)</label><input type="number" step="0.1" id="ndp_cantidad" value="0"></div>';
+        html += '<button class="btn-secondary" id="ndp_agregar" type="button">+ Agregar partida</button>';
+        html += '<div id="det_result"></div>';
+        html += '</div>';
+        body.innerHTML = html;
+        body.querySelector('#ndp_fecha').value = todayStr();
+        body.querySelector('#det_volver').addEventListener('click', function() { renderHistorialProcesamiento(body); });
+        body.querySelector('#ndp_agregar').addEventListener('click', function() {
+          var cant = Number(body.querySelector('#ndp_cantidad').value);
+          if (!cant || cant <= 0) { alert('Ingresá una cantidad válida'); return; }
+          apiPost('agregarPartidaProcesamiento', { procesamiento_id: id, fecha: body.querySelector('#ndp_fecha').value, cantidad_kg: cant }).then(function() {
+            renderDetalleProcesamiento(body, id);
+          }).catch(function(err) { body.querySelector('#det_result').innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>'; });
+        });
+      }).catch(function(err) { body.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>'; });
+    }
+
+    // ---- Resumen (graficos) ----
+    function renderResumenProcesamiento(body) {
+      body.innerHTML = '<div class="loading">Cargando resumen...</div>';
+      apiGet('resumenProcesamiento', {}).then(function(r) {
+        body.innerHTML = resumenProcesamientoHtml(r);
+      }).catch(function(err) { body.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>'; });
+    }
+    function resumenProcesamientoHtml(r) {
+      var html = '<div class="panel"><h3>Producto terminado ajustado por período</h3>';
+      html += '<div class="stat-mini-row">';
+      html += statMini('Total del período', fmtKg(r.totalPeriodo));
+      CATEGORIAS_PROCESAMIENTO.forEach(function(c) { html += statMini(c, fmtKg(r.totalesCategoria[c] || 0)); });
+      html += '</div>';
+      html += stackedBarChart(r);
+      html += '</div>';
+      html += '<div class="panel"><h3>Volumen de materia prima por categoría</h3>';
+      html += simpleBarChart(r.porCategoriaMP);
+      html += '</div>';
+      return html;
+    }
+    function stackedBarChart(r) {
+      if (!r.periodos.length) return '<div style="color:var(--text-muted);font-size:13px;">Todavía no hay datos para graficar.</div>';
+      var max = 0;
+      r.periodos.forEach(function(p) {
+        var total = 0;
+        Object.keys(r.porPeriodo[p]).forEach(function(c) { total += r.porPeriodo[p][c]; });
+        if (total > max) max = total;
+      });
+      if (max <= 0) max = 1;
+      var chartH = 160, barW = 40, gap = 24;
+      var svgW = r.periodos.length * (barW + gap) + gap;
+      var bars = '';
+      r.periodos.forEach(function(p, i) {
+        var x = gap + i * (barW + gap);
+        var stackedSoFar = 0;
+        var cats = CATEGORIAS_PROCESAMIENTO.concat(Object.keys(r.porPeriodo[p]).filter(function(c) { return CATEGORIAS_PROCESAMIENTO.indexOf(c) === -1; }));
+        cats.forEach(function(c) {
+          var val = r.porPeriodo[p][c] || 0;
+          if (val <= 0) return;
+          var h = (val / max) * chartH;
+          var y = chartH - stackedSoFar - h;
+          bars += '<rect x="' + x + '" y="' + y.toFixed(1) + '" width="' + barW + '" height="' + Math.max(h - 2, 0).toFixed(1) + '" fill="' + catColor(c) + '" rx="3"><title>' + esc(c) + ': ' + fmtKg(val) + '</title></rect>';
+          stackedSoFar += h;
+        });
+        bars += '<text x="' + (x + barW / 2) + '" y="' + (chartH + 16) + '" text-anchor="middle" class="chart-axis-label">' + esc(fmtPeriodo(p)) + '</text>';
+      });
+      var svg = '<svg viewBox="0 0 ' + svgW + ' ' + (chartH + 30) + '" class="chart-svg" preserveAspectRatio="xMinYMid meet">' + bars + '</svg>';
+      var legend = '<div class="chart-legend">' + CATEGORIAS_PROCESAMIENTO.map(function(c) {
+        return '<span class="legend-item"><span class="legend-swatch" style="background:' + catColor(c) + '"></span>' + esc(c) + '</span>';
+      }).join('') + '</div>';
+      return '<div class="chart-wrap">' + svg + '</div>' + legend;
+    }
+    function simpleBarChart(porCategoriaMP) {
+      var cats = Object.keys(porCategoriaMP || {});
+      if (!cats.length) return '<div style="color:var(--text-muted);font-size:13px;">Todavía no hay datos para graficar.</div>';
+      var max = Math.max.apply(null, cats.map(function(c) { return porCategoriaMP[c]; }));
+      if (max <= 0) max = 1;
+      var html = '<div class="hbar-list">';
+      cats.forEach(function(c) {
+        var val = porCategoriaMP[c];
+        var pct = Math.max((val / max * 100), 2);
+        html += '<div class="hbar-row"><div class="hbar-lbl">' + esc(c) + '</div><div class="hbar-track"><div class="hbar-fill" style="width:' + pct.toFixed(1) + '%;background:' + catColor(c) + '"></div></div><div class="hbar-val">' + fmtKg(val) + '</div></div>';
+      });
+      html += '</div>';
+      return html;
     }
 
     // ---------- LABORATORIO ----------
@@ -512,7 +834,7 @@
     // ---------- Helpers: forms & tabs ----------
     function tabsHtml(tabs, group) {
       var labels = { stock:'Stock', ingreso:'Ingreso BigBag', lote:'Nuevo Lote', silo:'Nuevo Silo',
-        abrir:'Abrir Orden', bigbag:'BigBag', merma:'Merma', empaque:'Empaque', cerrar:'Cerrar',
+        cargar:'Cargar Lote', historial:'Historial', resumen:'Resumen',
         solicitud:'Solicitud', estiba:'Estiba', asignarlote:'Asignar Lote', exportacion:'Exportación', asignarestiba:'Asignar Estiba' };
       var html = '<div class="tabs">';
       tabs.forEach(function(t, i) {
