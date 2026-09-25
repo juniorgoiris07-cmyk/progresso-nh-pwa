@@ -126,10 +126,6 @@
     <div class="auth-logo"><svg viewBox="0 0 100 100" width="100%" height="100%" role="img" aria-label="Progresso NH S.A."><circle cx="50" cy="50" r="47" fill="#171511"/><ellipse cx="48" cy="47" rx="36" ry="34" fill="#f2c93a" transform="rotate(-25 48 47)"/><ellipse cx="59" cy="57" rx="15" ry="5.5" fill="#6b4a1a" transform="rotate(-25 59 57)"/><line x1="46" y1="42" x2="55" y2="51" stroke="#c98a2c" stroke-width="1.4"/></svg></div>
     <h1>Progresso NH</h1>
     <p class="auth-sub">Ingresá para continuar</p>
-    <div class="auth-tabs">
-      <button type="button" class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Iniciar sesión</button>
-      <button type="button" class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">Crear cuenta</button>
-    </div>
     <form id="frmLogin">
       <label>Email</label>
       <input type="email" name="email" required autocomplete="username" placeholder="tu@email.com">
@@ -137,16 +133,8 @@
       <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
       <button class="btn auth-submit" type="submit">Entrar</button>
     </form>
-    <form id="frmSignup" class="hidden">
-      <label>Nombre</label>
-      <input type="text" name="nombre" required placeholder="Tu nombre">
-      <label>Email</label>
-      <input type="email" name="email" required autocomplete="username" placeholder="tu@email.com">
-      <label>Contraseña</label>
-      <input type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
-      <button class="btn auth-submit" type="submit">Crear cuenta</button>
-    </form>
     <p id="authMsg" class="auth-msg"></p>
+    <p class="auth-sub" style="margin:14px 0 0;">¿No tenés cuenta? Pedile acceso al administrador.</p>
   </div>
 </div>
 
@@ -198,39 +186,43 @@ const ICONS = {
   cierre: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>',
   resumen: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>',
-  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>'
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
+  usuarios: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
 };
 
 let usuario = null;
 let currentUser = null;
-
-function switchAuthTab(which){
-  document.getElementById('tabLogin').classList.toggle('active', which==='login');
-  document.getElementById('tabSignup').classList.toggle('active', which==='signup');
-  document.getElementById('frmLogin').classList.toggle('hidden', which!=='login');
-  document.getElementById('frmSignup').classList.toggle('hidden', which!=='signup');
-  document.getElementById('authMsg').textContent = '';
-  document.getElementById('authMsg').className = 'auth-msg';
-}
+let miRol = null;
 
 function showAuthScreen(){
   document.getElementById('authScreen').classList.remove('hidden');
   document.getElementById('appShell').classList.add('hidden');
   usuario = null;
   currentUser = null;
+  miRol = null;
 }
 
 async function onLogin(session){
   currentUser = session.user;
   let nombre = null;
+  let perfil = null;
   try{
-    const { data: perfil } = await sb.from('perfiles').select('*').eq('id', session.user.id).single();
+    const { data } = await sb.from('perfiles').select('*').eq('id', session.user.id).single();
+    perfil = data;
     nombre = perfil ? perfil.nombre : null;
   }catch(e){}
+  if(perfil && perfil.activo === false){
+    document.getElementById('authMsg').textContent = 'Tu cuenta está desactivada. Contactá al administrador.';
+    document.getElementById('authMsg').className = 'auth-msg err';
+    sb.auth.signOut();
+    return;
+  }
+  miRol = perfil ? perfil.rol : 'operario';
   usuario = nombre || (session.user.email ? session.user.email.split('@')[0] : 'Usuario');
   document.getElementById('usuarioChipText').textContent = usuario;
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('appShell').classList.remove('hidden');
+  renderHomeMenu();
 }
 
 function cerrarSesion(){
@@ -249,23 +241,6 @@ document.getElementById('frmLogin').addEventListener('submit', async (e) => {
   if(error){
     msg.textContent = error.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos' : error.message;
     msg.className = 'auth-msg err';
-  }
-});
-
-document.getElementById('frmSignup').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const fd = new FormData(e.target);
-  const nombre = fd.get('nombre').trim();
-  const email = fd.get('email').trim();
-  const password = fd.get('password');
-  const msg = document.getElementById('authMsg');
-  msg.textContent = 'Creando cuenta...'; msg.className = 'auth-msg';
-  const { data, error } = await sb.auth.signUp({ email, password, options: { data: { nombre } } });
-  if(error){ msg.textContent = error.message; msg.className = 'auth-msg err'; return; }
-  if(!data.session){
-    msg.textContent = 'Cuenta creada. Revisá tu email para confirmarla antes de entrar.';
-    msg.className = 'auth-msg ok';
-    e.target.reset();
   }
 });
 
@@ -294,11 +269,13 @@ const TABS = [
   {id:'cierre', label:'Cierre', icon:ICONS.cierre},
   {id:'resumen', label:'Resumen', icon:ICONS.resumen},
 ];
+const TAB_ADMIN = {id:'usuarios', label:'Usuarios', icon:ICONS.usuarios};
 
 let activeTab = null;
 
 function renderHomeMenu(){
-  document.getElementById('vistaMenuGrid').innerHTML = TABS.map(t =>
+  const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
+  document.getElementById('vistaMenuGrid').innerHTML = tabs.map(t =>
     `<button type="button" class="vista-menu-card" onclick="goTab('${t.id}')">
       <span class="vmc-icon">${t.icon}</span>
       <span class="vmc-label">${t.label}</span>
@@ -764,9 +741,46 @@ async function renderResumen(){
   </tbody></table></div>`;
 }
 
-const RENDERERS = { mp: renderMP, silo: renderSilo, lote: renderLote, bigbag: renderBigbag, cierre: renderCierre, resumen: renderResumen };
+// ============================================================
+// USUARIOS (solo admin)
+// ============================================================
+async function renderUsuarios(){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="card">
+    <h2>${ICONS.usuarios} Gestión de usuarios</h2>
+    <div class="desc">Para crear una cuenta nueva: Supabase → Authentication → Users → Add user (email + contraseña). Acá asignás el rol y activás/desactivás el acceso.</div>
+    <div id="usuariosList" class="table-wrap"><div class="empty">Cargando...</div></div>
+  </div>`;
+  loadUsuarios();
+}
 
-renderHomeMenu();
+async function loadUsuarios(){
+  const { data, error } = await sb.from('perfiles').select('*').order('creado_en');
+  const el = document.getElementById('usuariosList');
+  if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">No hay usuarios todavía.</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th><th></th></tr></thead><tbody>
+    ${data.map(u => `<tr>
+      <td>${u.nombre||'-'}</td>
+      <td>${u.email||'-'}</td>
+      <td><select id="rol-${u.id}" style="width:auto;margin:0;"><option value="operario" ${u.rol==='operario'?'selected':''}>Operario</option><option value="admin" ${u.rol==='admin'?'selected':''}>Admin</option></select></td>
+      <td><input type="checkbox" id="activo-${u.id}" style="width:auto;margin:0;" ${u.activo?'checked':''}></td>
+      <td><button class="btn small" onclick="guardarUsuario('${u.id}')">Guardar</button></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+async function guardarUsuario(id){
+  const rol = document.getElementById('rol-'+id).value;
+  const activo = document.getElementById('activo-'+id).checked;
+  const { error } = await sb.from('perfiles').update({ rol, activo }).eq('id', id);
+  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  toast('Usuario actualizado', 'ok');
+  if(currentUser && id === currentUser.id){ miRol = rol; }
+  loadUsuarios();
+}
+
+const RENDERERS = { mp: renderMP, silo: renderSilo, lote: renderLote, bigbag: renderBigbag, cierre: renderCierre, resumen: renderResumen, usuarios: renderUsuarios };
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
