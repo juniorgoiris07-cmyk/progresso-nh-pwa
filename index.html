@@ -1,956 +1,615 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Progresso">
-  <meta name="theme-color" content="#1F1B16">
-  <meta name="description" content="Sistema integral de trazabilidad y produccion - Progresso NH S.A.">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="icon" href="icon-192.png">
-  <title>Progresso - Trazabilidad</title>
-  <style>
-    :root {
-      --dark: #1F1B16;
-      --dark2: #2A241D;
-      --gold: #C9A227;
-      --gold-light: #E4C766;
-      --cream: #F3ECDC;
-      --card: #FFFFFF;
-      --text-dark: #2A241D;
-      --text-muted: #8A7F6B;
-      --danger: #B3432B;
-      --ok: #3D7A46;
-    }
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0; padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      background: var(--cream);
-      color: var(--text-dark);
-      -webkit-tap-highlight-color: transparent;
-    }
-    #app { min-height: 100vh; display: flex; flex-direction: column; }
-
-    header {
-      background: linear-gradient(155deg, #26211A, var(--dark) 60%);
-      color: #fff;
-      padding: 14px 16px 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky; top: 0; z-index: 20;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-    }
-    header .left { display: flex; align-items: center; gap: 10px; }
-    header .logo {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--gold-light), var(--gold));
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; color: var(--dark); font-size: 15px;
-    }
-    header .titles { display: flex; flex-direction: column; line-height: 1.15; }
-    header .titles .app-name { font-size: 13px; font-weight: 700; letter-spacing: .3px; opacity: .85; }
-    header .titles .greeting { font-size: 15px; font-weight: 600; }
-    header .icons { display: flex; gap: 14px; align-items: center; }
-    header .icon-btn {
-      width: 34px; height: 34px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.08); cursor: pointer; font-size: 16px;
-      border: none; color: #fff;
-    }
-    header .icon-btn:active { background: rgba(255,255,255,0.18); }
-    .accent-line { height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold)); }
-
-    main { flex: 1; padding: 16px; padding-bottom: 40px; max-width: 720px; margin: 0 auto; width: 100%; }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
-      gap: 16px;
-      margin-top: 6px;
-    }
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 22px 14px 16px 14px;
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-      box-shadow: 0 1px 2px rgba(42,36,29,0.04), 0 8px 20px -6px rgba(42,36,29,0.10);
-      border: 1px solid rgba(42,36,29,0.06);
-      cursor: pointer;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-      text-align: center;
-    }
-    .card:active { transform: scale(0.96); box-shadow: 0 1px 2px rgba(42,36,29,0.06); }
-    .card.active { border-color: var(--gold); box-shadow: 0 1px 2px rgba(201,162,39,0.15), 0 8px 20px -6px rgba(201,162,39,0.28); }
-    .card .badge {
-      width: 56px; height: 56px; border-radius: 16px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px; color: #fff;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 6px 14px -4px rgba(42,36,29,0.35);
-    }
-    .card .badge svg { width: 26px; height: 26px; stroke-width: 1.75; }
-    header .icon-btn svg { width: 18px; height: 18px; }
-    .card .label { font-size: 12.5px; font-weight: 700; color: var(--text-dark); letter-spacing: .1px; }
-
-    .badge.b1 { background: linear-gradient(145deg, #7E9D49, #5A7532); }
-    .badge.b2 { background: linear-gradient(145deg, #C4553A, #953821); }
-    .badge.b3 { background: linear-gradient(145deg, #35917F, #226357); }
-    .badge.b4 { background: linear-gradient(145deg, #46608C, #2C3F5E); }
-    .badge.b5 { background: linear-gradient(145deg, var(--gold-light), var(--gold)); }
-    .badge.b6 { background: linear-gradient(145deg, #5B4F42, #382F26); }
-
-    .section-title {
-      font-size: 18px; font-weight: 700; margin: 4px 0 14px 0; color: var(--text-dark);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .back-btn {
-      background: var(--dark); color: #fff; border: none; border-radius: 10px;
-      padding: 7px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
-    }
-
-    .stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
-    .stat-card {
-      background: var(--card); border-radius: 14px; padding: 14px;
-      box-shadow: 0 2px 6px rgba(42,36,29,0.08);
-    }
-    .stat-card .num { font-size: 26px; font-weight: 800; color: var(--dark); }
-    .stat-card .lbl { font-size: 12px; color: var(--text-muted); font-weight: 600; }
-
-    .alert-item {
-      background: #FDF2EC; border-left: 4px solid var(--danger);
-      border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px;
-    }
-    .alert-item .tipo { font-weight: 700; color: var(--danger); }
-    .alert-item .det { color: var(--text-dark); margin-top: 2px; }
-    .alert-item .fecha { color: var(--text-muted); font-size: 11px; margin-top: 4px; }
-
-    .panel { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(42,36,29,0.08); }
-    .panel h3 { margin: 0 0 12px 0; font-size: 15px; color: var(--dark); }
-    .field { margin-bottom: 12px; }
-    .field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
-    .field input, .field select, .field textarea {
-      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #E4DBC8;
-      font-size: 14px; background: #FBF8F1; color: var(--text-dark);
-    }
-    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--gold); }
-    .btn-primary {
-      background: var(--dark); color: #fff; border: none; border-radius: 12px;
-      padding: 12px 16px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%;
-    }
-    .btn-primary:active { background: var(--dark2); }
-    .btn-secondary {
-      background: transparent; color: var(--dark); border: 1.5px solid var(--dark);
-      border-radius: 12px; padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
-    }
-    .msg { border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-bottom: 12px; }
-    .msg.ok { background: #E8F3E9; color: var(--ok); }
-    .msg.err { background: #FDECEA; color: var(--danger); }
-    .list-item {
-      background: #FBF8F1; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px;
-      display: flex; justify-content: space-between; gap: 8px; align-items: center;
-    }
-    .list-item .meta { color: var(--text-muted); font-size: 11px; }
-    .pill { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; background: #EFE6CB; color: #7A6522; }
-    .loading { text-align: center; color: var(--text-muted); padding: 30px 0; font-size: 13px; }
-    .tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
-    .tab { padding: 8px 14px; border-radius: 20px; background: var(--card); font-size: 12.5px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; box-shadow: 0 1px 4px rgba(42,36,29,0.06); }
-    .tab.active { background: var(--dark); color: #fff; }
-
-    /* ---- Procesamiento (logica de procesamiento-chia) ---- */
-    h4 { font-size: 13px; color: var(--dark); margin: 16px 0 8px 0; }
-    hr { border: none; border-top: 1px solid #EFE6CB; margin: 16px 0; }
-    .stat-mini-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
-    .stat-mini { background: #FBF8F1; border-radius: 12px; padding: 10px 14px; flex: 1; min-width: 110px; }
-    .stat-mini .lbl { font-size: 10.5px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
-    .stat-mini .num { font-size: 17px; font-weight: 800; color: var(--dark); margin-top: 2px; }
-    .field input.readonly, .field input[readonly] { background: #EFE6CB; font-weight: 700; color: var(--dark); }
-    .partida-table { margin-bottom: 10px; }
-    .partida-empty { color: var(--text-muted); font-size: 12.5px; padding: 8px 0; }
-    .partida-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 10px; }
-    .partida-tbl th { background: var(--dark); color: #fff; text-align: left; padding: 6px 8px; font-size: 10.5px; text-transform: uppercase; }
-    .partida-tbl td { padding: 6px 8px; border-bottom: 1px solid #EFE6CB; }
-    .partida-del { background: none; border: none; color: var(--danger); font-size: 16px; cursor: pointer; line-height: 1; padding: 0 4px; }
-    .obs-row { display: flex; gap: 10px; flex-wrap: wrap; }
-    .obs-chip { display: flex; align-items: center; gap: 6px; background: #FBF8F1; border: 1.5px solid #E4DBC8; border-radius: 20px; padding: 6px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; }
-    .hist-search input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #E4DBC8; font-size: 14px; background: #fff; margin-bottom: 12px; }
-    .hist-tbl-wrap { overflow-x: auto; }
-    .hist-tbl { width: 100%; border-collapse: collapse; font-size: 12px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 6px rgba(42,36,29,0.08); }
-    .hist-tbl th { background: var(--dark); color: #fff; padding: 8px 6px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .2px; white-space: nowrap; }
-    .hist-tbl td { padding: 8px 6px; border-bottom: 1px solid #F1ECDD; white-space: nowrap; }
-    .hist-row { cursor: pointer; }
-    .hist-row:active { background: #FBF3DC; }
-    .badge-estado { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
-    .badge-proceso { background: #FCEED2; color: #8A6A0A; }
-    .badge-terminado { background: #DCEFE0; color: var(--ok); }
-    .chart-wrap { overflow-x: auto; margin: 10px 0; }
-    .chart-svg { width: 100%; min-width: 260px; height: auto; display: block; }
-    .chart-svg .chart-axis-label { font-size: 10px; fill: var(--text-muted); }
-    .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-dark); font-weight: 600; }
-    .legend-swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
-    .hbar-list { display: flex; flex-direction: column; gap: 10px; }
-    .hbar-row { display: grid; grid-template-columns: 110px 1fr 74px; align-items: center; gap: 8px; font-size: 12px; }
-    .hbar-lbl { color: var(--text-dark); font-weight: 600; }
-    .hbar-track { background: #F1ECDD; border-radius: 20px; height: 12px; overflow: hidden; }
-    .hbar-fill { height: 100%; border-radius: 20px; }
-    .hbar-val { text-align: right; color: var(--text-muted); font-weight: 700; }
-    .offline-banner {
-      background: var(--danger); color: #fff; text-align: center; font-size: 12px;
-      font-weight: 700; padding: 6px 10px; display: none;
-    }
-    .offline-banner.show { display: block; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Progresso NH - Producción</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a1712">
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --bg:#15130f; --surface:#1e1b15; --surface2:#262219; --border:#37311f;
+    --ink:#f2ede2; --ink-dim:#a89e88; --accent:#8fae52; --accent-dark:#5c7532;
+    --warn:#d18a3f; --danger:#c0503a; --ok:#4c9a6a;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent;}
+  header{background:linear-gradient(155deg,#26211a,var(--bg) 65%);padding:18px 16px 0;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.25);}
+  header h1{margin:0 0 2px;font-size:18px;font-weight:700;}
+  header .sub{color:var(--ink-dim);font-size:12.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  #usuarioChip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--ink);cursor:pointer;white-space:nowrap;}
+  nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav button{flex:none;background:transparent;border:none;color:var(--ink-dim);font-size:13.5px;font-weight:600;padding:9px 13px;border-radius:10px 10px 0 0;cursor:pointer;border-bottom:2px solid transparent;}
+  nav button.active{color:var(--ink);border-bottom:2px solid var(--accent);background:var(--surface);}
+  main{padding:16px;max-width:900px;margin:0 auto;padding-bottom:60px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+  .card h2{margin:0 0 4px;font-size:15px;}
+  .card .desc{color:var(--ink-dim);font-size:12.5px;margin-bottom:14px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
+  label{display:block;font-size:11.5px;color:var(--ink-dim);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;}
+  input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--ink);border-radius:9px;padding:9px 10px;font-size:14.5px;margin-bottom:10px;font-family:inherit;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+  textarea{resize:vertical;min-height:44px;}
+  .field-computed{opacity:.7;}
+  .field-computed input{background:#221f18;color:var(--ink-dim);}
+  .row-flex{display:flex;gap:8px;align-items:flex-end;}
+  .row-flex > div{flex:1;}
+  .btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#181510;border:none;border-radius:9px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;}
+  .btn:active{transform:scale(.98);}
+  .btn.secondary{background:var(--surface2);color:var(--ink);border:1px solid var(--border);}
+  .btn.danger{background:var(--danger);color:#fff;}
+  .btn.small{padding:6px 10px;font-size:12.5px;}
+  .btn svg{width:15px;height:15px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;color:var(--ink-dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:7px 8px;border-bottom:1px solid var(--border);}
+  td{padding:8px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  tbody tr:hover{background:var(--surface2);}
+  .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+  .badge.ok{background:rgba(76,154,106,.18);color:#7fce9c;}
+  .badge.warn{background:rgba(209,138,63,.18);color:#e3a869;}
+  .badge.off{background:rgba(168,158,136,.15);color:var(--ink-dim);}
+  .empty{color:var(--ink-dim);font-size:13px;padding:14px 4px;text-align:center;}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);color:var(--ink);padding:10px 18px;border-radius:10px;font-size:13.5px;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:100;max-width:90vw;}
+  .toast.err{border-color:var(--danger);color:#f2a493;}
+  .toast.ok{border-color:var(--ok);color:#9fdfb6;}
+  .checklist{max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;}
+  .checkrow{display:flex;align-items:center;gap:10px;padding:9px 11px;border-bottom:1px solid var(--border);font-size:13px;}
+  .checkrow:last-child{border-bottom:none;}
+  .checkrow input{width:auto;margin:0;}
+  .checkrow .meta{color:var(--ink-dim);font-size:11.5px;}
+  .silo-group{font-size:11.5px;color:var(--accent);font-weight:700;padding:8px 11px 2px;text-transform:uppercase;letter-spacing:.03em;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:4px;}
+  .stat{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px;}
+  .stat .n{font-size:19px;font-weight:800;}
+  .stat .l{font-size:11px;color:var(--ink-dim);text-transform:uppercase;}
+  .section-title{font-size:12px;font-weight:700;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.03em;margin:16px 0 8px;}
+  .icon{width:17px;height:17px;vertical-align:-3px;margin-right:4px;}
+  .lote-pill{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;}
+  .lote-pill.active{border-color:var(--accent);color:var(--accent);}
+  .pill-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;}
+</style>
 </head>
 <body>
-  <div id="app">
-    <header>
-      <div class="left">
-        <div class="logo">PN</div>
-        <div class="titles">
-          <div class="app-name">PROGRESSO NH</div>
-          <div class="greeting" id="greeting">Hola</div>
-        </div>
-      </div>
-      <div class="icons">
-        <button class="icon-btn" id="btnAlertas" title="Alertas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
-        <button class="icon-btn" id="btnHome" title="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
-      </div>
-    </header>
-    <div class="accent-line"></div>
-    <div class="offline-banner" id="offlineBanner">Sin conexion a internet</div>
-    <main id="main">
-      <div class="loading">Cargando...</div>
-    </main>
+
+<header>
+  <h1>Progresso NH · Producción</h1>
+  <div class="sub">
+    <span id="connStatus">Conectando...</span>
+    <span id="usuarioChip" onclick="cambiarUsuario()">Cargando...</span>
   </div>
+  <nav id="tabs"></nav>
+</header>
 
-  <script>
-    // =========================================================================
-    // Config: API de Apps Script (proyecto standalone, cuenta personal, deploy
-    // "Cualquier usuario" - acceso anonimo real). Esta PWA vive en GitHub Pages,
-    // separada del backend, y habla con el por fetch().
-    //
-    // IMPORTANTE - CORS: Apps Script no responde a preflight OPTIONS, asi que:
-    //   - Lecturas: GET con parametros en la query string.
-    //   - Escrituras: POST con Content-Type: text/plain;charset=utf-8 (nunca
-    //     application/json) y el JSON como texto plano en el body, para que el
-    //     navegador lo trate como "simple request" y no dispare preflight.
-    // =========================================================================
-    var API_URL = 'https://script.google.com/macros/s/AKfycbzVF5CBriXvDsX-IJdKrr52vnWRVGMWBCJ6SAbuEq5pAX6e5I9QqarQAWHBTPtlH4E0/exec';
+<main id="main"></main>
 
-    function apiGet(action, params) {
-      var url = API_URL + '?action=' + encodeURIComponent(action);
-      if (params) {
-        Object.keys(params).forEach(function (k) {
-          var v = params[k];
-          if (v !== undefined && v !== null && v !== '') {
-            url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(v);
-          }
-        });
-      }
-      return fetch(url, { method: 'GET', credentials: 'omit' })
-        .then(function (res) { return res.json(); })
-        .then(function (json) {
-          if (!json.ok) throw new Error(json.error || 'Error desconocido');
-          return json.data;
-        });
-    }
+<script>
+const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
+const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
-    function apiPost(action, data) {
-      var body = Object.assign({ action: action, usuario: CURRENT_USER }, data || {});
-      return fetch(API_URL, {
-        method: 'POST',
-        credentials: 'omit',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(body)
-      })
-        .then(function (res) { return res.json(); })
-        .then(function (json) {
-          if (!json.ok) throw new Error(json.error || 'Error desconocido');
-          return json.data;
-        });
-    }
+const CATEGORIAS = ['Organico','Organico BNN','Convencional UE','Convencional ROW'];
+const PRODUCTOS = ['Chia','Sesamo','Girasol confiteria','Otro'];
 
-    // =========================================================================
-    // Estado / usuario. La API es anonima (sin login de Google), asi que el
-    // "usuario" que queda registrado en las hojas es un nombre que se pide una
-    // sola vez y se guarda en este dispositivo (localStorage).
-    // =========================================================================
-    var CURRENT_USER = 'Usuario';
-    var CATEGORIAS_PROCESAMIENTO = ['Organico', 'Organico BNN', 'Convencional UE'];
-    var PENDING_PARTIDAS = [];
-    var MODULES = [
-      { id: 'dashboard', label: 'Resumen', badge: 'b5', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>' },
-      { id: 'materiaprima', label: 'Materia Prima', badge: 'b1', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>' },
-      { id: 'produccion', label: 'Producción', badge: 'b2', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>' },
-      { id: 'laboratorio', label: 'Laboratorio', badge: 'b3', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6L4.5 18.5A2 2 0 0 0 6.3 21h11.4a2 2 0 0 0 1.8-2.5L15 8V2"/><path d="M8.5 2h7"/><path d="M6.5 15h11"/></svg>' },
-      { id: 'comex', label: 'COMEX', badge: 'b4', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>' },
-      { id: 'alertas', label: 'Alertas', badge: 'b6', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' }
-    ];
-    var ACTIVE = 'dashboard';
+const ICONS = {
+  mp: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M5 7l1 13h12l1-13M9 11v6M15 11v6M9 7V4h6v3"/></svg>',
+  silo: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10c0-4 2.5-7 6-7s6 3 6 7v9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-9z"/><path d="M6 14h12"/></svg>',
+  lote: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  bigbag: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8l2-5h8l2 5"/><path d="M4 8h16l-1.5 12a2 2 0 0 1-2 2H7.5a2 2 0 0 1-2-2L4 8z"/></svg>',
+  cierre: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>',
+  resumen: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>'
+};
 
-    function el(html) {
-      var d = document.createElement('div');
-      d.innerHTML = html.trim();
-      return d.firstChild;
-    }
-    function esc(s) { return (s === undefined || s === null) ? '' : String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+let usuario = localStorage.getItem('progresso_usuario') || '';
 
-    function renderHome() {
-      var main = document.getElementById('main');
-      var html = '<div class="grid">';
-      MODULES.forEach(function(m) {
-        html += '<div class="card' + (m.id === ACTIVE ? ' active' : '') + '" data-mod="' + m.id + '">' +
-          '<div class="badge ' + m.badge + '">' + m.icon + '</div>' +
-          '<div class="label">' + m.label + '</div></div>';
-      });
-      html += '</div>';
-      main.innerHTML = html;
-      Array.prototype.forEach.call(main.querySelectorAll('.card'), function(c) {
-        c.addEventListener('click', function() { navigate(c.getAttribute('data-mod')); });
-      });
-    }
+function cambiarUsuario(){
+  const n = prompt('¿Quién sos? (nombre para registrar tus cargas)', usuario || '');
+  if(n !== null && n.trim()){
+    usuario = n.trim();
+    localStorage.setItem('progresso_usuario', usuario);
+    document.getElementById('usuarioChip').textContent = usuario;
+  }
+}
+if(!usuario){ setTimeout(cambiarUsuario, 300); }
 
-    function navigate(mod) {
-      ACTIVE = mod;
-      if (mod === 'dashboard') renderDashboard();
-      else if (mod === 'materiaprima') renderMateriaPrima();
-      else if (mod === 'produccion') renderProduccion();
-      else if (mod === 'laboratorio') renderLaboratorio();
-      else if (mod === 'comex') renderComex();
-      else if (mod === 'alertas') renderAlertas();
-    }
+function toast(msg, type){
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3200);
+}
 
-    function sectionHeader(title) {
-      return '<div class="section-title"><button class="back-btn" id="backBtn">&larr; Inicio</button>' + esc(title) + '</div>';
-    }
-    function wireBack() {
-      var b = document.getElementById('backBtn');
-      if (b) b.addEventListener('click', function() { ACTIVE = 'dashboard'; renderHome(); });
-    }
+function fmtKg(n){ return n === null || n === undefined ? '-' : Number(n).toLocaleString('es-PY',{maximumFractionDigits:2}) + ' kg'; }
+function fmtPct(n){ return n === null || n === undefined ? '-' : Number(n).toLocaleString('es-PY',{maximumFractionDigits:2}) + '%'; }
+function fmtDate(d){ if(!d) return '-'; return new Date(d).toLocaleDateString('es-PY'); }
+function opt(list, sel){ return list.map(v => `<option value="${v}" ${v===sel?'selected':''}>${v}</option>`).join(''); }
 
-    // ---------- DASHBOARD ----------
-    function renderDashboard() {
-      var main = document.getElementById('main');
-      main.innerHTML = sectionHeader('Resumen') + '<div class="loading">Cargando dashboard...</div>';
-      wireBack();
-      apiGet('dashboard').then(function(data) {
-        var html = sectionHeader('Resumen');
-        html += '<div class="stat-row">' +
-          statCard(data.ordenesAbiertas, 'Órdenes abiertas') +
-          statCard(data.alertasAbiertas, 'Alertas abiertas') +
-          statCard(data.solicitudesActivas, 'Solicitudes COMEX') +
-          statCard(data.silosEnUso, 'Silos en uso') +
-          '</div>';
-        html += '<div class="panel"><h3>Alertas recientes</h3>';
-        if (!data.alertas || data.alertas.length === 0) {
-          html += '<div style="color:var(--text-muted);font-size:13px;">Sin alertas abiertas.</div>';
-        } else {
-          data.alertas.forEach(function(a) {
-            html += '<div class="alert-item"><div class="tipo">' + esc(a.tipo) + '</div>' +
-              '<div class="det">' + esc(a.detalle) + '</div>' +
-              '<div class="fecha">' + esc(a.entidad) + ' ' + esc(a.entidad_id) + ' &middot; ' + esc(a.fecha_deteccion) + '</div></div>';
-          });
-        }
-        html += '</div>';
-        main.innerHTML = html;
-        wireBack();
-      }).catch(showErrorInMain);
-    }
-    function statCard(num, lbl) {
-      return '<div class="stat-card"><div class="num">' + esc(num) + '</div><div class="lbl">' + esc(lbl) + '</div></div>';
-    }
-    function showErrorInMain(err) {
-      var main = document.getElementById('main');
-      main.innerHTML = sectionHeader('Error') + '<div class="msg err">' + esc(err.message || err) + '</div>';
-      wireBack();
-    }
+const TABS = [
+  {id:'mp', label:'Recepción MP', icon:ICONS.mp},
+  {id:'silo', label:'Silos Bolsa', icon:ICONS.silo},
+  {id:'lote', label:'Lotes', icon:ICONS.lote},
+  {id:'bigbag', label:'Carga', icon:ICONS.bigbag},
+  {id:'cierre', label:'Cierre', icon:ICONS.cierre},
+  {id:'resumen', label:'Resumen', icon:ICONS.resumen},
+];
 
-    // ---------- MATERIA PRIMA ----------
-    function renderMateriaPrima() {
-      var main = document.getElementById('main');
-      var html = sectionHeader('Materia Prima');
-      html += tabsHtml(['stock', 'ingreso', 'lote', 'silo'], 'mp');
-      html += '<div id="mpBody"></div>';
-      main.innerHTML = html;
-      wireBack();
-      wireTabs('mp', function(tab) { renderMpTab(tab); });
-      renderMpTab('stock');
-    }
-    function renderMpTab(tab) {
-      var body = document.getElementById('mpBody');
-      if (tab === 'stock') {
-        body.innerHTML = '<div class="loading">Cargando stock...</div>';
-        apiGet('stockLotesMP').then(function(rows) {
-          var html = '';
-          if (!rows || rows.length === 0) html = '<div style="color:var(--text-muted);font-size:13px;">Sin lotes registrados.</div>';
-          rows.forEach(function(r) {
-            html += '<div class="list-item"><div><b>' + esc(r.id_lote_mp) + '</b> &middot; ' + esc(r.producto) +
-              '<div class="meta">Ingreso: ' + esc(r.ingreso_kg) + ' kg &middot; Consumido: ' + esc(r.consumido_kg) + ' kg</div></div>' +
-              '<div><span class="pill">' + esc(r.saldo_kg) + ' kg</span></div></div>';
-          });
-          body.innerHTML = html;
-        }).catch(function(e){ body.innerHTML = '<div class="msg err">' + esc(e.message||e) + '</div>'; });
-      } else if (tab === 'ingreso') {
-        body.innerHTML = formPanel('Registrar ingreso BigBag', [
-          { name: 'lote_mp_id', label: 'ID Lote MP (ej: LOT-0001)' },
-          { name: 'peso_kg', label: 'Peso (kg)', type: 'number' },
-          { name: 'codigo_bigbag', label: 'Código BigBag' }
-        ], function(data) { callServer('registrarIngresoBigBag', data, body); });
-      } else if (tab === 'lote') {
-        body.innerHTML = formPanel('Crear Lote MP', [
-          { name: 'producto', label: 'Producto' },
-          { name: 'proveedor', label: 'Proveedor' },
-          { name: 'orden_lote_id', label: 'ID Orden de Lote (opcional)' }
-        ], function(data) { callServer('crearLoteMP', data, body); });
-      } else if (tab === 'silo') {
-        body.innerHTML = formPanel('Crear Silo / Bolsa', [
-          { name: 'codigo', label: 'Código' },
-          { name: 'capacidad_kg', label: 'Capacidad (kg)', type: 'number' }
-        ], function(data) { callServer('crearSiloBolsa', data, body); });
-      }
-    }
+let activeTab = 'mp';
 
-    // ---------- PRODUCCION (carga de lote de procesamiento, igual a procesamiento-chia) ----------
-    function renderProduccion() {
-      var main = document.getElementById('main');
-      var html = sectionHeader('Producción');
-      html += tabsHtml(['cargar', 'historial', 'resumen'], 'pr');
-      html += '<div id="prBody"></div>';
-      main.innerHTML = html;
-      wireBack();
-      wireTabs('pr', function(tab) { renderPrTab(tab); });
-      renderPrTab('cargar');
-    }
-    function switchPrTab(tab) {
-      var tabs = document.querySelectorAll('.tab[data-group="pr"]');
-      Array.prototype.forEach.call(tabs, function(t) { t.classList.toggle('active', t.getAttribute('data-tab') === tab); });
-      renderPrTab(tab);
-    }
-    function renderPrTab(tab) {
-      var body = document.getElementById('prBody');
-      if (tab === 'cargar') renderCargarLote(body);
-      else if (tab === 'historial') renderHistorialProcesamiento(body);
-      else if (tab === 'resumen') renderResumenProcesamiento(body);
-    }
-    function categoriaOptionsHtml(incluirUsarDelLote) {
-      var html = incluirUsarDelLote ? '<option value="">(usar la del lote)</option>' : '<option value="">Seleccionar...</option>';
-      CATEGORIAS_PROCESAMIENTO.forEach(function(c) { html += '<option value="' + esc(c) + '">' + esc(c) + '</option>'; });
-      return html;
-    }
-    function todayStr() { return new Date().toISOString().slice(0, 10); }
-    function fmtKg(n) { n = Number(n) || 0; return n.toLocaleString('es-PY', { maximumFractionDigits: 1 }) + ' kg'; }
-    function statMini(lbl, val) { return '<div class="stat-mini"><div class="lbl">' + esc(lbl) + '</div><div class="num">' + esc(val) + '</div></div>'; }
-    function catColor(c) {
-      var map = { 'Organico': '#1baf7a', 'Organico BNN': '#2a78d6', 'Convencional UE': '#eb6834' };
-      return map[c] || '#898781';
-    }
-    function fmtPeriodo(p) {
-      var meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      var parts = String(p).split('-');
-      var y = parts[0], m = parseInt(parts[1], 10);
-      return (meses[m - 1] || p) + ' ' + y;
-    }
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = TABS.map(t =>
+    `<button class="${t.id===activeTab?'active':''}" onclick="goTab('${t.id}')">${t.icon}${t.label}</button>`
+  ).join('');
+}
 
-    // ---- Cargar lote ----
-    function renderCargarLote(body) {
-      PENDING_PARTIDAS = [];
-      body.innerHTML =
-        '<div class="panel">' +
-        '<h3>Nuevo lote de procesamiento</h3>' +
-        '<div style="color:var(--text-muted);font-size:12.5px;margin-bottom:14px;">Cargá los datos generales del lote. El producto terminado se agrega por partidas, con su fecha, abajo.</div>' +
-        '<div class="field"><label>Fecha</label><input type="date" id="cl_fecha"></div>' +
-        '<div class="field"><label>Lote</label><input type="text" id="cl_lote" placeholder="Ej. PROCHSC 021-26"></div>' +
-        '<div class="field"><label>Silo bolsa</label><input type="text" id="cl_silo" placeholder="Ej. SB-14"></div>' +
-        '<div class="field"><label>Categoría</label><select id="cl_categoria">' + categoriaOptionsHtml(false) + '</select></div>' +
-        '<div class="field"><label>Humedad (%)</label><input type="number" step="0.01" id="cl_humedad" placeholder="Ej. 7.8"></div>' +
-        '<div class="field"><label>Temperatura (°C)</label><input type="number" step="0.1" id="cl_temp" placeholder="Ej. 24"></div>' +
-        '<div class="field"><label>Volumen Materia Prima Silo Bolsa (kg)</label><input type="number" step="0.1" id="cl_volmp" value="0"></div>' +
-        '<div class="field"><label>Vol. producto terminado (kg)</label><input type="text" class="readonly" id="cl_volterm" value="0" readonly></div>' +
-        '<div class="field"><label>Estado del Proceso</label><select id="cl_estado"><option value="EN_PROCESO">En Proceso</option><option value="TERMINADO">Terminado</option></select></div>' +
-        '<hr>' +
-        '<h4>Producto terminado (por partidas / fechas)</h4>' +
-        '<div style="color:var(--text-muted);font-size:12px;margin-bottom:8px;">Cargá cada partida de producto terminado con su fecha y categoría. El total de arriba se calcula solo.</div>' +
-        '<div class="partida-table" id="cl_partidas"><div class="partida-empty">Sin partidas cargadas.</div></div>' +
-        '<div class="field"><label>Fecha</label><input type="date" id="pt_fecha"></div>' +
-        '<div class="field"><label>Cantidad (kg)</label><input type="number" step="0.1" id="pt_cantidad" value="0"></div>' +
-        '<div class="field"><label>Categoría</label><select id="pt_categoria">' + categoriaOptionsHtml(true) + '</select></div>' +
-        '<button class="btn-secondary" id="pt_agregar" type="button">+ Agregar partida</button>' +
-        '<div class="stat-mini-row" style="margin-top:14px;">' +
-        statMini('Rendimiento', '—') + statMini('Merma (kg)', '—') +
-        '</div>' +
-        '<hr>' +
-        '<h4>Ajuste de empaquetado</h4>' +
-        '<div class="field"><label>Ajuste de Empaquetado (kg)</label><input type="number" step="0.1" id="cl_ajuste" value="0" placeholder="Ej. -500"></div>' +
-        '<div class="field"><label>Motivo del ajuste</label><input type="text" id="cl_motivo" placeholder="Ej. Diferencia de humedad al embolsar"></div>' +
-        '<div class="field"><label>Producto Terminado Ajustado (kg)</label><input type="text" class="readonly" id="cl_ajustado" value="0" readonly></div>' +
-        '<h4>Observación</h4>' +
-        '<div class="obs-row">' +
-        '<label class="obs-chip"><input type="checkbox" id="cl_calado"> Calado</label>' +
-        '<label class="obs-chip"><input type="checkbox" id="cl_lacrado"> Lacrado</label>' +
-        '<label class="obs-chip"><input type="checkbox" id="cl_fumigado"> Fumigado</label>' +
-        '</div>' +
-        '<div class="field" style="margin-top:10px;"><label>Otras observaciones</label><input type="text" id="cl_otros" placeholder="Opcional"></div>' +
-        '<div id="cl_result"></div>' +
-        '<div style="display:flex;gap:10px;margin-top:14px;">' +
-        '<button class="btn-secondary" id="cl_limpiar" type="button" style="flex:1;">Limpiar</button>' +
-        '<button class="btn-primary" id="cl_guardar" type="button" style="flex:2;">Guardar lote</button>' +
-        '</div>' +
-        '</div>';
-      wireCargarLote(body);
-    }
-    function wireCargarLote(body) {
-      body.querySelector('#cl_fecha').value = todayStr();
-      body.querySelector('#pt_fecha').value = todayStr();
+function goTab(id){
+  activeTab = id;
+  renderTabs();
+  RENDERERS[id]();
+}
 
-      function recalc() {
-        var volMP = Number(body.querySelector('#cl_volmp').value) || 0;
-        var volTerm = PENDING_PARTIDAS.reduce(function(s, p) { return s + Number(p.cantidad_kg || 0); }, 0);
-        body.querySelector('#cl_volterm').value = volTerm.toFixed(1);
-        var minis = body.querySelectorAll('.stat-mini .num');
-        var rend = volMP > 0 ? (volTerm / volMP * 100) : null;
-        minis[0].textContent = rend === null ? '—' : rend.toFixed(1) + '%';
-        minis[1].textContent = volMP > 0 ? (volMP - volTerm).toFixed(1) + ' kg' : '—';
-        var ajuste = Number(body.querySelector('#cl_ajuste').value) || 0;
-        body.querySelector('#cl_ajustado').value = (volTerm + ajuste).toFixed(1);
-        renderPartidasList(body, recalc);
-      }
+document.getElementById('usuarioChip').textContent = usuario || 'Elegí tu nombre';
 
-      body.querySelector('#cl_volmp').addEventListener('input', recalc);
-      body.querySelector('#cl_ajuste').addEventListener('input', recalc);
-      body.querySelector('#pt_agregar').addEventListener('click', function() {
-        var cant = Number(body.querySelector('#pt_cantidad').value);
-        if (!cant || cant <= 0) { alert('Ingresá una cantidad válida'); return; }
-        PENDING_PARTIDAS.push({
-          fecha: body.querySelector('#pt_fecha').value || todayStr(),
-          cantidad_kg: cant,
-          categoria: body.querySelector('#pt_categoria').value || ''
-        });
-        body.querySelector('#pt_cantidad').value = 0;
-        recalc();
-      });
-      body.querySelector('#cl_limpiar').addEventListener('click', function() { renderCargarLote(body); });
-      body.querySelector('#cl_guardar').addEventListener('click', function() { guardarLote(body); });
+// ============================================================
+// RECEPCION MP
+// ============================================================
+async function renderMP(){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="card">
+    <h2>${ICONS.mp} Nueva recepción de materia prima</h2>
+    <div class="desc">Datos de la boleta. Peso neto, % descuento total y kg líquido se calculan solos.</div>
+    <form id="frmMP">
+      <div class="section-title">Datos generales de la carga</div>
+      <div class="grid">
+        <div><label>Nº Boleta *</label><input name="nro_boleta" required></div>
+        <div><label>Fecha *</label><input name="fecha" type="date" required></div>
+        <div><label>Chapa camión</label><input name="chapa_camion"></div>
+        <div><label>Chofer</label><input name="chofer"></div>
+        <div><label>Procedencia</label><input name="procedencia"></div>
+        <div><label>Tipo de cosecha</label><select name="tipo_cosecha"><option value="">-</option><option>Corte hilerado</option><option>Desecado</option></select></div>
+        <div><label>Peso Bruto (kg) *</label><input name="peso_bruto_kg" type="number" step="0.01" required oninput="calcMP()"></div>
+        <div><label>Peso Tara (kg) *</label><input name="peso_tara_kg" type="number" step="0.01" required oninput="calcMP()"></div>
+        <div class="field-computed"><label>Peso Neto (calculado)</label><input id="mpPesoNeto" disabled></div>
+        <div><label>Nº Parcela</label><input name="nro_parcela"></div>
+        <div><label>% de esta parcela</label><input name="pct_parcela" type="number" step="0.01" placeholder="ej: 50"></div>
+      </div>
 
-      recalc();
-    }
-    function renderPartidasList(body, recalc) {
-      var wrap = body.querySelector('#cl_partidas');
-      if (!PENDING_PARTIDAS.length) { wrap.innerHTML = '<div class="partida-empty">Sin partidas cargadas.</div>'; return; }
-      var html = '<table class="partida-tbl"><thead><tr><th>Fecha</th><th>Cantidad (kg)</th><th>Categoría</th><th></th></tr></thead><tbody>';
-      PENDING_PARTIDAS.forEach(function(p, i) {
-        html += '<tr><td>' + esc(p.fecha) + '</td><td>' + fmtKg(p.cantidad_kg) + '</td><td>' + esc(p.categoria || '(del lote)') + '</td>' +
-          '<td><button class="partida-del" data-i="' + i + '" type="button">&times;</button></td></tr>';
-      });
-      html += '</tbody></table>';
-      wrap.innerHTML = html;
-      Array.prototype.forEach.call(wrap.querySelectorAll('.partida-del'), function(btn) {
-        btn.addEventListener('click', function() {
-          PENDING_PARTIDAS.splice(Number(btn.getAttribute('data-i')), 1);
-          recalc();
-        });
-      });
-    }
-    function guardarLote(body) {
-      var lote = body.querySelector('#cl_lote').value.trim();
-      if (!lote) { alert('El campo Lote es obligatorio'); return; }
-      var resultDiv = body.querySelector('#cl_result');
-      resultDiv.innerHTML = '<div class="loading">Guardando...</div>';
-      var data = {
-        fecha: body.querySelector('#cl_fecha').value,
-        lote: lote,
-        silo_bolsa: body.querySelector('#cl_silo').value,
-        categoria: body.querySelector('#cl_categoria').value,
-        humedad_pct: body.querySelector('#cl_humedad').value,
-        temperatura_c: body.querySelector('#cl_temp').value,
-        volumen_mp_kg: body.querySelector('#cl_volmp').value,
-        estado_proceso: body.querySelector('#cl_estado').value,
-        ajuste_empaquetado_kg: body.querySelector('#cl_ajuste').value,
-        motivo_ajuste: body.querySelector('#cl_motivo').value,
-        obs_calado: body.querySelector('#cl_calado').checked,
-        obs_lacrado: body.querySelector('#cl_lacrado').checked,
-        obs_fumigado: body.querySelector('#cl_fumigado').checked,
-        obs_otros: body.querySelector('#cl_otros').value
-      };
-      var partidasACargar = PENDING_PARTIDAS.slice();
-      apiPost('crearProcesamiento', data).then(function(row) {
-        var id = row.id_procesamiento;
-        return Promise.all(partidasACargar.map(function(p) {
-          return apiPost('agregarPartidaProcesamiento', { procesamiento_id: id, fecha: p.fecha, cantidad_kg: p.cantidad_kg, categoria: p.categoria });
-        })).then(function() { return id; });
-      }).then(function(id) {
-        resultDiv.innerHTML = '<div class="msg ok">Lote ' + esc(lote) + ' guardado correctamente (' + esc(id) + ').</div>';
-        PENDING_PARTIDAS = [];
-      }).catch(function(err) {
-        resultDiv.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>';
-      });
-    }
+      <div class="section-title">Laboratorio (recepción)</div>
+      <div class="grid">
+        <div><label>% Humedad</label><input name="pct_humedad" type="number" step="0.01" oninput="calcMP()"></div>
+        <div><label>Temperatura (°C)</label><input name="temperatura_c" type="number" step="0.1"></div>
+        <div><label>% Impureza gruesa</label><input name="pct_impureza_gruesa" type="number" step="0.01"></div>
+        <div><label>% Impureza fina</label><input name="pct_impureza_fina" type="number" step="0.01"></div>
+        <div><label>% Descuento calidad</label><input name="pct_descuento_calidad" type="number" step="0.01" oninput="calcMP()"></div>
+        <div><label>% Descuento humedad</label><input name="pct_descuento_humedad" type="number" step="0.01" oninput="calcMP()"></div>
+        <div class="field-computed"><label>% Total descuento</label><input id="mpTotalDesc" disabled></div>
+        <div class="field-computed"><label>Kg descuento total</label><input id="mpKgDesc" disabled></div>
+        <div class="field-computed"><label>Kg líquido de la carga</label><input id="mpKgLiquido" disabled></div>
+      </div>
 
-    // ---- Historial ----
-    function renderHistorialProcesamiento(body) {
-      body.innerHTML = '<div class="hist-search"><input type="text" id="hist_buscar" placeholder="Buscar lote, silo bolsa, categoría..."></div><div id="hist_list" class="loading">Cargando historial...</div>';
-      var buscar = body.querySelector('#hist_buscar');
-      var timer;
-      buscar.addEventListener('input', function() {
-        clearTimeout(timer);
-        timer = setTimeout(function() { cargarHistorial(body, buscar.value); }, 300);
-      });
-      cargarHistorial(body, '');
-    }
-    function cargarHistorial(body, texto) {
-      var list = body.querySelector('#hist_list');
-      list.innerHTML = '<div class="loading">Cargando historial...</div>';
-      apiGet('listarProcesamientos', texto ? { texto: texto } : {}).then(function(rows) {
-        if (!rows.length) { list.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">Sin lotes cargados todavía.</div>'; return; }
-        var html = '<div class="hist-tbl-wrap"><table class="hist-tbl"><thead><tr><th>Fecha</th><th>Lote</th><th>Silo</th><th>Categoría</th><th>Humedad</th><th>Temp.</th><th>Vol. MP</th><th>Vol. terminado</th><th>Estado</th></tr></thead><tbody>';
-        rows.forEach(function(r) {
-          var esTerminado = r.estado_proceso === 'TERMINADO';
-          html += '<tr class="hist-row" data-id="' + esc(r.id_procesamiento) + '">' +
-            '<td>' + esc(r.fecha) + '</td><td>' + esc(r.lote) + '</td><td>' + esc(r.silo_bolsa) + '</td>' +
-            '<td>' + esc(r.categoria) + '</td><td>' + esc(r.humedad_pct) + (r.humedad_pct !== '' ? '%' : '') + '</td>' +
-            '<td>' + esc(r.temperatura_c) + (r.temperatura_c !== '' ? '°C' : '') + '</td>' +
-            '<td>' + fmtKg(r.volumen_mp_kg) + '</td><td>' + fmtKg(r.vol_producto_terminado_kg) + '</td>' +
-            '<td><span class="badge-estado ' + (esTerminado ? 'badge-terminado' : 'badge-proceso') + '">' + (esTerminado ? 'Terminado' : 'En Proceso') + '</span></td></tr>';
-        });
-        html += '</tbody></table></div>';
-        list.innerHTML = html;
-        Array.prototype.forEach.call(list.querySelectorAll('.hist-row'), function(tr) {
-          tr.addEventListener('click', function() { renderDetalleProcesamiento(body, tr.getAttribute('data-id')); });
-        });
-      }).catch(function(err) { list.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>'; });
-    }
-    function renderDetalleProcesamiento(body, id) {
-      body.innerHTML = '<div class="loading">Cargando lote...</div>';
-      apiGet('procesamientoDetalle', { id_procesamiento: id }).then(function(det) {
-        var p = det.procesamiento;
-        var html = '<div class="panel">';
-        html += '<button class="btn-secondary" id="det_volver" type="button" style="margin-bottom:12px;">&larr; Volver al historial</button>';
-        html += '<h3>' + esc(p.lote) + '</h3>';
-        html += '<div class="stat-mini-row">' +
-          statMini('Vol. materia prima', fmtKg(p.volumen_mp_kg)) +
-          statMini('Vol. producto terminado', fmtKg(det.vol_producto_terminado_kg)) +
-          statMini('Rendimiento', det.rendimiento_pct === null ? '—' : det.rendimiento_pct.toFixed(1) + '%') +
-          statMini('Merma', fmtKg(det.merma_kg)) +
-          '</div>';
-        html += '<div class="list-item"><div>Silo bolsa: <b>' + esc(p.silo_bolsa || '—') + '</b></div></div>';
-        html += '<div class="list-item"><div>Categoría: <b>' + esc(p.categoria || '—') + '</b></div></div>';
-        html += '<div class="list-item"><div>Humedad / Temp.: <b>' + esc(p.humedad_pct || '—') + '% / ' + esc(p.temperatura_c || '—') + '°C</b></div></div>';
-        html += '<div class="list-item"><div>Estado: <b>' + (p.estado_proceso === 'TERMINADO' ? 'Terminado' : 'En Proceso') + '</b></div></div>';
-        if (Number(p.ajuste_empaquetado_kg)) {
-          html += '<div class="list-item"><div>Ajuste de empaquetado: <b>' + fmtKg(p.ajuste_empaquetado_kg) + '</b>' + (p.motivo_ajuste ? ' — ' + esc(p.motivo_ajuste) : '') +
-            '<br>Producto terminado ajustado: <b>' + fmtKg(det.producto_terminado_ajustado_kg) + '</b></div></div>';
-        }
-        var obs = [p.obs_calado ? 'Calado' : '', p.obs_lacrado ? 'Lacrado' : '', p.obs_fumigado ? 'Fumigado' : '', p.obs_otros || ''].filter(Boolean).join(' · ');
-        if (obs) html += '<div class="list-item"><div>Observación: <b>' + esc(obs) + '</b></div></div>';
+      <div class="section-title">Almacenamiento</div>
+      <div class="grid">
+        <div><label>Silo bolsa *</label><select name="silo_bolsa_id" id="mpSiloSelect" required></select></div>
+        <div><label>Patio de destino</label><input name="patio_destino"></div>
+      </div>
+      <label>Observaciones</label><textarea name="observaciones"></textarea>
+      <button class="btn" type="submit">${ICONS.check} Guardar recepción</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Recepciones recientes</h2>
+    <div id="mpList" class="table-wrap"><div class="empty">Cargando...</div></div>
+  </div>`;
 
-        html += '<h4 style="margin-top:16px;">Partidas de producto terminado</h4>';
-        if (!det.partidas.length) {
-          html += '<div style="color:var(--text-muted);font-size:13px;">Sin partidas cargadas.</div>';
-        } else {
-          html += '<table class="partida-tbl"><thead><tr><th>Fecha</th><th>Cantidad (kg)</th><th>Categoría</th></tr></thead><tbody>';
-          det.partidas.forEach(function(pt) { html += '<tr><td>' + esc(pt.fecha) + '</td><td>' + fmtKg(pt.cantidad_kg) + '</td><td>' + esc(pt.categoria) + '</td></tr>'; });
-          html += '</tbody></table>';
-        }
-        html += '<div class="field" style="margin-top:12px;"><label>Agregar partida — Fecha</label><input type="date" id="ndp_fecha"></div>';
-        html += '<div class="field"><label>Cantidad (kg)</label><input type="number" step="0.1" id="ndp_cantidad" value="0"></div>';
-        html += '<button class="btn-secondary" id="ndp_agregar" type="button">+ Agregar partida</button>';
-        html += '<div id="det_result"></div>';
-        html += '</div>';
-        body.innerHTML = html;
-        body.querySelector('#ndp_fecha').value = todayStr();
-        body.querySelector('#det_volver').addEventListener('click', function() { renderHistorialProcesamiento(body); });
-        body.querySelector('#ndp_agregar').addEventListener('click', function() {
-          var cant = Number(body.querySelector('#ndp_cantidad').value);
-          if (!cant || cant <= 0) { alert('Ingresá una cantidad válida'); return; }
-          apiPost('agregarPartidaProcesamiento', { procesamiento_id: id, fecha: body.querySelector('#ndp_fecha').value, cantidad_kg: cant }).then(function() {
-            renderDetalleProcesamiento(body, id);
-          }).catch(function(err) { body.querySelector('#det_result').innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>'; });
-        });
-      }).catch(function(err) { body.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>'; });
-    }
+  document.getElementById('frmMP').querySelector('[name=fecha]').value = new Date().toISOString().slice(0,10);
 
-    // ---- Resumen (graficos) ----
-    function renderResumenProcesamiento(body) {
-      body.innerHTML = '<div class="loading">Cargando resumen...</div>';
-      apiGet('resumenProcesamiento', {}).then(function(r) {
-        body.innerHTML = resumenProcesamientoHtml(r);
-      }).catch(function(err) { body.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>'; });
-    }
-    function resumenProcesamientoHtml(r) {
-      var html = '<div class="panel"><h3>Producto terminado ajustado por período</h3>';
-      html += '<div class="stat-mini-row">';
-      html += statMini('Total del período', fmtKg(r.totalPeriodo));
-      CATEGORIAS_PROCESAMIENTO.forEach(function(c) { html += statMini(c, fmtKg(r.totalesCategoria[c] || 0)); });
-      html += '</div>';
-      html += stackedBarChart(r);
-      html += '</div>';
-      html += '<div class="panel"><h3>Volumen de materia prima por categoría</h3>';
-      html += simpleBarChart(r.porCategoriaMP);
-      html += '</div>';
-      return html;
-    }
-    function stackedBarChart(r) {
-      if (!r.periodos.length) return '<div style="color:var(--text-muted);font-size:13px;">Todavía no hay datos para graficar.</div>';
-      var max = 0;
-      r.periodos.forEach(function(p) {
-        var total = 0;
-        Object.keys(r.porPeriodo[p]).forEach(function(c) { total += r.porPeriodo[p][c]; });
-        if (total > max) max = total;
-      });
-      if (max <= 0) max = 1;
-      var chartH = 160, barW = 40, gap = 24;
-      var svgW = r.periodos.length * (barW + gap) + gap;
-      var bars = '';
-      r.periodos.forEach(function(p, i) {
-        var x = gap + i * (barW + gap);
-        var stackedSoFar = 0;
-        var cats = CATEGORIAS_PROCESAMIENTO.concat(Object.keys(r.porPeriodo[p]).filter(function(c) { return CATEGORIAS_PROCESAMIENTO.indexOf(c) === -1; }));
-        cats.forEach(function(c) {
-          var val = r.porPeriodo[p][c] || 0;
-          if (val <= 0) return;
-          var h = (val / max) * chartH;
-          var y = chartH - stackedSoFar - h;
-          bars += '<rect x="' + x + '" y="' + y.toFixed(1) + '" width="' + barW + '" height="' + Math.max(h - 2, 0).toFixed(1) + '" fill="' + catColor(c) + '" rx="3"><title>' + esc(c) + ': ' + fmtKg(val) + '</title></rect>';
-          stackedSoFar += h;
-        });
-        bars += '<text x="' + (x + barW / 2) + '" y="' + (chartH + 16) + '" text-anchor="middle" class="chart-axis-label">' + esc(fmtPeriodo(p)) + '</text>';
-      });
-      var svg = '<svg viewBox="0 0 ' + svgW + ' ' + (chartH + 30) + '" class="chart-svg" preserveAspectRatio="xMinYMid meet">' + bars + '</svg>';
-      var legend = '<div class="chart-legend">' + CATEGORIAS_PROCESAMIENTO.map(function(c) {
-        return '<span class="legend-item"><span class="legend-swatch" style="background:' + catColor(c) + '"></span>' + esc(c) + '</span>';
-      }).join('') + '</div>';
-      return '<div class="chart-wrap">' + svg + '</div>' + legend;
-    }
-    function simpleBarChart(porCategoriaMP) {
-      var cats = Object.keys(porCategoriaMP || {});
-      if (!cats.length) return '<div style="color:var(--text-muted);font-size:13px;">Todavía no hay datos para graficar.</div>';
-      var max = Math.max.apply(null, cats.map(function(c) { return porCategoriaMP[c]; }));
-      if (max <= 0) max = 1;
-      var html = '<div class="hbar-list">';
-      cats.forEach(function(c) {
-        var val = porCategoriaMP[c];
-        var pct = Math.max((val / max * 100), 2);
-        html += '<div class="hbar-row"><div class="hbar-lbl">' + esc(c) + '</div><div class="hbar-track"><div class="hbar-fill" style="width:' + pct.toFixed(1) + '%;background:' + catColor(c) + '"></div></div><div class="hbar-val">' + fmtKg(val) + '</div></div>';
-      });
-      html += '</div>';
-      return html;
-    }
+  const { data: silos } = await sb.from('silos_bolsa').select('*').eq('estado','ABIERTO').order('creado_en',{ascending:false});
+  const sel = document.getElementById('mpSiloSelect');
+  sel.innerHTML = (silos||[]).map(s => `<option value="${s.id}">Silo ${s.numero} · ${s.producto} · ${s.categoria}</option>`).join('') || '<option value="">No hay silos abiertos - creá uno primero</option>';
 
-    // ---------- LABORATORIO ----------
-    function renderLaboratorio() {
-      var main = document.getElementById('main');
-      var html = sectionHeader('Laboratorio');
-      html += formPanelStr('Registrar Análisis', [
-        { name: 'entidad_tipo', label: 'Tipo de entidad (ej: BIGBAG_PROCESO)' },
-        { name: 'entidad_id', label: 'ID de entidad' },
-        { name: 'tipo', label: 'Tipo de análisis' },
-        { name: 'laboratorio', label: 'Laboratorio' },
-        { name: 'resultado_general', label: 'Resultado general (APROBADO/RECHAZADO)' }
-      ]);
-      main.innerHTML = html;
-      wireBack();
-      document.getElementById('formSubmit').addEventListener('click', function() {
-        var data = collectForm();
-        callServer('crearAnalisis', data, document.getElementById('formResult'));
-      });
-    }
+  document.getElementById('frmMP').addEventListener('submit', submitMP);
+  loadMPList();
+}
 
-    // ---------- COMEX ----------
-    function renderComex() {
-      var main = document.getElementById('main');
-      var html = sectionHeader('COMEX / Despacho');
-      html += tabsHtml(['solicitud', 'estiba', 'asignarlote', 'exportacion', 'asignarestiba'], 'cx');
-      html += '<div id="cxBody"></div>';
-      main.innerHTML = html;
-      wireBack();
-      wireTabs('cx', function(tab) { renderCxTab(tab); });
-      renderCxTab('solicitud');
-    }
-    function renderCxTab(tab) {
-      var body = document.getElementById('cxBody');
-      if (tab === 'solicitud') {
-        body.innerHTML = formPanel('Crear Solicitud COMEX', [
-          { name: 'producto', label: 'Producto' },
-          { name: 'cantidad_solicitada', label: 'Cantidad solicitada (kg)', type: 'number' },
-          { name: 'cliente', label: 'Cliente' },
-          { name: 'canal', label: 'Canal (WhatsApp/Email/...)' }
-        ], function(data) { callServer('crearSolicitudComex', data, body); });
-      } else if (tab === 'estiba') {
-        body.innerHTML = formPanel('Crear Estiba', [
-          { name: 'tipo_producto', label: 'Tipo de producto' },
-          { name: 'capacidad_estimada_kg', label: 'Capacidad estimada (kg)', type: 'number' },
-          { name: 'ubicacion', label: 'Ubicación' }
-        ], function(data) { callServer('crearEstiba', data, body); });
-      } else if (tab === 'asignarlote') {
-        body.innerHTML = formPanel('Asignar Lote a Estiba', [
-          { name: 'estiba_id', label: 'ID Estiba' },
-          { name: 'lote_mp_id', label: 'ID Lote MP' },
-          { name: 'cantidad_kg', label: 'Cantidad (kg)', type: 'number' }
-        ], function(data) { callServer('asignarLoteAEstiba', data, body); });
-      } else if (tab === 'exportacion') {
-        body.innerHTML = formPanel('Crear Exportación', [
-          { name: 'solicitud_comex_id', label: 'ID Solicitud COMEX (opcional)' },
-          { name: 'tipo_bolsa', label: 'Tipo de bolsa' },
-          { name: 'tipo_contenerizado', label: 'Tipo contenerizado' }
-        ], function(data) { callServer('crearExportacion', data, body); });
-      } else if (tab === 'asignarestiba') {
-        body.innerHTML = formPanel('Asignar Estiba a Exportación', [
-          { name: 'exportacion_id', label: 'ID Exportación' },
-          { name: 'estiba_lote_id', label: 'ID Estiba-Lote' },
-          { name: 'cantidad_kg', label: 'Cantidad (kg)', type: 'number' }
-        ], function(data) { callServer('asignarEstibaAExportacion', data, body); });
-      }
-    }
+function calcMP(){
+  const f = document.getElementById('frmMP');
+  const bruto = parseFloat(f.peso_bruto_kg.value) || 0;
+  const tara = parseFloat(f.peso_tara_kg.value) || 0;
+  const neto = bruto - tara;
+  const dCal = parseFloat(f.pct_descuento_calidad.value) || 0;
+  const dHum = parseFloat(f.pct_descuento_humedad.value) || 0;
+  const totalDesc = dCal + dHum;
+  const kgDesc = neto * totalDesc / 100;
+  const kgLiquido = neto - kgDesc;
+  document.getElementById('mpPesoNeto').value = neto.toFixed(2) + ' kg';
+  document.getElementById('mpTotalDesc').value = totalDesc.toFixed(2) + ' %';
+  document.getElementById('mpKgDesc').value = kgDesc.toFixed(2) + ' kg';
+  document.getElementById('mpKgLiquido').value = kgLiquido.toFixed(2) + ' kg';
+}
 
-    // ---------- ALERTAS ----------
-    function renderAlertas() {
-      var main = document.getElementById('main');
-      main.innerHTML = sectionHeader('Alertas') + '<div class="loading">Cargando alertas...</div>';
-      wireBack();
-      apiGet('alertas', {}).then(function(rows) {
-        var html = sectionHeader('Alertas');
-        if (!rows || rows.length === 0) {
-          html += '<div style="color:var(--text-muted);font-size:13px;">Sin alertas.</div>';
-        } else {
-          rows.forEach(function(a) {
-            html += '<div class="alert-item"><div class="tipo">' + esc(a.tipo) + ' &middot; ' + esc(a.estado) + '</div>' +
-              '<div class="det">' + esc(a.detalle) + '</div>' +
-              '<div class="fecha">' + esc(a.entidad) + ' ' + esc(a.entidad_id) + ' &middot; ' + esc(a.fecha_deteccion) + '</div>';
-            if (a.estado === 'ABIERTA') {
-              html += '<button class="btn-secondary" style="margin-top:8px;" data-id="' + esc(a.id_alerta) + '" onclick="resolverAlerta(\'' + esc(a.id_alerta) + '\')">Marcar revisada</button>';
-            }
-            html += '</div>';
-          });
-        }
-        main.innerHTML = html;
-        wireBack();
-      }).catch(showErrorInMain);
-    }
-    function resolverAlerta(id) {
-      apiPost('resolverAlerta', { id_alerta: id, estado: 'REVISADA' }).then(function() {
-        renderAlertas();
-      }).catch(function(e){ alert(e.message || e); });
-    }
+async function submitMP(e){
+  e.preventDefault();
+  const f = e.target;
+  const fd = new FormData(f);
+  const payload = Object.fromEntries(fd.entries());
+  ['peso_bruto_kg','peso_tara_kg','pct_humedad','temperatura_c','pct_impureza_gruesa','pct_impureza_fina','pct_descuento_calidad','pct_descuento_humedad','pct_parcela'].forEach(k=>{
+    payload[k] = payload[k] === '' ? null : Number(payload[k]);
+  });
+  payload.creado_por = usuario || null;
 
-    // ---------- Helpers: forms & tabs ----------
-    function tabsHtml(tabs, group) {
-      var labels = { stock:'Stock', ingreso:'Ingreso BigBag', lote:'Nuevo Lote', silo:'Nuevo Silo',
-        cargar:'Cargar Lote', historial:'Historial', resumen:'Resumen',
-        solicitud:'Solicitud', estiba:'Estiba', asignarlote:'Asignar Lote', exportacion:'Exportación', asignarestiba:'Asignar Estiba' };
-      var html = '<div class="tabs">';
-      tabs.forEach(function(t, i) {
-        html += '<div class="tab' + (i === 0 ? ' active' : '') + '" data-tab="' + t + '" data-group="' + group + '">' + (labels[t] || t) + '</div>';
-      });
-      html += '</div>';
-      return html;
-    }
-    function wireTabs(group, cb) {
-      var tabs = document.querySelectorAll('.tab[data-group="' + group + '"]');
-      Array.prototype.forEach.call(tabs, function(t) {
-        t.addEventListener('click', function() {
-          Array.prototype.forEach.call(tabs, function(x) { x.classList.remove('active'); });
-          t.classList.add('active');
-          cb(t.getAttribute('data-tab'));
-        });
-      });
-    }
-    function formPanel(title, fields, onSubmit) {
-      var html = '<div class="panel"><h3>' + esc(title) + '</h3><div id="dynForm">';
-      fields.forEach(function(f) {
-        html += '<div class="field"><label>' + esc(f.label) + '</label><input type="' + (f.type || 'text') + '" data-field="' + f.name + '"></div>';
-      });
-      html += '</div><div id="dynResult"></div><button class="btn-primary" id="dynSubmit">Guardar</button></div>';
-      setTimeout(function() {
-        var btn = document.getElementById('dynSubmit');
-        if (btn) btn.addEventListener('click', function() {
-          var data = {};
-          Array.prototype.forEach.call(document.querySelectorAll('#dynForm [data-field]'), function(inp) {
-            data[inp.getAttribute('data-field')] = inp.value;
-          });
-          onSubmit(data);
-        });
-      }, 0);
-      return html;
-    }
-    function formPanelStr(title, fields) {
-      var html = '<div class="panel"><h3>' + esc(title) + '</h3><div id="dynForm">';
-      fields.forEach(function(f) {
-        html += '<div class="field"><label>' + esc(f.label) + '</label><input type="text" data-field="' + f.name + '"></div>';
-      });
-      html += '</div><div id="formResult"></div><button class="btn-primary" id="formSubmit">Guardar</button></div>';
-      return html;
-    }
-    function collectForm() {
-      var data = {};
-      Array.prototype.forEach.call(document.querySelectorAll('#dynForm [data-field]'), function(inp) {
-        data[inp.getAttribute('data-field')] = inp.value;
-      });
-      return data;
-    }
-    function callServer(fnName, data, targetEl) {
-      var resultDiv = targetEl.querySelector ? targetEl.querySelector('#dynResult') : null;
-      if (!resultDiv) resultDiv = document.getElementById('dynResult') || document.getElementById('formResult');
-      if (resultDiv) resultDiv.innerHTML = '<div class="loading">Guardando...</div>';
-      apiPost(fnName, data).then(function(res) {
-        if (resultDiv) resultDiv.innerHTML = '<div class="msg ok">Guardado correctamente.</div>';
-      }).catch(function(err) {
-        if (resultDiv) resultDiv.innerHTML = '<div class="msg err">' + esc(err.message || err) + '</div>';
-      });
-    }
+  const { data, error } = await sb.from('recepcion_mp').insert(payload).select().single();
+  if(error){ toast('Error: ' + error.message, 'err'); return; }
 
-    document.getElementById('btnHome').addEventListener('click', function() { ACTIVE = 'dashboard'; renderHome(); });
-    document.getElementById('btnAlertas').addEventListener('click', function() { navigate('alertas'); });
+  toast('Recepción ' + data.id + ' guardada', 'ok');
+  renderMP();
+}
 
-    // ---------- Banner de sin conexion ----------
-    function updateOfflineBanner() {
-      var b = document.getElementById('offlineBanner');
-      if (!b) return;
-      b.classList.toggle('show', !navigator.onLine);
-    }
-    window.addEventListener('online', updateOfflineBanner);
-    window.addEventListener('offline', updateOfflineBanner);
-    updateOfflineBanner();
+async function loadMPList(){
+  const { data, error } = await sb.from('recepcion_mp').select('*, silos_bolsa(numero,categoria)').order('creado_en',{ascending:false}).limit(30);
+  const el = document.getElementById('mpList');
+  if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay recepciones cargadas.</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>ID</th><th>Boleta</th><th>Fecha</th><th>Silo</th><th>Peso Neto</th><th>Kg Líquido</th><th>Estado</th></tr></thead><tbody>
+    ${data.map(r => `<tr><td>${r.id}</td><td>${r.nro_boleta}</td><td>${fmtDate(r.fecha)}</td><td>${r.silos_bolsa ? 'Silo '+r.silos_bolsa.numero+' · '+r.silos_bolsa.categoria : '-'}</td><td>${fmtKg(r.peso_neto_kg)}</td><td>${fmtKg(r.kg_liquido_carga)}</td><td><span class="badge ${r.estado==='DISPONIBLE'?'ok':'off'}">${r.estado}</span></td></tr>`).join('')}
+  </tbody></table>`;
+}
 
-    // ---------- Service worker (instalable / offline) ----------
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('sw.js').catch(function() {});
-      });
-    }
+// ============================================================
+// SILOS BOLSA
+// ============================================================
+async function renderSilo(){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="card">
+    <h2>${ICONS.silo} Nuevo silo bolsa</h2>
+    <div class="desc">La categoría/calidad se define acá, no por carga individual.</div>
+    <form id="frmSilo">
+      <div class="grid">
+        <div><label>Número *</label><input name="numero" required></div>
+        <div><label>Producto *</label><select name="producto" required>${opt(PRODUCTOS)}</select></div>
+        <div><label>Categoría *</label><select name="categoria" required>${opt(CATEGORIAS)}</select></div>
+        <div><label>Patio</label><input name="patio"></div>
+      </div>
+      <label>Observaciones</label><textarea name="observaciones"></textarea>
+      <button class="btn" type="submit">${ICONS.check} Crear silo bolsa</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Silos bolsa</h2>
+    <div id="siloList" class="table-wrap"><div class="empty">Cargando...</div></div>
+  </div>`;
+  document.getElementById('frmSilo').addEventListener('submit', submitSilo);
+  loadSiloList();
+}
 
-    // ---------- Init: pedir nombre de usuario (una sola vez, guardado local) ----------
-    function ensureUsuario(cb) {
-      var saved = null;
-      try { saved = localStorage.getItem('pn_usuario'); } catch (e) {}
-      if (saved) { CURRENT_USER = saved; cb(); return; }
-      showUsuarioPrompt(cb);
-    }
-    function showUsuarioPrompt(cb) {
-      var main = document.getElementById('main');
-      main.innerHTML = '<div class="panel"><h3>¿Cómo te llamás?</h3>' +
-        '<div style="color:var(--text-muted);font-size:12.5px;margin-bottom:12px;">Se usa para registrar quién hizo cada movimiento. Se guarda solo en este dispositivo.</div>' +
-        '<div class="field"><input type="text" id="usuarioInput" placeholder="Tu nombre"></div>' +
-        '<button class="btn-primary" id="usuarioSubmit">Continuar</button></div>';
-      var input = document.getElementById('usuarioInput');
-      function submit() {
-        var val = input.value.trim();
-        if (!val) { input.focus(); return; }
-        CURRENT_USER = val;
-        try { localStorage.setItem('pn_usuario', val); } catch (e) {}
-        cb();
-      }
-      document.getElementById('usuarioSubmit').addEventListener('click', submit);
-      input.addEventListener('keydown', function(e) { if (e.key === 'Enter') submit(); });
-      input.focus();
-    }
+async function submitSilo(e){
+  e.preventDefault();
+  const payload = Object.fromEntries(new FormData(e.target).entries());
+  payload.creado_por = usuario || null;
+  const { data, error } = await sb.from('silos_bolsa').insert(payload).select().single();
+  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  toast('Silo ' + data.id + ' creado', 'ok');
+  renderSilo();
+}
 
-    ensureUsuario(function() {
-      document.getElementById('greeting').textContent = 'Hola, ' + CURRENT_USER.split(' ')[0];
-      renderHome();
-    });
-  </script>
+async function loadSiloList(){
+  const { data, error } = await sb.from('silos_bolsa').select('*').order('creado_en',{ascending:false});
+  const el = document.getElementById('siloList');
+  if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay silos bolsa.</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>ID</th><th>Nº</th><th>Producto</th><th>Categoría</th><th>Patio</th><th>Estado</th><th></th></tr></thead><tbody>
+    ${data.map(s => `<tr><td>${s.id}</td><td>${s.numero}</td><td>${s.producto}</td><td>${s.categoria}</td><td>${s.patio||'-'}</td><td><span class="badge ${s.estado==='ABIERTO'?'ok':'off'}">${s.estado}</span></td>
+    <td>${s.estado==='ABIERTO' ? `<button class="btn secondary small" onclick="cerrarSilo('${s.id}')">Cerrar</button>` : ''}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+async function cerrarSilo(id){
+  if(!confirm('¿Cerrar este silo bolsa? Ya no vas a poder cargarle más recepciones.')) return;
+  const { error } = await sb.from('silos_bolsa').update({estado:'CERRADO'}).eq('id', id);
+  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  loadSiloList();
+}
+
+// ============================================================
+// LOTES
+// ============================================================
+async function renderLote(){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="card">
+    <h2>${ICONS.lote} Crear lote</h2>
+    <div class="desc">Elegí las cargas de materia prima (de uno o varios silos bolsa) que van a entrar en proceso.</div>
+    <div class="grid">
+      <div><label>Producto *</label><select id="loteProducto">${opt(PRODUCTOS)}</select></div>
+      <div><label>Categoría</label><select id="loteCategoria"><option value="">-</option>${opt(CATEGORIAS)}</select></div>
+      <div><label>Responsable</label><input id="loteResponsable"></div>
+    </div>
+    <label>Cargas disponibles</label>
+    <div id="recepcionChecklist" class="checklist"><div class="empty">Cargando...</div></div>
+    <div style="margin-top:12px"><button class="btn" onclick="crearLote()">${ICONS.plus} Crear lote con seleccionadas</button></div>
+  </div>
+  <div class="card">
+    <h2>Lotes</h2>
+    <div id="loteList" class="table-wrap"><div class="empty">Cargando...</div></div>
+  </div>`;
+  loadRecepcionChecklist();
+  loadLoteList();
+}
+
+async function loadRecepcionChecklist(){
+  const { data, error } = await sb.from('recepcion_mp').select('*, silos_bolsa(numero,categoria,producto)').eq('estado','DISPONIBLE').order('silo_bolsa_id');
+  const el = document.getElementById('recepcionChecklist');
+  if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">No hay cargas disponibles (todas ya están asignadas a un lote).</div>'; return; }
+  const bySilo = {};
+  data.forEach(r => { const k = r.silo_bolsa_id; (bySilo[k] = bySilo[k]||[]).push(r); });
+  el.innerHTML = Object.entries(bySilo).map(([siloId, rows]) => {
+    const s = rows[0].silos_bolsa;
+    return `<div class="silo-group">Silo ${s.numero} · ${s.producto} · ${s.categoria}</div>` +
+      rows.map(r => `<label class="checkrow"><input type="checkbox" class="recepcion-check" value="${r.id}"><span>${r.nro_boleta}</span><span class="meta">${fmtDate(r.fecha)} · ${fmtKg(r.kg_liquido_carga)}</span></label>`).join('');
+  }).join('');
+}
+
+async function crearLote(){
+  const seleccionadas = [...document.querySelectorAll('.recepcion-check:checked')].map(c => c.value);
+  if(!seleccionadas.length){ toast('Elegí al menos una carga', 'err'); return; }
+  const producto = document.getElementById('loteProducto').value;
+  const categoria = document.getElementById('loteCategoria').value || null;
+  const responsable = document.getElementById('loteResponsable').value || null;
+
+  const { data: lote, error } = await sb.from('lotes').insert({producto, categoria, responsable, creado_por: usuario||null}).select().single();
+  if(error){ toast('Error: ' + error.message, 'err'); return; }
+
+  const rows = seleccionadas.map(rid => ({lote_id: lote.id, recepcion_mp_id: rid}));
+  const { error: e2 } = await sb.from('lote_recepcion').insert(rows);
+  if(e2){ toast('Lote creado pero error asignando cargas: ' + e2.message, 'err'); return; }
+
+  toast('Lote ' + lote.id + ' creado con ' + seleccionadas.length + ' carga(s)', 'ok');
+  renderLote();
+}
+
+async function loadLoteList(){
+  const { data, error } = await sb.from('lotes').select('*').order('creado_en',{ascending:false});
+  const el = document.getElementById('loteList');
+  if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay lotes.</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Lote</th><th>Producto</th><th>Categoría</th><th>Responsable</th><th>Creado</th><th>Estado</th></tr></thead><tbody>
+    ${data.map(l => `<tr><td>${l.id}</td><td>${l.producto}</td><td>${l.categoria||'-'}</td><td>${l.responsable||'-'}</td><td>${fmtDate(l.fecha_creacion)}</td><td><span class="badge ${l.estado==='EN_PROCESO'?'warn':'ok'}">${l.estado}</span></td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+// ============================================================
+// CARGA POR BIGBAG
+// ============================================================
+let loteActivoId = null;
+
+async function renderBigbag(){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="card">
+    <h2>${ICONS.bigbag} Carga por bigbag</h2>
+    <div class="desc">Elegí el lote en proceso y cargá cada bigbag a medida que se procesa.</div>
+    <div id="lotePills" class="pill-row"></div>
+    <form id="frmBigbag" style="display:none">
+      <div class="grid">
+        <div><label>Fecha</label><input name="fecha" type="date"></div>
+        <div><label>Hora</label><input name="hora" type="time"></div>
+        <div><label>Turno *</label><select name="turno" required><option value="DIA">Día (06-18h)</option><option value="NOCHE">Noche (18-06h)</option></select></div>
+        <div><label>Nº Bigbag (vacío = automático)</label><input name="nro_bigbag" type="number"></div>
+        <div><label>Pureza %</label><input name="pureza_pct" type="number" step="0.01"></div>
+        <div><label>Humedad del grano %</label><input name="humedad_grano_pct" type="number" step="0.01"></div>
+        <div><label>Temp. ambiente °C</label><input name="temperatura_ambiente_c" type="number" step="0.1"></div>
+        <div><label>Temp. del grano °C</label><input name="temperatura_grano_c" type="number" step="0.1"></div>
+        <div><label>Encargado</label><input name="encargado"></div>
+      </div>
+      <label>Observaciones</label><textarea name="observaciones"></textarea>
+      <button class="btn" type="submit">${ICONS.plus} Registrar bigbag</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Bigbags del lote</h2>
+    <div id="bigbagList" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div>
+  </div>`;
+
+  const { data: lotes } = await sb.from('lotes').select('*').eq('estado','EN_PROCESO').order('creado_en',{ascending:false});
+  const pillsEl = document.getElementById('lotePills');
+  if(!lotes || !lotes.length){ pillsEl.innerHTML = '<div class="empty">No hay lotes en proceso.</div>'; return; }
+  pillsEl.innerHTML = lotes.map(l => `<div class="lote-pill" id="pill-${l.id}" onclick="elegirLote('${l.id}')">${l.id} · ${l.producto}</div>`).join('');
+  elegirLote(lotes[0].id);
+
+  document.getElementById('frmBigbag').addEventListener('submit', submitBigbag);
+}
+
+function elegirLote(id){
+  loteActivoId = id;
+  document.querySelectorAll('.lote-pill').forEach(p => p.classList.remove('active'));
+  const pill = document.getElementById('pill-'+id);
+  if(pill) pill.classList.add('active');
+  const f = document.getElementById('frmBigbag');
+  f.style.display = 'block';
+  f.fecha.value = new Date().toISOString().slice(0,10);
+  const h = new Date();
+  f.turno.value = (h.getHours() >= 6 && h.getHours() < 18) ? 'DIA' : 'NOCHE';
+  loadBigbagList();
+}
+
+async function submitBigbag(e){
+  e.preventDefault();
+  if(!loteActivoId){ toast('Elegí un lote primero', 'err'); return; }
+  const payload = Object.fromEntries(new FormData(e.target).entries());
+  payload.lote_id = loteActivoId;
+  if(!payload.nro_bigbag) delete payload.nro_bigbag; else payload.nro_bigbag = Number(payload.nro_bigbag);
+  ['pureza_pct','humedad_grano_pct','temperatura_ambiente_c','temperatura_grano_c'].forEach(k=>{
+    payload[k] = payload[k] === '' ? null : Number(payload[k]);
+  });
+  payload.encargado = payload.encargado || usuario || null;
+
+  const { data, error } = await sb.from('produccion_bigbag').insert(payload).select().single();
+  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  toast('Bigbag Nº' + data.nro_bigbag + ' registrado', 'ok');
+  e.target.reset();
+  elegirLote(loteActivoId);
+}
+
+async function loadBigbagList(){
+  const { data, error } = await sb.from('produccion_bigbag').select('*').eq('lote_id', loteActivoId).order('nro_bigbag');
+  const el = document.getElementById('bigbagList');
+  if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay bigbags cargados en este lote.</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Nº</th><th>Turno</th><th>Fecha</th><th>Pureza</th><th>Hum. grano</th><th>Encargado</th></tr></thead><tbody>
+    ${data.map(b => `<tr><td>${b.nro_bigbag}</td><td>${b.turno}</td><td>${fmtDate(b.fecha)}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${b.encargado||'-'}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+// ============================================================
+// CIERRE (turno + lote)
+// ============================================================
+async function renderCierre(){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="card">
+    <h2>${ICONS.cierre} Actualización diaria (por turno)</h2>
+    <div class="desc">Ajuste con los números reales del turno: kg procesados y mermas.</div>
+    <div id="lotePillsCierre" class="pill-row"></div>
+    <form id="frmTurno" style="display:none">
+      <div class="grid">
+        <div><label>Fecha *</label><input name="fecha" type="date" required></div>
+        <div><label>Turno *</label><select name="turno" required><option value="DIA">Día</option><option value="NOCHE">Noche</option></select></div>
+        <div><label>Kg reales procesados</label><input name="kg_reales_procesados" type="number" step="0.01"></div>
+        <div><label>Mermas (kg)</label><input name="mermas_kg" type="number" step="0.01"></div>
+      </div>
+      <label>Observaciones</label><textarea name="observaciones"></textarea>
+      <button class="btn" type="submit">${ICONS.check} Guardar ajuste de turno</button>
+    </form>
+  </div>
+  <div class="card" id="cierreLoteCard" style="display:none">
+    <h2>Cierre final del lote</h2>
+    <div class="desc">Se hace una sola vez, cuando termina de procesarse todo el lote.</div>
+    <div class="grid">
+      <div><label>Kg ingresado MP (sugerido)</label><input id="cfKgMp" disabled></div>
+      <div><label>Kg procesado total *</label><input id="cfKgProc" type="number" step="0.01"></div>
+      <div><label>Mermas totales (kg)</label><input id="cfMermas" type="number" step="0.01"></div>
+    </div>
+    <label>Resumen análisis MP</label><textarea id="cfAnalisisMp"></textarea>
+    <label>Resumen análisis PT (producto terminado)</label><textarea id="cfAnalisisPt"></textarea>
+    <label>Diferencia MP vs PT / observaciones</label><textarea id="cfDif"></textarea>
+    <button class="btn" onclick="cerrarLoteFinal()">${ICONS.check} Cerrar lote definitivamente</button>
+  </div>
+  <div class="card">
+    <h2>Historial de ajustes de este lote</h2>
+    <div id="turnoList" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div>
+  </div>`;
+
+  const { data: lotes } = await sb.from('lotes').select('*').eq('estado','EN_PROCESO').order('creado_en',{ascending:false});
+  const pillsEl = document.getElementById('lotePillsCierre');
+  if(!lotes || !lotes.length){ pillsEl.innerHTML = '<div class="empty">No hay lotes en proceso para cerrar.</div>'; return; }
+  pillsEl.innerHTML = lotes.map(l => `<div class="lote-pill" id="pillc-${l.id}" onclick="elegirLoteCierre('${l.id}')">${l.id} · ${l.producto}</div>`).join('');
+  elegirLoteCierre(lotes[0].id);
+
+  document.getElementById('frmTurno').addEventListener('submit', submitTurno);
+}
+
+async function elegirLoteCierre(id){
+  loteActivoId = id;
+  document.querySelectorAll('#lotePillsCierre .lote-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('pillc-'+id).classList.add('active');
+  document.getElementById('frmTurno').style.display = 'block';
+  document.getElementById('frmTurno').fecha.value = new Date().toISOString().slice(0,10);
+
+  document.getElementById('cierreLoteCard').style.display = 'block';
+  const { data: sumRow } = await sb.from('v_resumen_lotes').select('*').eq('lote_id', id).single();
+  document.getElementById('cfKgMp').value = sumRow ? fmtKg(sumRow.kg_mp_asignado) : '-';
+
+  loadTurnoList();
+}
+
+async function submitTurno(e){
+  e.preventDefault();
+  const payload = Object.fromEntries(new FormData(e.target).entries());
+  payload.lote_id = loteActivoId;
+  payload.kg_reales_procesados = payload.kg_reales_procesados === '' ? null : Number(payload.kg_reales_procesados);
+  payload.mermas_kg = payload.mermas_kg === '' ? 0 : Number(payload.mermas_kg);
+  payload.ajustado_por = usuario || null;
+
+  const { error } = await sb.from('lote_turno_cierre').upsert(payload, {onConflict:'lote_id,fecha,turno'});
+  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  toast('Ajuste de turno guardado', 'ok');
+  loadTurnoList();
+}
+
+async function loadTurnoList(){
+  const { data, error } = await sb.from('lote_turno_cierre').select('*').eq('lote_id', loteActivoId).order('fecha',{ascending:false});
+  const el = document.getElementById('turnoList');
+  if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay ajustes cargados para este lote.</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Turno</th><th>Kg reales</th><th>Mermas</th><th>Ajustó</th></tr></thead><tbody>
+    ${data.map(t => `<tr><td>${fmtDate(t.fecha)}</td><td>${t.turno}</td><td>${fmtKg(t.kg_reales_procesados)}</td><td>${fmtKg(t.mermas_kg)}</td><td>${t.ajustado_por||'-'}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+async function cerrarLoteFinal(){
+  const kgProc = parseFloat(document.getElementById('cfKgProc').value);
+  if(!kgProc){ toast('Cargá el kg procesado total', 'err'); return; }
+  if(!confirm('¿Cerrar definitivamente el lote ' + loteActivoId + '? No se puede deshacer desde acá.')) return;
+
+  const { data: sumRow } = await sb.from('v_resumen_lotes').select('*').eq('lote_id', loteActivoId).single();
+  const payload = {
+    lote_id: loteActivoId,
+    kg_ingresado_mp: sumRow ? sumRow.kg_mp_asignado : 0,
+    kg_procesado_total: kgProc,
+    mermas_totales_kg: parseFloat(document.getElementById('cfMermas').value) || null,
+    analisis_mp_resumen: document.getElementById('cfAnalisisMp').value || null,
+    analisis_pt_resumen: document.getElementById('cfAnalisisPt').value || null,
+    diferencia_analisis: document.getElementById('cfDif').value || null,
+    cerrado_por: usuario || null
+  };
+  const { error } = await sb.from('lote_cierre').insert(payload);
+  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  toast('Lote ' + loteActivoId + ' cerrado', 'ok');
+  renderCierre();
+}
+
+// ============================================================
+// RESUMEN
+// ============================================================
+async function renderResumen(){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="card"><h2>${ICONS.resumen} Resumen de producción</h2>
+  <div class="desc">Vista simple por ahora - se va a ampliar cuando conectemos con COMEX.</div>
+  <div id="resumenBody"><div class="empty">Cargando...</div></div></div>`;
+
+  const { data, error } = await sb.from('v_resumen_lotes').select('*').order('fecha_creacion',{ascending:false});
+  const el = document.getElementById('resumenBody');
+  if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay lotes.</div>'; return; }
+
+  const totalMp = data.reduce((a,r)=>a+(Number(r.kg_mp_asignado)||0),0);
+  const totalProc = data.reduce((a,r)=>a+(Number(r.kg_procesado_total)||0),0);
+  const cerrados = data.filter(r=>r.estado==='CERRADO').length;
+
+  el.innerHTML = `<div class="stat-grid">
+    <div class="stat"><div class="n">${data.length}</div><div class="l">Lotes</div></div>
+    <div class="stat"><div class="n">${cerrados}</div><div class="l">Cerrados</div></div>
+    <div class="stat"><div class="n">${fmtKg(totalMp)}</div><div class="l">MP asignada</div></div>
+    <div class="stat"><div class="n">${fmtKg(totalProc)}</div><div class="l">Procesado</div></div>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Lote</th><th>Producto</th><th>Estado</th><th>Cargas MP</th><th>Kg MP</th><th>Bigbags</th><th>Rendimiento</th></tr></thead><tbody>
+    ${data.map(r => `<tr><td>${r.lote_id}</td><td>${r.producto}</td><td><span class="badge ${r.estado==='EN_PROCESO'?'warn':'ok'}">${r.estado}</span></td><td>${r.cantidad_cargas_mp}</td><td>${fmtKg(r.kg_mp_asignado)}</td><td>${r.cantidad_bigbags}</td><td>${fmtPct(r.rendimiento_pct)}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+const RENDERERS = { mp: renderMP, silo: renderSilo, lote: renderLote, bigbag: renderBigbag, cierre: renderCierre, resumen: renderResumen };
+
+document.getElementById('connStatus').textContent = 'Conectado a Supabase';
+renderTabs();
+goTab('mp');
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
 </body>
 </html>
