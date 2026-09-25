@@ -1,11 +1,11 @@
 /**
  * sw.js - Service worker de la PWA Progresso NH.
  * Cachea el app shell (HTML/CSS/JS son un solo index.html + manifest + iconos)
- * para que la app abra y sea instalable incluso offline. Las llamadas a la API
- * de Apps Script (script.google.com) NUNCA se cachean: siempre van a red, para
- * no mostrar datos de stock/produccion desactualizados.
+ * para que la app abra y sea instalable incluso offline. Las llamadas a
+ * Supabase (oulrdijjdrfsmbeezolt.supabase.co) NUNCA se cachean: siempre van a
+ * red, para no mostrar datos de stock/produccion desactualizados.
  */
-var CACHE_NAME = 'progresso-pwa-v2';
+var CACHE_NAME = 'progresso-pwa-v3';
 var APP_SHELL = [
   './',
   './index.html',
@@ -36,14 +36,12 @@ self.addEventListener('fetch', function (event) {
   var req = event.request;
   var url = req.url;
 
-  // Llamadas a la API: siempre red, nunca cache. Si falla (sin conexion),
-  // devolvemos un JSON de error prolijo en vez de dejar que el fetch() del
-  // cliente explote con un error de red crudo.
-  if (url.indexOf('script.google.com') !== -1) {
+  // Llamadas a Supabase: siempre red, nunca cache.
+  if (url.indexOf('supabase.co') !== -1) {
     event.respondWith(
       fetch(req).catch(function () {
         return new Response(
-          JSON.stringify({ ok: false, error: 'Sin conexion a internet. Intenta de nuevo.' }),
+          JSON.stringify({ error: 'Sin conexion a internet. Intenta de nuevo.' }),
           { headers: { 'Content-Type': 'application/json' } }
         );
       })
