@@ -157,7 +157,7 @@
   </header>
 
   <main id="mainWrap">
-    <button id="volverBtn" class="volver-btn hidden" onclick="goHome()">
+    <button id="volverBtn" class="volver-btn hidden" onclick="history.back()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
       Menú
     </button>
@@ -223,6 +223,21 @@ async function onLogin(session){
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('appShell').classList.remove('hidden');
   renderHomeMenu();
+  if(!navInitialized){
+    navInitialized = true;
+    history.replaceState({view:'home'}, '');
+    window.addEventListener('popstate', (e) => {
+      const view = e.state ? e.state.view : 'home';
+      if(view === 'home'){
+        goHome(false);
+      }else{
+        activeTab = view;
+        document.getElementById('homeMenu').classList.add('hidden');
+        document.getElementById('volverBtn').classList.remove('hidden');
+        RENDERERS[view]();
+      }
+    });
+  }
 }
 
 function cerrarSesion(){
@@ -272,6 +287,7 @@ const TABS = [
 const TAB_ADMIN = {id:'usuarios', label:'Usuarios', icon:ICONS.usuarios};
 
 let activeTab = null;
+let navInitialized = false;
 
 function renderHomeMenu(){
   const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
@@ -283,11 +299,12 @@ function renderHomeMenu(){
   ).join('');
 }
 
-function goHome(){
+function goHome(push){
   activeTab = null;
   document.getElementById('homeMenu').classList.remove('hidden');
   document.getElementById('volverBtn').classList.add('hidden');
   document.getElementById('main').innerHTML = '';
+  if(push !== false) history.pushState({view:'home'}, '');
 }
 
 function goTab(id){
@@ -295,6 +312,7 @@ function goTab(id){
   document.getElementById('homeMenu').classList.add('hidden');
   document.getElementById('volverBtn').classList.remove('hidden');
   RENDERERS[id]();
+  history.pushState({view:id}, '');
 }
 
 // ============================================================
