@@ -73,6 +73,10 @@
   .btn.danger{background:var(--danger);color:#fff;}
   .btn.small{padding:7px 12px;font-size:12.5px;}
   .btn svg{width:15px;height:15px;}
+    .btn.danger-ghost{background:transparent;color:var(--danger);border:1px solid var(--danger-bg);padding:9px 10px;}
+    .parcela-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;}
+    .parcela-row > div{flex:1;}
+    .parcela-row .pr-pct{max-width:130px;flex:0 0 130px;}
   table{width:100%;border-collapse:collapse;font-size:13px;}
   th{text-align:left;color:var(--text-muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:8px 9px;border-bottom:1px solid var(--gridline);background:var(--surface-2);}
   td{padding:9px;border-bottom:1px solid var(--gridline);white-space:nowrap;color:var(--text-primary);}
@@ -335,18 +339,21 @@ async function renderMP(){
         <div><label>Peso Bruto (kg) *</label><input name="peso_bruto_kg" type="number" step="0.01" required oninput="calcMP()"></div>
         <div><label>Peso Tara (kg) *</label><input name="peso_tara_kg" type="number" step="0.01" required oninput="calcMP()"></div>
         <div class="field-computed"><label>Peso Neto (calculado)</label><input id="mpPesoNeto" disabled></div>
-        <div><label>Nº Parcela</label><input name="nro_parcela"></div>
-        <div><label>% de esta parcela</label><input name="pct_parcela" type="number" step="0.01" placeholder="ej: 50"></div>
-      </div>
+        <div>
+
+              <div class="section-title">Parcelas (opcional)</div>
+                    <div class="desc" style="margin-bottom:8px;">Si la carga es de una sola parcela, cargá solo la primera fila. Si viene mezclada, agregá las que hagan falta.</div>
+                          <div id="parcelaRows"></div>
+                                <button type="button" class="btn secondary small" onclick="agregarParcela()">+ Agregar parcela</button>
 
       <div class="section-title">Laboratorio (recepción)</div>
       <div class="grid">
         <div><label>% Humedad</label><input name="pct_humedad" type="number" step="0.01" oninput="calcMP()"></div>
         <div><label>Temperatura (°C)</label><input name="temperatura_c" type="number" step="0.1"></div>
-        <div><label>% Impureza gruesa</label><input name="pct_impureza_gruesa" type="number" step="0.01"></div>
-        <div><label>% Impureza fina</label><input name="pct_impureza_fina" type="number" step="0.01"></div>
+        <div><label>% Impureza gruesa</label><input name="pct_impureza_gruesa" type="number" step="0.01" oninput="calcMP()"></div>
+        <div><label>% Impureza fina</label><input name="pct_impureza_fina" type="number" step="0.01" oninput="calcMP()"></div>
         <div><label>% Descuento calidad</label><input name="pct_descuento_calidad" type="number" step="0.01" oninput="calcMP()"></div>
-        <div><label>% Descuento humedad</label><input name="pct_descuento_humedad" type="number" step="0.01" oninput="calcMP()"></div>
+        <div><label>% Descuento humedad</label><input name="pct_descuento_humedad" type="number" step="0.01"></div>
         <div class="field-computed"><label>% Total descuento</label><input id="mpTotalDesc" disabled></div>
         <div class="field-computed"><label>Kg descuento total</label><input id="mpKgDesc" disabled></div>
         <div class="field-computed"><label>Kg líquido de la carga</label><input id="mpKgLiquido" disabled></div>
@@ -372,18 +379,43 @@ async function renderMP(){
   const sel = document.getElementById('mpSiloSelect');
   sel.innerHTML = (silos||[]).map(s => `<option value="${s.id}">Silo ${s.numero} · ${s.producto} · ${s.categoria}</option>`).join('') || '<option value="">No hay silos abiertos - creá uno primero</option>';
 
-  document.getElementById('frmMP').addEventListener('submit', submitMP);
+  mpParcelaCount = 0;
+      document.getElementById('parcelaRows').innerHTML = filaParcelaHTML(0);
+  
+      document.getElementById('frmMP').addEventListener('submit', submitMP);
   loadMPList();
 }
 
-function calcMP(){
+let mpParcelaCount = 0;
+  
+    function filaParcelaHTML(id){
+          var btn = id > 0 ? ('<button type="button" class="btn danger-ghost" onclick="quitarParcela('+id+')" title="Quitar">x</button>') : '';
+          return '<div class="parcela-row" id="prow-'+id+'">'
+                  + '<div><label>Nro. Parcela</label><input id="parcela-nro-'+id+'" placeholder="ej: 4"></div>'
+                  + '<div class="pr-pct"><label>% de esta parcela</label><input id="parcela-pct-'+id+'" type="number" step="0.01" placeholder="ej: 60"></div>'
+                  + btn
+                  + '</div>';
+    }
+
+    function agregarParcela(){
+          mpParcelaCount++;
+          document.getElementById('parcelaRows').insertAdjacentHTML('beforeend', filaParcelaHTML(mpParcelaCount));
+    }
+
+    function quitarParcela(id){
+          var row = document.getElementById('prow-'+id);
+          if(row) row.remove();
+    }
+  
+  function calcMP(){
   const f = document.getElementById('frmMP');
   const bruto = parseFloat(f.peso_bruto_kg.value) || 0;
   const tara = parseFloat(f.peso_tara_kg.value) || 0;
   const neto = bruto - tara;
-  const dCal = parseFloat(f.pct_descuento_calidad.value) || 0;
-  const dHum = parseFloat(f.pct_descuento_humedad.value) || 0;
-  const totalDesc = dCal + dHum;
+      const impGruesa = parseFloat(f.pct_impureza_gruesa.value) || 0;
+      const impFina = parseFloat(f.pct_impureza_fina.value) || 0;
+      const dCal = parseFloat(f.pct_descuento_calidad.value) || 0;
+      const totalDesc = impGruesa + impFina + dCal;
   const kgDesc = neto * totalDesc / 100;
   const kgLiquido = neto - kgDesc;
   document.getElementById('mpPesoNeto').value = neto.toFixed(2) + ' kg';
@@ -397,14 +429,28 @@ async function submitMP(e){
   const f = e.target;
   const fd = new FormData(f);
   const payload = Object.fromEntries(fd.entries());
-  ['peso_bruto_kg','peso_tara_kg','pct_humedad','temperatura_c','pct_impureza_gruesa','pct_impureza_fina','pct_descuento_calidad','pct_descuento_humedad','pct_parcela'].forEach(k=>{
+  ['peso_bruto_kg','peso_tara_kg','pct_humedad','temperatura_c','pct_impureza_gruesa','pct_impureza_fina','pct_descuento_calidad','pct_descuento_humedad'].forEach(k=>{
     payload[k] = payload[k] === '' ? null : Number(payload[k]);
   });
   payload.creado_por = usuario || null;
 
   const { data, error } = await sb.from('recepcion_mp').insert(payload).select().single();
   if(error){ toast('Error: ' + error.message, 'err'); return; }
+      const parcelaRows = Array.from(document.querySelectorAll('#parcelaRows .parcela-row'));
+        const parcelas = parcelaRows.map(row => {
+                  const id = row.id.replace('prow-','');
+                  const nro = document.getElementById('parcela-nro-'+id).value.trim();
+                  const pct = document.getElementById('parcela-pct-'+id).value;
+                  return { nro_parcela: nro || null, pct_parcela: pct === '' ? null : Number(pct) };
+        }).filter(p => p.nro_parcela !== null || p.pct_parcela !== null);
 
+        if(parcelas.length){
+                  const { error: errP } = await sb.from('recepcion_parcela').insert(
+                              parcelas.map(p => ({ recepcion_mp_id: data.id, nro_parcela: p.nro_parcela, pct_parcela: p.pct_parcela }))
+                            );
+                  if(errP){ toast('Recepción guardada, pero error al guardar parcelas: ' + errP.message, 'err'); renderMP(); return; }
+        }
+  
   toast('Recepción ' + data.id + ' guardada', 'ok');
   renderMP();
 }
