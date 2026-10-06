@@ -143,6 +143,17 @@
   .edit-btn{appearance:none;border:1px solid var(--gridline);background:var(--card);border-radius:8px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;color:var(--accent-dark);}
   .edit-btn:hover{border-color:var(--accent);}
   #mpList td.hum{color:var(--warn);font-weight:700;}
+  .appbar-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .usuario-btn.pwd-btn{padding:8px 10px;}
+  .usuario-btn.pwd-btn svg{width:15px;height:15px;opacity:1;}
+  .pwd-overlay{position:fixed;inset:0;background:rgba(10,8,4,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:200;}
+  .pwd-box{width:100%;max-width:400px;max-height:92vh;overflow-y:auto;background:var(--card);border:1px solid var(--gridline);border-radius:16px;padding:22px 22px 18px;box-shadow:var(--shadow-md);}
+  .pwd-box h3{margin:0 0 2px;font-size:17px;font-weight:800;}
+  .pwd-box .desc{margin-bottom:14px;word-break:break-all;}
+  .pwd-link{display:inline-block;font-size:12.5px;font-weight:700;color:var(--accent-dark);margin:-4px 0 12px;cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;font-family:inherit;}
+  .pwd-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;}
+  .pwd-row{display:flex;gap:8px;align-items:flex-start;}
+  .pwd-row > input{flex:1;}
 </style>
 </head>
 <body>
@@ -1082,6 +1093,171 @@ async function guardarUsuario(id){
   if(currentUser && id === currentUser.id){ miRol = rol; }
   loadUsuarios();
 }
+
+// ============================================================
+// CAMBIAR CONTRASEÑA (solo usuario logueado, sobre su propia cuenta)
+// - Pide la contraseña actual, o un código enviado por mail si no la recuerda
+// - Mínimo 8 caracteres con letras y números; bloqueo tras 5 intentos fallidos
+// - Al cambiarla, cierra las sesiones abiertas en otros dispositivos
+// ============================================================
+let pwdModo = 'actual';
+let pwdFallos = 0;
+let pwdBloqueoHasta = 0;
+let pwdOcupado = false;
+
+const PWD_KEY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15L19 4"/><path d="M18 5l3 3"/><path d="M15 8l3 3"/></svg>';
+
+function initBotonPass(){
+  const chip = document.getElementById('usuarioChip');
+  if(!chip || document.getElementById('pwdBtn')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'appbar-actions';
+  chip.parentNode.insertBefore(wrap, chip);
+  const b = document.createElement('button');
+  b.type = 'button'; b.id = 'pwdBtn'; b.className = 'usuario-btn pwd-btn';
+  b.title = 'Cambiar contraseña'; b.setAttribute('aria-label','Cambiar contraseña');
+  b.innerHTML = PWD_KEY_ICON;
+  b.onclick = abrirCambioPass;
+  wrap.appendChild(b);
+  wrap.appendChild(chip);
+}
+
+function pwdMsg(txt, tipo){
+  const el = document.getElementById('pwdMsg');
+  if(!el) return;
+  el.textContent = txt || '';
+  el.className = 'auth-msg' + (tipo ? ' ' + tipo : '');
+}
+
+function pwdSetModo(modo){
+  pwdModo = modo;
+  document.getElementById('pwdBoxActual').classList.toggle('hidden', modo !== 'actual');
+  document.getElementById('pwdBoxCodigo').classList.toggle('hidden', modo !== 'codigo');
+  document.getElementById('pwdToggle').textContent = modo === 'actual' ? 'No recuerdo mi contraseña actual' : 'Prefiero usar mi contraseña actual';
+  pwdMsg('');
+}
+
+async function abrirCambioPass(){
+  if(document.getElementById('pwdModal')) return;
+  const { data } = await sb.auth.getUser();
+  const user = data && data.user;
+  if(!user){ toast('Tenés que iniciar sesión primero','err'); return; }
+  pwdModo = 'actual';
+  const m = document.createElement('div');
+  m.id = 'pwdModal'; m.className = 'pwd-overlay';
+  m.innerHTML = `<div class="pwd-box" role="dialog" aria-modal="true" aria-labelledby="pwdTitle">
+    <h3 id="pwdTitle">Cambiar contraseña</h3>
+    <div class="desc" id="pwdUser"></div>
+    <form id="frmPwd" autocomplete="off">
+      <div id="pwdBoxActual">
+        <label>Contraseña actual</label>
+        <input type="password" id="pwdActual" autocomplete="current-password">
+      </div>
+      <div id="pwdBoxCodigo" class="hidden">
+        <label>Código enviado a tu mail</label>
+        <div class="pwd-row"><input id="pwdCodigo" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"><button type="button" class="btn secondary small" id="pwdEnviar" style="margin-top:0;height:42px;">Enviar código</button></div>
+      </div>
+      <button type="button" class="pwd-link" id="pwdToggle">No recuerdo mi contraseña actual</button>
+      <label>Nueva contraseña</label>
+      <input type="password" id="pwdNueva" autocomplete="new-password">
+      <label>Repetir nueva contraseña</label>
+      <input type="password" id="pwdRepite" autocomplete="new-password">
+      <div class="note">Mínimo 8 caracteres, con letras y números.</div>
+      <div id="pwdMsg" class="auth-msg"></div>
+      <div class="pwd-actions">
+        <button type="button" class="btn secondary" id="pwdCancelar">Cancelar</button>
+        <button type="submit" class="btn" id="pwdGuardar">Cambiar contraseña</button>
+      </div>
+    </form>
+  </div>`;
+  document.body.appendChild(m);
+  document.getElementById('pwdUser').textContent = user.email || '';
+  document.getElementById('pwdToggle').onclick = () => pwdSetModo(pwdModo === 'actual' ? 'codigo' : 'actual');
+  document.getElementById('pwdCancelar').onclick = cerrarCambioPass;
+  document.getElementById('pwdEnviar').onclick = pwdEnviarCodigo;
+  document.getElementById('frmPwd').addEventListener('submit', pwdGuardar);
+  m.addEventListener('mousedown', e => { if(e.target === m) cerrarCambioPass(); });
+  document.addEventListener('keydown', pwdEsc);
+  document.getElementById('pwdActual').focus();
+}
+
+function pwdEsc(e){ if(e.key === 'Escape') cerrarCambioPass(); }
+
+function cerrarCambioPass(){
+  const m = document.getElementById('pwdModal');
+  if(m) m.remove();
+  document.removeEventListener('keydown', pwdEsc);
+}
+
+async function pwdEnviarCodigo(){
+  if(pwdOcupado) return;
+  pwdOcupado = true;
+  const btn = document.getElementById('pwdEnviar'); btn.disabled = true;
+  const { error } = await sb.auth.reauthenticate();
+  pwdOcupado = false; btn.disabled = false;
+  if(error){ pwdMsg('No se pudo enviar el código: ' + error.message, 'err'); return; }
+  pwdMsg('Te enviamos un código a tu mail. Escribilo arriba.', 'ok');
+}
+
+function pwdValidar(nueva, repite, actual){
+  if(nueva.length < 8) return 'La nueva contraseña debe tener al menos 8 caracteres';
+  if(!/[A-Za-z]/.test(nueva) || !/[0-9]/.test(nueva)) return 'Tiene que incluir letras y números';
+  if(nueva !== repite) return 'Las contraseñas nuevas no coinciden';
+  if(actual && nueva === actual) return 'La nueva contraseña tiene que ser distinta de la actual';
+  return null;
+}
+
+async function pwdGuardar(e){
+  e.preventDefault();
+  if(pwdOcupado) return;
+  if(Date.now() < pwdBloqueoHasta){
+    pwdMsg('Demasiados intentos. Esperá ' + Math.ceil((pwdBloqueoHasta - Date.now())/1000) + ' segundos.', 'err');
+    return;
+  }
+  const actual = document.getElementById('pwdActual').value;
+  const codigo = document.getElementById('pwdCodigo').value.trim();
+  const nueva = document.getElementById('pwdNueva').value;
+  const repite = document.getElementById('pwdRepite').value;
+  if(pwdModo === 'actual' && !actual){ pwdMsg('Escribí tu contraseña actual', 'err'); return; }
+  if(pwdModo === 'codigo' && !codigo){ pwdMsg('Escribí el código que te llegó por mail', 'err'); return; }
+  const v = pwdValidar(nueva, repite, pwdModo === 'actual' ? actual : null);
+  if(v){ pwdMsg(v, 'err'); return; }
+
+  pwdOcupado = true;
+  const btn = document.getElementById('pwdGuardar'); btn.disabled = true;
+  try {
+    const { data: ud } = await sb.auth.getUser();
+    const user = ud && ud.user;
+    if(!user){ pwdMsg('Tu sesión venció. Volvé a ingresar.', 'err'); return; }
+    let upd;
+    if(pwdModo === 'actual'){
+      const { error: eAuth } = await sb.auth.signInWithPassword({ email: user.email, password: actual });
+      if(eAuth){
+        pwdFallos++;
+        if(pwdFallos >= 5){ pwdFallos = 0; pwdBloqueoHasta = Date.now() + 60000; pwdMsg('Demasiados intentos. Esperá 60 segundos.', 'err'); }
+        else pwdMsg('La contraseña actual no es correcta', 'err');
+        return;
+      }
+      upd = await sb.auth.updateUser({ password: nueva });
+    } else {
+      upd = await sb.auth.updateUser({ password: nueva, nonce: codigo });
+    }
+    if(upd.error){
+      const msg = /nonce|reauth|code|token/i.test(upd.error.message) ? 'El código no es correcto o venció' : 'No se pudo cambiar: ' + upd.error.message;
+      pwdMsg(msg, 'err');
+      return;
+    }
+    pwdFallos = 0;
+    await sb.auth.signOut({ scope: 'others' });
+    cerrarCambioPass();
+    toast('Contraseña actualizada. Se cerraron las sesiones en otros dispositivos.', 'ok');
+  } finally {
+    pwdOcupado = false;
+    const b = document.getElementById('pwdGuardar'); if(b) b.disabled = false;
+  }
+}
+
+initBotonPass();
 
 const RENDERERS = { mp: renderMP, silo: renderSilo, lote: renderLote, bigbag: renderBigbag, cierre: renderCierre, resumen: renderResumen, usuarios: renderUsuarios };
 
