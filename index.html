@@ -104,6 +104,10 @@
   .icon{width:17px;height:17px;vertical-align:-3px;margin-right:4px;}
   .lote-pill{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--gridline);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:var(--shadow-sm);}
   .lote-pill.active{border-color:var(--accent);color:var(--accent-dark);background:rgba(var(--accent-rgb),.08);}
+  .lote-sel{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 14px;}
+  .lote-sel-q{flex:1 1 220px;min-width:0;}
+  .lote-sel-s{flex:2 1 280px;min-width:0;font-weight:700;}
+  .lote-sel-cnt{flex:1 1 100%;font-size:12px;color:var(--text-muted);}
   .pill-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;}
   .vista-menu-grid{margin-top:4px;}
 
@@ -310,7 +314,7 @@ function toast(msg, type){
 
 function fmtKg(n){ return n === null || n === undefined ? '-' : Number(n).toLocaleString('es-PY',{maximumFractionDigits:2}) + ' kg'; }
 function fmtPct(n){ return n === null || n === undefined ? '-' : Number(n).toLocaleString('es-PY',{maximumFractionDigits:2}) + '%'; }
-function fmtDate(d){ if(!d) return '-'; return new Date(d).toLocaleDateString('es-PY'); }
+function fmtDate(d){ if(!d) return '-'; const s=String(d); if(s.length===10){ const p=s.split('-'); return (+p[2])+'/'+(+p[1])+'/'+p[0]; } return new Date(d).toLocaleDateString('es-PY'); }
 function opt(list, sel){ return list.map(v => `<option value="${v}" ${v===sel?'selected':''}>${v}</option>`).join(''); }
 
 const TABS = [
@@ -842,12 +846,48 @@ async function loadLoteList(){
 // ============================================================
 let loteActivoId = null;
 
+// Selector de lote con buscador (escala a muchos lotes)
+function loteSelectorHTML(pref){
+  return `<div class="lote-sel">
+    <input type="search" id="${pref}Buscar" class="lote-sel-q" placeholder="Buscar lote, producto o calidad..." autocomplete="off">
+    <select id="${pref}Sel" class="lote-sel-s"></select>
+    <div id="${pref}Cnt" class="lote-sel-cnt"></div>
+  </div>`;
+}
+function loteSelectorInit(pref, lotes, onPick, key){
+  const q = document.getElementById(pref+'Buscar'), sel = document.getElementById(pref+'Sel'), cnt = document.getElementById(pref+'Cnt');
+  const label = l => `${l.id} · ${l.producto}${l.categoria ? ' · ' + l.categoria : ''}`;
+  const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  let last = null; try { last = localStorage.getItem(key); } catch(e){}
+  let current = (last && lotes.some(l => l.id === last)) ? last : lotes[0].id;
+  function fill(){
+    const t = norm(q.value).trim().split(/\s+/).filter(Boolean);
+    const list = lotes.filter(l => { const h = norm(label(l)); return t.every(w => h.includes(w)); });
+    sel.innerHTML = list.map(l => `<option value="${l.id}">${label(l)}</option>`).join('') || '<option value="">Ningún lote coincide</option>';
+    cnt.textContent = t.length ? `${list.length} de ${lotes.length} lotes en proceso` : `${lotes.length} lote${lotes.length===1?'':'s'} en proceso`;
+    if(list.some(l => l.id === current)) sel.value = current;
+    else if(list.length){ sel.value = list[0].id; pick(list[0].id); }
+  }
+  function pick(id){
+    current = id;
+    try { localStorage.setItem(key, id); } catch(e){}
+    onPick(id);
+  }
+  q.addEventListener('input', fill);
+  sel.addEventListener('change', () => { if(sel.value) pick(sel.value); });
+  fill();
+  pick(current);
+}
+
+
+
 async function renderBigbag(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
-    <h2>${ICONS.bigbag} Carga por bigbag</h2>
-    <div class="desc">Elegí el lote en proceso y cargá cada bigbag a medida que se procesa.</div>
-    <div id="lotePills" class="pill-row"></div>
+    <h2>${ICONS.bigbag} Análisis físicos del producto terminado · bigbag</h2>
+    <div class="desc">Registro de los análisis físicos del producto terminado, bigbag por bigbag. <b>Solo registro: acá no se descuenta nada</b> por pureza, humedad ni otros conceptos.</div>
+    ${loteSelectorHTML("bb")}
+    <div id="bbLoteInfo" style="display:none;margin:10px 0;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);font-size:14px"></div>
     <form id="frmBigbag" style="display:none">
       <div class="grid">
         <div><label>Fecha</label><input name="fecha" type="date"></div>
@@ -870,23 +910,27 @@ async function renderBigbag(){
   </div>`;
 
   const { data: lotes } = await sb.from('lotes').select('*').eq('estado','EN_PROCESO').order('creado_en',{ascending:false});
-  const pillsEl = document.getElementById('lotePills');
-  if(!lotes || !lotes.length){ pillsEl.innerHTML = '<div class="empty">No hay lotes en proceso.</div>'; return; }
-  pillsEl.innerHTML = lotes.map(l => `<div class="lote-pill" id="pill-${l.id}" onclick="elegirLote('${l.id}')">${l.id} · ${l.producto}</div>`).join('');
-  elegirLote(lotes[0].id);
-
+  window.bbLotes = {};
+  (lotes||[]).forEach(l => { window.bbLotes[l.id] = l; });
+  if(!lotes || !lotes.length){ document.getElementById('bbLoteInfo').style.display='block'; document.getElementById('bbLoteInfo').innerHTML = 'No hay lotes en proceso.'; document.querySelector('.lote-sel').style.display='none'; return; }
   document.getElementById('frmBigbag').addEventListener('submit', submitBigbag);
+  loteSelectorInit('bb', lotes, elegirLote, 'nh_lote_carga');
 }
 
 function elegirLote(id){
   loteActivoId = id;
-  document.querySelectorAll('.lote-pill').forEach(p => p.classList.remove('active'));
-  const pill = document.getElementById('pill-'+id);
-  if(pill) pill.classList.add('active');
+  const l = (window.bbLotes||{})[id] || {};
+  const info = document.getElementById('bbLoteInfo');
+  if(info){
+    info.style.display = 'block';
+    info.innerHTML = `<b>Lote:</b> ${id} &nbsp;·&nbsp; <b>Producto:</b> ${l.producto||'-'} &nbsp;·&nbsp; <b>Calidad:</b> ${l.categoria||'-'}`;
+  }
   const f = document.getElementById('frmBigbag');
   f.style.display = 'block';
-  f.fecha.value = new Date().toISOString().slice(0,10);
   const h = new Date();
+  const p2 = n => String(n).padStart(2,'0');
+  f.fecha.value = h.getFullYear() + '-' + p2(h.getMonth()+1) + '-' + p2(h.getDate());
+  f.hora.value = p2(h.getHours()) + ':' + p2(h.getMinutes());
   f.turno.value = (h.getHours() >= 6 && h.getHours() < 18) ? 'DIA' : 'NOCHE';
   loadBigbagList();
 }
@@ -897,6 +941,7 @@ async function submitBigbag(e){
   const payload = Object.fromEntries(new FormData(e.target).entries());
   payload.lote_id = loteActivoId;
   if(!payload.nro_bigbag) delete payload.nro_bigbag; else payload.nro_bigbag = Number(payload.nro_bigbag);
+  if(!payload.hora) payload.hora = null;
   ['pureza_pct','humedad_grano_pct','temperatura_ambiente_c','temperatura_grano_c'].forEach(k=>{
     payload[k] = payload[k] === '' ? null : Number(payload[k]);
   });
@@ -914,9 +959,14 @@ async function loadBigbagList(){
   const el = document.getElementById('bigbagList');
   if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay bigbags cargados en este lote.</div>'; return; }
-  el.innerHTML = `<table><thead><tr><th>Nº</th><th>Turno</th><th>Fecha</th><th>Pureza</th><th>Hum. grano</th><th>Encargado</th></tr></thead><tbody>
-    ${data.map(b => `<tr><td>${b.nro_bigbag}</td><td>${b.turno}</td><td>${fmtDate(b.fecha)}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${b.encargado||'-'}</td></tr>`).join('')}
-  </tbody></table>`;
+  const l = (window.bbLotes||{})[loteActivoId] || {};
+  const n = v => (v===null||v===undefined||v==='') ? '-' : v;
+  const hh = t => t ? String(t).slice(0,5) : '-';
+  const avg = k => { const v = data.map(b => b[k]).filter(x => x!==null && x!==undefined && x!=='').map(Number); return v.length ? v.reduce((a,x)=>a+x,0)/v.length : null; };
+  const fa = (v,d) => v===null ? '-' : v.toFixed(d).replace('.',',');
+  el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Hora</th><th>Turno</th><th>Producto</th><th>Lote</th><th>Calidad</th><th>Nº Bigbag</th><th>Pureza</th><th>Hum. grano</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th></tr></thead><tbody>
+    ${data.map(b => `<tr><td>${fmtDate(b.fecha)}</td><td>${hh(b.hora)}</td><td>${b.turno}</td><td>${l.producto||'-'}</td><td>${b.lote_id}</td><td>${l.categoria||'-'}</td><td>${b.nro_bigbag}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${b.encargado||'-'}</td><td>${b.observaciones||''}</td></tr>`).join('')}
+  </tbody><tfoot><tr style="font-weight:700;background:var(--surface-2)"><td colspan="6">PROMEDIO del lote (${data.length} bigbag${data.length===1?'':'s'})</td><td></td><td>${avg('pureza_pct')===null?'-':fa(avg('pureza_pct'),2)+'%'}</td><td>${avg('humedad_grano_pct')===null?'-':fa(avg('humedad_grano_pct'),2)+'%'}</td><td>${fa(avg('temperatura_ambiente_c'),1)}</td><td>${fa(avg('temperatura_grano_c'),1)}</td><td></td><td></td></tr></tfoot></table>`;
 }
 
 // ============================================================
@@ -927,7 +977,7 @@ async function renderCierre(){
   main.innerHTML = `<div class="card">
     <h2>${ICONS.cierre} Actualización diaria (por turno)</h2>
     <div class="desc">Ajuste con los números reales del turno: kg procesados y mermas.</div>
-    <div id="lotePillsCierre" class="pill-row"></div>
+    ${loteSelectorHTML("cl")}
     <form id="frmTurno" style="display:none">
       <div class="grid">
         <div><label>Fecha *</label><input name="fecha" type="date" required></div>
@@ -958,18 +1008,13 @@ async function renderCierre(){
   </div>`;
 
   const { data: lotes } = await sb.from('lotes').select('*').eq('estado','EN_PROCESO').order('creado_en',{ascending:false});
-  const pillsEl = document.getElementById('lotePillsCierre');
-  if(!lotes || !lotes.length){ pillsEl.innerHTML = '<div class="empty">No hay lotes en proceso para cerrar.</div>'; return; }
-  pillsEl.innerHTML = lotes.map(l => `<div class="lote-pill" id="pillc-${l.id}" onclick="elegirLoteCierre('${l.id}')">${l.id} · ${l.producto}</div>`).join('');
-  elegirLoteCierre(lotes[0].id);
-
+  if(!lotes || !lotes.length){ document.querySelector('.lote-sel').innerHTML = '<div class="empty">No hay lotes en proceso para cerrar.</div>'; return; }
   document.getElementById('frmTurno').addEventListener('submit', submitTurno);
+  loteSelectorInit('cl', lotes, elegirLoteCierre, 'nh_lote_cierre');
 }
 
 async function elegirLoteCierre(id){
   loteActivoId = id;
-  document.querySelectorAll('#lotePillsCierre .lote-pill').forEach(p => p.classList.remove('active'));
-  document.getElementById('pillc-'+id).classList.add('active');
   document.getElementById('frmTurno').style.display = 'block';
   document.getElementById('frmTurno').fecha.value = new Date().toISOString().slice(0,10);
 
