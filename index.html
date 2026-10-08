@@ -470,7 +470,7 @@ function mpFillSilos(silos, extra){
   const cur = sel.value;
   const list = silos.slice();
   if(extra && !list.some(s => s.id === extra.id)) list.push(extra);
-  sel.innerHTML = list.map(s => `<option value="${s.id}">Silo ${mpEsc(s.numero)} · ${mpEsc(s.producto)} · ${mpEsc(s.categoria)}</option>`).join('') || '<option value="">No hay silos abiertos - creá uno primero</option>';
+  sel.innerHTML = list.map(s => `<option value="${s.id}">Silo ${mpEsc(s.numero)} · ${mpEsc(s.producto)} · ${mpEsc(s.categoria||'calidad pendiente')}</option>`).join('') || '<option value="">No hay silos abiertos - creá uno primero</option>';
   if(cur && list.some(s => s.id === cur)) sel.value = cur;
 }
 
@@ -762,9 +762,15 @@ async function loadSiloList(){
   if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay silos bolsa.</div>'; return; }
   el.innerHTML = `<table><thead><tr><th>ID</th><th>Nº</th><th>Producto</th><th>Categoría</th><th>Patio</th><th>Estado</th><th></th></tr></thead><tbody>
-    ${data.map(s => `<tr><td>${s.id}</td><td>${s.numero}</td><td>${s.producto}</td><td>${s.categoria}</td><td>${s.patio||'-'}</td><td><span class="badge ${s.estado==='ABIERTO'?'ok':'off'}">${s.estado}</span></td>
+    ${data.map(s => `<tr><td>${s.id}</td><td>${s.numero}</td><td>${s.producto}</td><td><select onchange="setSiloCategoria('${s.id}', this.value)" style="min-width:150px"><option value=""${s.categoria?'':' selected'}>Pendiente (lab)</option>${CATEGORIAS.map(c => `<option${s.categoria===c?' selected':''}>${c}</option>`).join('')}</select></td><td>${s.patio||'-'}</td><td><span class="badge ${s.estado==='ABIERTO'?'ok':'off'}">${s.estado}</span></td>
     <td>${s.estado==='ABIERTO' ? `<button class="btn secondary small" onclick="cerrarSilo('${s.id}')">Cerrar</button>` : ''}</td></tr>`).join('')}
   </tbody></table>`;
+}
+
+async function setSiloCategoria(id, v){
+  const { error } = await sb.from('silos_bolsa').update({categoria: v || null}).eq('id', id);
+  if(error){ toast('Error: ' + error.message, 'err'); loadSiloList(); return; }
+  toast(v ? 'Calidad del silo actualizada' : 'Calidad del silo: pendiente', 'ok');
 }
 
 async function cerrarSilo(id){
@@ -808,7 +814,7 @@ async function loadRecepcionChecklist(){
   data.forEach(r => { const k = r.silo_bolsa_id; (bySilo[k] = bySilo[k]||[]).push(r); });
   el.innerHTML = Object.entries(bySilo).map(([siloId, rows]) => {
     const s = rows[0].silos_bolsa;
-    return `<div class="silo-group">Silo ${s.numero} · ${s.producto} · ${s.categoria}</div>` +
+    return `<div class="silo-group">Silo ${s.numero} · ${s.producto} · ${s.categoria||'calidad pendiente'}</div>` +
       rows.map(r => `<label class="checkrow"><input type="checkbox" class="recepcion-check" value="${r.id}"><span>${r.nro_boleta}</span><span class="meta">${fmtDate(r.fecha)} · ${fmtKg(r.kg_liquido_carga)}</span></label>`).join('');
   }).join('');
 }
