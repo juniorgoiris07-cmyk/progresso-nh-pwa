@@ -108,6 +108,29 @@
   .lote-sel-q{flex:1 1 220px;min-width:0;}
   .lote-sel-s{flex:2 1 280px;min-width:0;font-weight:700;}
   .lote-sel-cnt{flex:1 1 100%;font-size:12px;color:var(--text-muted);}
+  .lt-chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;margin-bottom:4px;}
+  .lt-chip{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--card);border:1px solid var(--gridline);border-radius:12px;padding:8px 12px;cursor:pointer;font:inherit;text-align:left;box-shadow:var(--shadow-sm);position:relative;}
+  .lt-chip b{font-size:13px;color:var(--text-primary);}
+  .lt-chip span{font-size:11px;color:var(--text-muted);}
+  .lt-chip i{position:absolute;top:-7px;right:-4px;background:var(--accent);color:#fff;font-style:normal;font-size:10px;font-weight:800;border-radius:10px;padding:1px 7px;}
+  .lt-chip.on{border-color:var(--accent);background:rgba(var(--accent-rgb),.09);}
+  .lt-chip.on b{color:var(--accent-dark);}
+  .lt-filtros{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;}
+  .lt-filtros input[type=search]{flex:2 1 240px;min-width:0;}
+  .lt-filtros select{flex:1 1 180px;min-width:0;}
+  .lt-solo{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--text-secondary);margin:0;white-space:nowrap;}
+  .lt-solo input{width:auto;margin:0;}
+  .lt-scroll{max-height:440px;overflow:auto;border:1px solid var(--gridline);border-radius:10px;background:var(--card);}
+  .lt-scroll thead th{position:sticky;top:0;z-index:2;background:var(--surface-2);}
+  .lt-tabla tbody tr{cursor:pointer;}
+  .lt-tabla tbody tr:hover td{background:rgba(var(--accent-rgb),.05);}
+  .lt-tabla tbody tr.lt-sel td{background:rgba(var(--accent-rgb),.13);}
+  .lt-tabla td.num,.lt-tabla th.num{text-align:right;white-space:nowrap;}
+  .lt-tabla td input,.lt-tabla th input{width:auto;margin:0;}
+  .lt-barra{position:sticky;bottom:0;z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:10px;padding:12px 14px;background:var(--card);border:1px solid var(--accent);border-radius:12px;box-shadow:var(--shadow-md);}
+  .lt-res{font-size:13.5px;flex:1 1 260px;}
+  .lt-muted{color:var(--text-muted);font-size:12px;}
+  .lt-acc{display:flex;gap:8px;flex-wrap:wrap;}
   .pill-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;}
   .vista-menu-grid{margin-top:4px;}
 
@@ -783,53 +806,147 @@ async function cerrarSilo(id){
 // ============================================================
 // LOTES
 // ============================================================
+let LOTE_ROWS = [];
+let loteSel = new Set();
+let loteFiltro = { q:'', silo:'', prov:'', solo:false };
+let loteUltimo = null;
+
 async function renderLote(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
     <h2>${ICONS.lote} Crear lote</h2>
-    <div class="desc">Elegí las cargas de materia prima (de uno o varios silos bolsa) que van a entrar en proceso.</div>
+    <div class="desc">1) Completá los datos del lote. 2) Elegí las cargas de abajo (podés filtrar por silo, proveedor o buscar). 3) Creá el lote.</div>
     <div class="grid">
       <div><label>Producto *</label><select id="loteProducto">${opt(PRODUCTOS)}</select></div>
-      <div><label>Categoría</label><select id="loteCategoria"><option value="">-</option>${opt(CATEGORIAS)}</select></div>
+      <div><label>Calidad</label><select id="loteCategoria"><option value="">-</option>${opt(CATEGORIAS)}</select></div>
       <div><label>Responsable</label><input id="loteResponsable"></div>
     </div>
-    <label>Cargas disponibles</label>
-    <div id="recepcionChecklist" class="checklist"><div class="empty">Cargando...</div></div>
-    <div style="margin-top:12px"><button class="btn" onclick="crearLote()">${ICONS.plus} Crear lote con seleccionadas</button></div>
+  </div>
+  <div class="card">
+    <h2>Cargas disponibles</h2>
+    <div id="ltSilos" class="lt-chips"></div>
+    <div class="lt-filtros">
+      <input type="search" id="ltBuscar" placeholder="Buscar remisión, proveedor, chofer o chapa..." autocomplete="off" oninput="loteFiltro.q=this.value;ltRender()">
+      <select id="ltProv" onchange="loteFiltro.prov=this.value;ltRender()"><option value="">Todos los proveedores</option></select>
+      <label class="lt-solo"><input type="checkbox" id="ltSolo" onchange="loteFiltro.solo=this.checked;ltRender()"> Solo seleccionadas</label>
+    </div>
+    <div id="ltTabla" class="lt-scroll"><div class="empty">Cargando...</div></div>
+    <div id="ltBarra" class="lt-barra"></div>
   </div>
   <div class="card">
     <h2>Lotes</h2>
     <div id="loteList" class="table-wrap"><div class="empty">Cargando...</div></div>
   </div>`;
+  loteSel = new Set(); loteUltimo = null;
+  loteFiltro = { q:'', silo:'', prov:'', solo:false };
   loadRecepcionChecklist();
   loadLoteList();
 }
 
 async function loadRecepcionChecklist(){
-  const { data, error } = await sb.from('recepcion_mp').select('*, silos_bolsa(numero,categoria,producto)').eq('estado','DISPONIBLE').order('silo_bolsa_id');
-  const el = document.getElementById('recepcionChecklist');
+  const { data, error } = await sb.from('recepcion_mp').select('*, silos_bolsa(numero,categoria,producto)').eq('estado','DISPONIBLE').order('fecha').order('nro_boleta');
+  const el = document.getElementById('ltTabla');
   if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
-  if(!data || !data.length){ el.innerHTML = '<div class="empty">No hay cargas disponibles (todas ya están asignadas a un lote).</div>'; return; }
-  const bySilo = {};
-  data.forEach(r => { const k = r.silo_bolsa_id; (bySilo[k] = bySilo[k]||[]).push(r); });
-  el.innerHTML = Object.entries(bySilo).map(([siloId, rows]) => {
-    const s = rows[0].silos_bolsa;
-    return `<div class="silo-group">Silo ${s.numero} · ${s.producto} · ${s.categoria||'calidad pendiente'}</div>` +
-      rows.map(r => `<label class="checkrow"><input type="checkbox" class="recepcion-check" value="${r.id}"><span>${r.nro_boleta}</span><span class="meta">${fmtDate(r.fecha)} · ${fmtKg(r.kg_liquido_carga)}</span></label>`).join('');
-  }).join('');
+  LOTE_ROWS = data || [];
+  if(!LOTE_ROWS.length){ el.innerHTML = '<div class="empty">No hay cargas disponibles (todas ya están asignadas a un lote).</div>'; ltBarra(); return; }
+  const provs = Array.from(new Set(LOTE_ROWS.map(r => r.proveedor).filter(Boolean))).sort();
+  document.getElementById('ltProv').innerHTML = '<option value="">Todos los proveedores</option>' + provs.map(p => `<option>${mpEsc(p)}</option>`).join('');
+  ltRender();
+}
+
+function ltN(n){ return n === null || n === undefined ? '-' : Number(n).toLocaleString('es-PY',{maximumFractionDigits:0}); }
+function ltP(n){ return n === null || n === undefined ? '-' : Number(n).toLocaleString('es-PY',{minimumFractionDigits:1,maximumFractionDigits:2}); }
+function ltSiloNum(r){ return r.silos_bolsa ? r.silos_bolsa.numero : r.silo_bolsa_id; }
+
+function ltFiltradas(){
+  const q = (loteFiltro.q || '').toLowerCase().trim().split(/\s+/).filter(Boolean);
+  return LOTE_ROWS.filter(r => {
+    if(loteFiltro.silo && r.silo_bolsa_id !== loteFiltro.silo) return false;
+    if(loteFiltro.prov && r.proveedor !== loteFiltro.prov) return false;
+    if(loteFiltro.solo && !loteSel.has(r.id)) return false;
+    if(q.length){ const h = [r.nro_boleta, r.proveedor, r.chofer, r.chapa_camion, ltSiloNum(r)].join(' ').toLowerCase(); if(!q.every(w => h.includes(w))) return false; }
+    return true;
+  });
+}
+
+function ltRender(){
+  // chips por silo
+  const porSilo = {};
+  LOTE_ROWS.forEach(r => { const s = porSilo[r.silo_bolsa_id] = porSilo[r.silo_bolsa_id] || { id:r.silo_bolsa_id, num:ltSiloNum(r), n:0, kg:0, sel:0 }; s.n++; s.kg += Number(r.kg_liquido_carga||0); if(loteSel.has(r.id)) s.sel++; });
+  const silos = Object.values(porSilo).sort((a,b) => String(a.num).localeCompare(String(b.num), 'es', {numeric:true}));
+  const totKg = LOTE_ROWS.reduce((a,r) => a + Number(r.kg_liquido_carga||0), 0);
+  document.getElementById('ltSilos').innerHTML =
+    `<button type="button" class="lt-chip${loteFiltro.silo===''?' on':''}" onclick="ltSilo('')"><b>Todos</b><span>${LOTE_ROWS.length} cargas · ${ltN(totKg)} kg</span></button>` +
+    silos.map(s => `<button type="button" class="lt-chip${loteFiltro.silo===s.id?' on':''}" onclick="ltSilo('${s.id}')"><b>${mpEsc(s.num)}</b><span>${s.n} cargas · ${ltN(s.kg)} kg</span>${s.sel?`<i>${s.sel} elegidas</i>`:''}</button>`).join('');
+  // tabla
+  const fs = ltFiltradas();
+  const todasSel = fs.length > 0 && fs.every(r => loteSel.has(r.id));
+  const el = document.getElementById('ltTabla');
+  if(!fs.length){ el.innerHTML = '<div class="empty">Ninguna carga coincide con el filtro.</div>'; }
+  else {
+    el.innerHTML = `<table class="lt-tabla"><thead><tr>
+      <th style="width:34px"><input type="checkbox" ${todasSel?'checked':''} onchange="ltTodas(this.checked)" title="Elegir / quitar todas las que se ven"></th>
+      <th>Remisión</th><th>Fecha</th><th>Proveedor</th><th>Silo</th><th>Tipo</th><th class="num">Neto kg</th><th class="num">Hum %</th><th class="num">Imp %</th><th class="num">Líquido kg</th></tr></thead><tbody>
+      ${fs.map(r => `<tr class="${loteSel.has(r.id)?'lt-sel':''}" onclick="ltFila(event,'${r.id}')"><td><input type="checkbox" ${loteSel.has(r.id)?'checked':''} tabindex="-1"></td>
+        <td><b>${mpEsc(r.nro_boleta)}</b></td><td>${mpFd(r.fecha)}</td><td>${mpEsc(r.proveedor||'')}</td><td>${mpEsc(ltSiloNum(r))}</td><td>${mpEsc(r.tipo_cosecha||'')}</td>
+        <td class="num">${ltN(r.peso_neto_kg)}</td><td class="num">${ltP(r.pct_humedad)}</td><td class="num">${ltP(Number(r.pct_impureza_gruesa||0)+Number(r.pct_impureza_fina||0))}</td><td class="num"><b>${ltN(r.kg_liquido_carga)}</b></td></tr>`).join('')}
+    </tbody></table>`;
+  }
+  ltBarra(fs);
+}
+
+function ltBarra(fs){
+  const el = document.getElementById('ltBarra'); if(!el) return;
+  fs = fs || ltFiltradas();
+  const sel = LOTE_ROWS.filter(r => loteSel.has(r.id));
+  const neto = sel.reduce((a,r) => a + Number(r.peso_neto_kg||0), 0);
+  const liq = sel.reduce((a,r) => a + Number(r.kg_liquido_carga||0), 0);
+  const w = f => neto ? sel.reduce((a,r) => a + Number(r.peso_neto_kg||0) * f(r), 0) / neto : null;
+  const hum = w(r => Number(r.pct_humedad||0)), imp = w(r => Number(r.pct_impureza_gruesa||0)+Number(r.pct_impureza_fina||0));
+  const bySilo = {}; sel.forEach(r => { const k = ltSiloNum(r); bySilo[k] = (bySilo[k]||0) + 1; });
+  const desglose = Object.entries(bySilo).map(([k,v]) => `${mpEsc(k)}: ${v}`).join(' · ');
+  const visSinSel = fs.filter(r => !loteSel.has(r.id)).length;
+  el.innerHTML = `<div class="lt-res">${sel.length
+      ? `<b>${sel.length}</b> carga${sel.length===1?'':'s'} elegida${sel.length===1?'':'s'} · <b>${ltN(liq)} kg</b> líquidos <span class="lt-muted">(${ltN(neto)} kg netos · hum. prom. ${ltP(hum)}% · imp. prom. ${ltP(imp)}%)</span><div class="lt-muted">${desglose}</div>`
+      : '<span class="lt-muted">Todavía no elegiste ninguna carga. Tocá una fila (o usá las casillas) para elegirla.</span>'}</div>
+    <div class="lt-acc">
+      ${visSinSel ? `<button type="button" class="btn secondary small" onclick="ltTodas(true)">Elegir las ${visSinSel} que se ven</button>` : ''}
+      ${sel.length ? `<button type="button" class="btn secondary small" onclick="ltLimpiar()">Quitar todas</button>` : ''}
+      <button type="button" class="btn" ${sel.length?'':'disabled'} onclick="crearLote()">${ICONS.plus} Crear lote${sel.length?` con ${sel.length}`:''}</button>
+    </div>`;
+}
+
+function ltSilo(id){ loteFiltro.silo = (loteFiltro.silo === id ? '' : id); ltRender(); }
+function ltLimpiar(){ loteSel.clear(); loteUltimo = null; ltRender(); }
+function ltTodas(on){ ltFiltradas().forEach(r => on ? loteSel.add(r.id) : loteSel.delete(r.id)); ltRender(); }
+function ltFila(ev, id){
+  const fs = ltFiltradas();
+  if(ev.shiftKey && loteUltimo && fs.some(r => r.id === loteUltimo)){
+    const a = fs.findIndex(r => r.id === loteUltimo), b = fs.findIndex(r => r.id === id);
+    const [i,j] = a < b ? [a,b] : [b,a];
+    for(let k = i; k <= j; k++) loteSel.add(fs[k].id);
+  } else {
+    if(loteSel.has(id)) loteSel.delete(id); else loteSel.add(id);
+  }
+  loteUltimo = id;
+  const sc = document.getElementById('ltTabla'), top = sc ? sc.scrollTop : 0;
+  ltRender();
+  const sc2 = document.getElementById('ltTabla'); if(sc2) sc2.scrollTop = top;
 }
 
 async function crearLote(){
-  const seleccionadas = [...document.querySelectorAll('.recepcion-check:checked')].map(c => c.value);
+  const seleccionadas = LOTE_ROWS.filter(r => loteSel.has(r.id));
   if(!seleccionadas.length){ toast('Elegí al menos una carga', 'err'); return; }
   const producto = document.getElementById('loteProducto').value;
   const categoria = document.getElementById('loteCategoria').value || null;
   const responsable = document.getElementById('loteResponsable').value || null;
+  const kg = seleccionadas.reduce((a,r) => a + Number(r.kg_liquido_carga||0), 0);
+  if(!confirm('¿Crear un lote de ' + producto + (categoria ? ' (' + categoria + ')' : '') + ' con ' + seleccionadas.length + ' carga(s) y ' + ltN(kg) + ' kg líquidos?')) return;
 
   const { data: lote, error } = await sb.from('lotes').insert({producto, categoria, responsable, creado_por: usuario||null}).select().single();
   if(error){ toast('Error: ' + error.message, 'err'); return; }
 
-  const rows = seleccionadas.map(rid => ({lote_id: lote.id, recepcion_mp_id: rid}));
+  const rows = seleccionadas.map(r => ({lote_id: lote.id, recepcion_mp_id: r.id}));
   const { error: e2 } = await sb.from('lote_recepcion').insert(rows);
   if(e2){ toast('Lote creado pero error asignando cargas: ' + e2.message, 'err'); return; }
 
