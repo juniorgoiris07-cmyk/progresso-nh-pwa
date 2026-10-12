@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Progresso NH - Producción</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#171511">
@@ -186,6 +186,47 @@
   .pwd-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;}
   .pwd-row{display:flex;gap:8px;align-items:flex-start;}
   .pwd-row > input{flex:1;}
+  /* ===== v11: sensacion de app nativa ===== */
+  :root{--nav-h:62px;}
+  html,body{overscroll-behavior-y:none;}
+  button,.vista-menu-card,.navb,.sheet-item,.lote-pill,.lt-chip,.edit-btn,.volver-btn,.btn{touch-action:manipulation;-webkit-user-select:none;user-select:none;}
+  header.appbar{padding-top:calc(20px + env(safe-area-inset-top));}
+  main{padding-bottom:calc(var(--nav-h) + 34px + env(safe-area-inset-bottom));}
+  .toast{bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom));}
+  .lt-barra{bottom:calc(var(--nav-h) + 8px + env(safe-area-inset-bottom));}
+  .btn:active,.vista-menu-card:active,.edit-btn:active,.volver-btn:active,.lote-pill:active,.lt-chip:active{transform:scale(.97);transition:transform .08s;}
+  @media (hover:none){.vista-menu-card:hover{transform:none;box-shadow:var(--shadow-sm);border-color:var(--gridline);}}
+
+  .navbar{position:fixed;left:0;right:0;bottom:0;z-index:60;}
+  .navbar-in{max-width:920px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--gridline);padding:0 4px calc(0px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(20,18,10,.07);}
+  .navb{appearance:none;background:none;border:none;position:relative;height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:inherit;font-size:10.5px;font-weight:700;color:var(--text-muted);cursor:pointer;border-radius:12px;-webkit-tap-highlight-color:transparent;}
+  .navb .icon{width:23px;height:23px;transition:transform .18s;}
+  .navb:active .icon{transform:scale(.86);}
+  .navb:active{background:rgba(var(--accent-rgb),.08);}
+  .navb.on{color:var(--accent-dark);}
+  .navb.on .icon{transform:translateY(-1px);}
+  .navb.on::before{content:'';position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,var(--accent),#f2c93a,var(--accent));}
+  body.kb .navbar{display:none;}
+  body.kb .toast{bottom:18px;}
+
+  .sheet-bg{position:fixed;inset:0;background:rgba(10,8,4,.5);z-index:70;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .sheet-bg.on{opacity:1;pointer-events:auto;}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:71;transform:translateY(105%);transition:transform .26s cubic-bezier(.2,.8,.2,1);pointer-events:none;}
+  .sheet.on{transform:none;pointer-events:auto;}
+  .sheet-in{max-width:920px;margin:0 auto;background:var(--card);border-radius:20px 20px 0 0;padding:8px 14px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(20,18,10,.18);}
+  .sheet-grip{width:38px;height:4px;border-radius:4px;background:var(--gridline);margin:4px auto 10px;}
+  .sheet-item{appearance:none;width:100%;display:flex;align-items:center;gap:14px;background:none;border:none;font-family:inherit;font-size:15.5px;font-weight:700;color:var(--text-primary);padding:13px 10px;border-radius:12px;cursor:pointer;text-align:left;}
+  .sheet-item:active{background:rgba(var(--accent-rgb),.1);}
+  .sheet-ic{width:42px;height:42px;border-radius:50%;background:rgba(var(--accent-rgb),.12);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;flex:none;}
+  .sheet-ic .icon{width:20px;height:20px;}
+
+  @keyframes viewInR{from{opacity:0;transform:translateX(26px);}to{opacity:1;transform:none;}}
+  @keyframes viewInL{from{opacity:0;transform:translateX(-26px);}to{opacity:1;transform:none;}}
+  @keyframes viewInU{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  .anim-r{animation:viewInR .22s cubic-bezier(.2,.8,.2,1);}
+  .anim-l{animation:viewInL .22s cubic-bezier(.2,.8,.2,1);}
+  .anim-u{animation:viewInU .22s cubic-bezier(.2,.8,.2,1);}
+  @media (prefers-reduced-motion:reduce){.anim-r,.anim-l,.anim-u{animation:none;}.sheet,.sheet-bg{transition:none;}}
 </style>
 </head>
 <body>
@@ -235,6 +276,12 @@
 
     <div id="main"></div>
   </main>
+
+  <nav class="navbar hidden" id="navbar"><div class="navbar-in" id="navbarIn"></div></nav>
+  <div class="sheet-bg" id="sheetBg" onclick="cerrarMas()"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-label="Más secciones">
+    <div class="sheet-in"><div class="sheet-grip"></div><div id="sheetItems"></div></div>
+  </div>
 </div>
 
 <script>
@@ -254,7 +301,9 @@ const ICONS = {
   resumen: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
-  usuarios: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+  usuarios: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  home: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>',
+  mas: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>'
 };
 
 let usuario = null;
@@ -264,6 +313,8 @@ let miRol = null;
 function showAuthScreen(){
   document.getElementById('authScreen').classList.remove('hidden');
   document.getElementById('appShell').classList.add('hidden');
+  document.getElementById('navbar').classList.add('hidden');
+  if(typeof sheetOpen !== 'undefined' && sheetOpen) cerrarMas(true);
   usuario = null;
   currentUser = null;
   miRol = null;
@@ -290,18 +341,25 @@ async function onLogin(session){
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('appShell').classList.remove('hidden');
   renderHomeMenu();
+  document.getElementById('navbar').classList.remove('hidden');
+  renderNavbar();
   if(!navInitialized){
     navInitialized = true;
     history.replaceState({view:'home'}, '');
     window.addEventListener('popstate', (e) => {
       const view = e.state ? e.state.view : 'home';
+      if(sheetOpen){ sheetPushed = false; cerrarMas(true); return; }
+      if(skipPop){ skipPop = false; return; }
       if(view === 'home'){
         goHome(false);
       }else{
+        const prev = activeTab;
         activeTab = view;
         document.getElementById('homeMenu').classList.add('hidden');
-        document.getElementById('volverBtn').classList.remove('hidden');
         RENDERERS[view]();
+        animar(document.getElementById('main'), navDirTo(prev, view));
+        renderNavbar();
+        window.scrollTo(0,0);
       }
     });
   }
@@ -335,6 +393,7 @@ function toast(msg, type){
   t.className = 'toast' + (type ? ' '+type : '');
   t.textContent = msg;
   document.body.appendChild(t);
+  if(type === 'ok') vibrar(12); else if(type === 'err') vibrar([40,60,40]);
   setTimeout(()=>t.remove(), 3200);
 }
 
@@ -366,20 +425,91 @@ function renderHomeMenu(){
   ).join('');
 }
 
+const NAV_ORDER = ['home','mp','lote','bigbag','silo','cierre','resumen','usuarios'];
+const NAV_BAR = ['home','mp','lote','bigbag'];
+let sheetOpen = false, sheetPushed = false, skipPop = false;
+
+function navDirTo(prev, next){
+  const a = NAV_ORDER.indexOf(prev || 'home'), b = NAV_ORDER.indexOf(next || 'home');
+  return b > a ? 1 : (b < a ? -1 : 0);
+}
+function animar(el, dir){
+  if(!el) return;
+  el.classList.remove('anim-r','anim-l','anim-u');
+  void el.offsetWidth;
+  const c = dir > 0 ? 'anim-r' : (dir < 0 ? 'anim-l' : 'anim-u');
+  el.classList.add(c);
+  setTimeout(()=>el.classList.remove(c), 320);
+}
+function vibrar(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+
+function renderNavbar(){
+  const cur = activeTab || 'home';
+  const enBarra = NAV_BAR.includes(cur);
+  const lbl = {home:'Inicio', mp:'Recepción', lote:'Lotes', bigbag:'Carga'};
+  const ic = {home:ICONS.home, mp:ICONS.mp, lote:ICONS.lote, bigbag:ICONS.bigbag};
+  document.getElementById('navbarIn').innerHTML =
+    NAV_BAR.map(id => `<button type="button" class="navb ${cur===id?'on':''}" onclick="navGo('${id}')" aria-label="${lbl[id]}"${cur===id?' aria-current="page"':''}>${ic[id]}<span>${lbl[id]}</span></button>`).join('') +
+    `<button type="button" class="navb ${enBarra?'':'on'}" onclick="abrirMas()" aria-label="Más">${ICONS.mas}<span>Más</span></button>`;
+}
+
+function navGo(id){
+  vibrar(8);
+  if(id === 'home'){ if(activeTab) history.back(); return; }
+  if(activeTab === id) return;
+  goTab(id);
+}
+
+function abrirMas(){
+  if(sheetOpen) return;
+  vibrar(8);
+  const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
+  const extra = tabs.filter(t => !NAV_BAR.includes(t.id));
+  document.getElementById('sheetItems').innerHTML = extra.map(t =>
+    `<button type="button" class="sheet-item" onclick="goTab('${t.id}')"><span class="sheet-ic">${t.icon}</span>${t.label}</button>`
+  ).join('');
+  history.pushState({view: activeTab || 'home', sheet:true}, '');
+  sheetOpen = true; sheetPushed = true;
+  document.getElementById('sheetBg').classList.add('on');
+  document.getElementById('sheet').classList.add('on');
+}
+function cerrarMas(fromPop){
+  if(!sheetOpen) return;
+  sheetOpen = false;
+  document.getElementById('sheetBg').classList.remove('on');
+  document.getElementById('sheet').classList.remove('on');
+  if(fromPop === true) return;
+  if(sheetPushed){ sheetPushed = false; skipPop = true; history.back(); }
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarMas(); });
+document.addEventListener('focusin', e => { if(e.target.matches && e.target.matches('input,select,textarea')) document.body.classList.add('kb'); });
+document.addEventListener('focusout', () => { setTimeout(()=>{ const a = document.activeElement; if(!(a && a.matches && a.matches('input,select,textarea'))) document.body.classList.remove('kb'); }, 120); });
+
 function goHome(push){
   activeTab = null;
   document.getElementById('homeMenu').classList.remove('hidden');
   document.getElementById('volverBtn').classList.add('hidden');
   document.getElementById('main').innerHTML = '';
   if(push !== false) history.pushState({view:'home'}, '');
+  animar(document.getElementById('homeMenu'), -1);
+  renderNavbar();
+  window.scrollTo(0,0);
 }
 
 function goTab(id){
+  const prev = activeTab;
+  const desdeSheet = sheetOpen;
+  if(sheetOpen){ sheetOpen = false; document.getElementById('sheetBg').classList.remove('on'); document.getElementById('sheet').classList.remove('on'); }
   activeTab = id;
   document.getElementById('homeMenu').classList.add('hidden');
-  document.getElementById('volverBtn').classList.remove('hidden');
+  document.getElementById('volverBtn').classList.add('hidden');
   RENDERERS[id]();
-  history.pushState({view:id}, '');
+  if(prev === null && !desdeSheet) history.pushState({view:id}, '');
+  else history.replaceState({view:id}, '');
+  sheetPushed = false;
+  animar(document.getElementById('main'), navDirTo(prev, id));
+  renderNavbar();
+  window.scrollTo(0,0);
 }
 
 let MP_ROWS = [];
