@@ -5,7 +5,7 @@
  * Supabase (oulrdijjdrfsmbeezolt.supabase.co) NUNCA se cachean: siempre van a
  * red, para no mostrar datos de stock/produccion desactualizados.
  */
-var CACHE_NAME = 'progresso-pwa-v3';
+var CACHE_NAME = 'progresso-pwa-v4';
 var APP_SHELL = [
   './',
   './index.html',
@@ -17,7 +17,12 @@ var APP_SHELL = [
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(function (cache) { return cache.addAll(APP_SHELL); })
+      .then(function (cache) {
+        // cache:'reload' salta la cache HTTP del navegador (GitHub Pages ~10 min)
+        return Promise.all(APP_SHELL.map(function (u) {
+          return cache.add(new Request(u, { cache: 'reload' }));
+        }));
+      })
       .then(function () { return self.skipWaiting(); })
   );
 });
@@ -53,7 +58,8 @@ self.addEventListener('fetch', function (event) {
   if (req.method === 'GET') {
     event.respondWith(
       caches.match(req).then(function (cached) {
-        var network = fetch(req).then(function (res) {
+        var sameOrigin = url.indexOf(self.location.origin) === 0;
+        var network = (sameOrigin ? fetch(url, { cache: 'no-cache' }) : fetch(req)).then(function (res) {
           if (res && res.status === 200) {
             var clone = res.clone();
             caches.open(CACHE_NAME).then(function (cache) { cache.put(req, clone); });
