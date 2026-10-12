@@ -197,10 +197,10 @@
   .btn:active,.vista-menu-card:active,.edit-btn:active,.volver-btn:active,.lote-pill:active,.lt-chip:active{transform:scale(.97);transition:transform .08s;}
   @media (hover:none){.vista-menu-card:hover{transform:none;box-shadow:var(--shadow-sm);border-color:var(--gridline);}}
 
-  .navbar{position:fixed;left:0;right:0;bottom:0;z-index:60;}
-  .navbar-in{max-width:920px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--gridline);padding:0 4px calc(0px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(20,18,10,.07);}
+  .navbar{position:fixed;left:0;right:0;bottom:0;z-index:60;transform:translateZ(0);will-change:transform;contain:layout paint;}
+  .navbar-in{max-width:920px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border-top:1px solid var(--gridline);padding:0 4px calc(0px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(20,18,10,.07);}
   .navb{appearance:none;background:none;border:none;position:relative;height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-family:inherit;font-size:10.5px;font-weight:700;color:var(--text-muted);cursor:pointer;border-radius:12px;-webkit-tap-highlight-color:transparent;}
-  .navb .icon{width:23px;height:23px;transition:transform .18s;}
+  .navb .icon{width:23px;height:23px;transition:transform .12s;}
   .navb:active .icon{transform:scale(.86);}
   .navb:active{background:rgba(var(--accent-rgb),.08);}
   .navb.on{color:var(--accent-dark);}
@@ -211,8 +211,8 @@
 
   .sheet-bg{position:fixed;inset:0;background:rgba(10,8,4,.5);z-index:70;opacity:0;pointer-events:none;transition:opacity .2s;}
   .sheet-bg.on{opacity:1;pointer-events:auto;}
-  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:71;transform:translateY(105%);transition:transform .26s cubic-bezier(.2,.8,.2,1);pointer-events:none;}
-  .sheet.on{transform:none;pointer-events:auto;}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:71;transform:translateY(105%);transition:transform .22s cubic-bezier(.2,.8,.2,1);pointer-events:none;will-change:transform;visibility:hidden;}
+  .sheet.on{transform:none;pointer-events:auto;visibility:visible;}
   .sheet-in{max-width:920px;margin:0 auto;background:var(--card);border-radius:20px 20px 0 0;padding:8px 14px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(20,18,10,.18);}
   .sheet-grip{width:38px;height:4px;border-radius:4px;background:var(--gridline);margin:4px auto 10px;}
   .sheet-item{appearance:none;width:100%;display:flex;align-items:center;gap:14px;background:none;border:none;font-family:inherit;font-size:15.5px;font-weight:700;color:var(--text-primary);padding:13px 10px;border-radius:12px;cursor:pointer;text-align:left;}
@@ -220,13 +220,15 @@
   .sheet-ic{width:42px;height:42px;border-radius:50%;background:rgba(var(--accent-rgb),.12);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;flex:none;}
   .sheet-ic .icon{width:20px;height:20px;}
 
-  @keyframes viewInR{from{opacity:0;transform:translateX(26px);}to{opacity:1;transform:none;}}
-  @keyframes viewInL{from{opacity:0;transform:translateX(-26px);}to{opacity:1;transform:none;}}
-  @keyframes viewInU{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
-  .anim-r{animation:viewInR .22s cubic-bezier(.2,.8,.2,1);}
-  .anim-l{animation:viewInL .22s cubic-bezier(.2,.8,.2,1);}
-  .anim-u{animation:viewInU .22s cubic-bezier(.2,.8,.2,1);}
+  @keyframes viewInR{from{opacity:0;transform:translate3d(16px,0,0);}to{opacity:1;transform:none;}}
+  @keyframes viewInL{from{opacity:0;transform:translate3d(-16px,0,0);}to{opacity:1;transform:none;}}
+  @keyframes viewInU{from{opacity:0;transform:translate3d(0,8px,0);}to{opacity:1;transform:none;}}
+  .anim-r,.anim-l,.anim-u{will-change:transform,opacity;}
+  .anim-r{animation:viewInR .17s ease-out;}
+  .anim-l{animation:viewInL .17s ease-out;}
+  .anim-u{animation:viewInU .17s ease-out;}
   @media (prefers-reduced-motion:reduce){.anim-r,.anim-l,.anim-u{animation:none;}.sheet,.sheet-bg{transition:none;}}
+  .sheet-bg{will-change:opacity;}
 </style>
 </head>
 <body>
@@ -428,7 +430,7 @@ function renderHomeMenu(){
 
 const NAV_ORDER = ['home','mp','lote','bigbag','silo','cierre','resumen','usuarios'];
 const NAV_BAR = ['home','mp','lote','bigbag'];
-let sheetOpen = false, sheetPushed = false, skipPop = false, navExtra = 0;
+let sheetOpen = false, sheetPushed = false, skipPop = false, navExtra = 0, navTok = 0;
 
 function navDirTo(prev, next){
   const a = NAV_ORDER.indexOf(prev || 'home'), b = NAV_ORDER.indexOf(next || 'home');
@@ -440,25 +442,36 @@ function animar(el, dir){
   void el.offsetWidth;
   const c = dir > 0 ? 'anim-r' : (dir < 0 ? 'anim-l' : 'anim-u');
   el.classList.add(c);
-  setTimeout(()=>el.classList.remove(c), 320);
+  setTimeout(()=>el.classList.remove(c), 260);
 }
 function vibrar(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 
 function renderNavbar(){
-  const cur = activeTab || 'home';
-  const enBarra = NAV_BAR.includes(cur);
-  const lbl = {home:'Inicio', mp:'Recepción', lote:'Lotes', bigbag:'Carga'};
-  const ic = {home:ICONS.home, mp:ICONS.mp, lote:ICONS.lote, bigbag:ICONS.bigbag};
-  document.getElementById('navbarIn').innerHTML =
-    NAV_BAR.map(id => `<button type="button" class="navb ${cur===id?'on':''}" onclick="navGo('${id}')" aria-label="${lbl[id]}"${cur===id?' aria-current="page"':''}>${ic[id]}<span>${lbl[id]}</span></button>`).join('') +
-    `<button type="button" class="navb ${enBarra?'':'on'}" onclick="abrirMas()" aria-label="Más">${ICONS.mas}<span>Más</span></button>`;
+  const nb = document.getElementById('navbarIn');
+  if(!nb.firstChild){
+    const lbl = {home:'Inicio', mp:'Recepción', lote:'Lotes', bigbag:'Carga'};
+    const ic = {home:ICONS.home, mp:ICONS.mp, lote:ICONS.lote, bigbag:ICONS.bigbag};
+    nb.innerHTML = NAV_BAR.map(id => `<button type="button" class="navb" data-id="${id}" onclick="navGo('${id}')" aria-label="${lbl[id]}">${ic[id]}<span>${lbl[id]}</span></button>`).join('') +
+      `<button type="button" class="navb" data-id="mas" onclick="abrirMas()" aria-label="Más">${ICONS.mas}<span>Más</span></button>`;
+  }
+  setNavOn(activeTab || 'home');
+}
+function setNavOn(id){
+  const key = NAV_BAR.includes(id) ? id : 'mas';
+  document.querySelectorAll('#navbarIn .navb').forEach(b => {
+    const on = b.dataset.id === key;
+    if(on !== b.classList.contains('on')) b.classList.toggle('on', on);
+    if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
 }
 
 function navGo(id){
   vibrar(8);
-  if(id === 'home'){ if(activeTab) history.go(-Math.max(1, navExtra)); return; }
+  if(id === 'home'){ if(activeTab){ setNavOn('home'); history.go(-Math.max(1, navExtra)); } return; }
   if(activeTab === id) return;
-  goTab(id);
+  setNavOn(id);
+  const tok = ++navTok;
+  requestAnimationFrame(() => requestAnimationFrame(() => { if(tok === navTok) goTab(id); }));
 }
 
 function abrirMas(){
@@ -499,6 +512,7 @@ function goHome(push){
 }
 
 function goTab(id){
+  navTok++;
   const prev = activeTab;
   const desdeSheet = sheetOpen;
   if(sheetOpen){ sheetOpen = false; document.getElementById('sheetBg').classList.remove('on'); document.getElementById('sheet').classList.remove('on'); }
@@ -515,6 +529,7 @@ function goTab(id){
 }
 
 let MP_ROWS = [];
+let mpLimit = 40;
 let mpEditId = null;
 let mpHumMax = 8;
 try { const hv = parseFloat(localStorage.getItem('mp_hum_max')); if(!isNaN(hv)) mpHumMax = hv; } catch(e){}
@@ -528,6 +543,7 @@ let mpParcelaCount = 0;
 async function renderMP(){
   const main = document.getElementById('main');
   mpEditId = null;
+  mpLimit = 40;
   main.innerHTML = `<div class="card">
     <div class="row-flex" style="align-items:flex-start;">
       <div><h2 id="mpTitle">${ICONS.mp} Recepción de materia prima</h2></div>
@@ -853,9 +869,9 @@ function mpRenderList(){
   const hp = hs.length ? hs.reduce((a,b) => a + b, 0)/hs.length : 0;
   const pp = fs.reduce((a,x) => a + x.tot*x.neto, 0) / (tn || 1);
   el.innerHTML = `<table><thead><tr><th>Remisión</th><th>Fecha</th><th>Placa</th><th>Chofer</th><th>Proveedor / Productor</th><th>Parcela</th><th class="num">% parcela</th><th>Tipo</th><th class="num sep">Peso bruto</th><th class="num">Peso tara</th><th class="num">Peso neto</th><th class="num sep">Humedad %</th><th class="num">Temp °C</th><th class="num">Impurezas %</th><th class="num">Desc. calidad %</th><th class="num">Desc. humedad %</th><th class="num">Total desc. %</th><th class="num sep">Descuento kg</th><th class="num">Peso final kg</th><th class="sep">Observaciones</th><th>Ubicación</th><th>Silo bolsa</th><th>Lote</th><th>Para</th><th>Estado</th><th>Laboratorio</th><th></th></tr></thead><tbody>${
-    fs.map(x => { const r = x.r, lote = mpLoteDe(r), asig = r.estado === 'ASIGNADA';
+    fs.slice(0, mpLimit).map(x => { const r = x.r, lote = mpLoteDe(r), asig = r.estado === 'ASIGNADA';
       return `<tr><td>${mpEsc(r.nro_boleta)}</td><td>${mpFd(r.fecha)}</td><td>${mpEsc(r.chapa_camion||'')}</td><td>${mpEsc(r.chofer||'')}</td><td>${mpEsc(r.proveedor||'')}</td><td>${mpEsc(x.nro)}</td><td class="num">${mpFk(x.pct,2)}</td><td>${mpEsc(r.tipo_cosecha||'')}</td><td class="num sep">${mpFk(x.bruto)}</td><td class="num">${mpFk(r.peso_tara_kg)}</td><td class="num">${mpFk(x.neto)}</td><td class="num sep">${r.pct_humedad==null?'':mpFk(r.pct_humedad,1)}</td><td class="num">${r.temperatura_c==null?'':mpFk(r.temperatura_c)}</td><td class="num">${mpFk(Number(r.pct_impureza_gruesa||0)+Number(r.pct_impureza_fina||0),2)}</td><td class="num">${mpFk(r.pct_descuento_calidad,2)}</td><td class="num${x.dh>0?' hum':''}">${mpFk(x.dh,2)}</td><td class="num">${mpFk(x.tot,2)}</td><td class="num sep">${mpFk(x.desc)}</td><td class="num"><b>${mpFk(x.fin)}</b></td><td class="sep">${mpEsc(r.observaciones||'')}</td><td>${mpEsc(r.patio_destino||'')}</td><td>${mpEsc(r.silos_bolsa ? r.silos_bolsa.numero : '')}</td><td>${lote ? mpEsc(lote) : '<span style="color:var(--text-muted)">—</span>'}</td><td>${mpEsc(r.destino||'')}</td><td><span class="badge ${asig?'ok':'warn'}">${asig?'Procesado':'Sin procesar'}</span></td><td>${mpEsc(r.laboratorio||'')}</td><td>${asig ? '' : `<button class="edit-btn" onclick="mpEdit('${mpEsc(r.id)}')">Editar</button>`}</td></tr>`; }).join('')
-  }</tbody><tfoot><tr><td colspan="8">Totales · ${fs.length} filas</td><td class="num sep">${mpFk(tb)}</td><td></td><td class="num">${mpFk(tn)}</td><td class="num sep">${mpFk(hp,1)} prom.</td><td colspan="4" class="num">${mpFk(pp,2)} prom.</td><td class="num sep">${mpFk(td)}</td><td class="num">${mpFk(tf)}</td><td colspan="8" class="sep"></td></tr></tfoot></table>`;
+  }${fs.length > mpLimit ? `<tr><td colspan="26" style="text-align:center;padding:12px"><button type="button" class="btn secondary small" onclick="mpLimit+=80;mpRenderList()">Mostrar más (${fs.length - mpLimit} restantes)</button></td></tr>` : ''}</tbody><tfoot><tr><td colspan="8">Totales · ${fs.length} filas</td><td class="num sep">${mpFk(tb)}</td><td></td><td class="num">${mpFk(tn)}</td><td class="num sep">${mpFk(hp,1)} prom.</td><td colspan="4" class="num">${mpFk(pp,2)} prom.</td><td class="num sep">${mpFk(td)}</td><td class="num">${mpFk(tf)}</td><td colspan="8" class="sep"></td></tr></tfoot></table>`;
 }
 
 function mpExport(){
