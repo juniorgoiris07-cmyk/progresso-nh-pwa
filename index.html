@@ -354,6 +354,7 @@ async function onLogin(session){
         goHome(false);
       }else{
         const prev = activeTab;
+        navExtra = Math.max(1, navExtra - 1);
         activeTab = view;
         document.getElementById('homeMenu').classList.add('hidden');
         RENDERERS[view]();
@@ -427,7 +428,7 @@ function renderHomeMenu(){
 
 const NAV_ORDER = ['home','mp','lote','bigbag','silo','cierre','resumen','usuarios'];
 const NAV_BAR = ['home','mp','lote','bigbag'];
-let sheetOpen = false, sheetPushed = false, skipPop = false;
+let sheetOpen = false, sheetPushed = false, skipPop = false, navExtra = 0;
 
 function navDirTo(prev, next){
   const a = NAV_ORDER.indexOf(prev || 'home'), b = NAV_ORDER.indexOf(next || 'home');
@@ -455,7 +456,7 @@ function renderNavbar(){
 
 function navGo(id){
   vibrar(8);
-  if(id === 'home'){ if(activeTab) history.back(); return; }
+  if(id === 'home'){ if(activeTab) history.go(-Math.max(1, navExtra)); return; }
   if(activeTab === id) return;
   goTab(id);
 }
@@ -487,6 +488,7 @@ document.addEventListener('focusout', () => { setTimeout(()=>{ const a = documen
 
 function goHome(push){
   activeTab = null;
+  navExtra = 0;
   document.getElementById('homeMenu').classList.remove('hidden');
   document.getElementById('volverBtn').classList.add('hidden');
   document.getElementById('main').innerHTML = '';
@@ -504,8 +506,8 @@ function goTab(id){
   document.getElementById('homeMenu').classList.add('hidden');
   document.getElementById('volverBtn').classList.add('hidden');
   RENDERERS[id]();
-  if(prev === null && !desdeSheet) history.pushState({view:id}, '');
-  else history.replaceState({view:id}, '');
+  if(prev === null && !desdeSheet){ history.pushState({view:id}, ''); navExtra = 1; }
+  else{ history.replaceState({view:id}, ''); navExtra = (prev === null) ? 1 : (desdeSheet ? navExtra + 1 : Math.max(1, navExtra)); }
   sheetPushed = false;
   animar(document.getElementById('main'), navDirTo(prev, id));
   renderNavbar();
