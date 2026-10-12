@@ -57,7 +57,7 @@
   .vista-menu-card .vmc-label{font-size:13.5px;font-weight:800;color:var(--text-primary);}
 
   .card{background:var(--card);border:1px solid var(--gridline);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
-  .card h2{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:2px;}
+  .card h2{margin:0 0 14px;font-size:15px;display:flex;align-items:center;gap:2px;}
   .card .desc{color:var(--text-muted);font-size:12.5px;margin-bottom:14px;}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
   label{display:block;font-size:11.5px;color:var(--text-muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;}
@@ -194,7 +194,6 @@
   <div class="auth-card">
     <div class="auth-logo"><img src="icon-512.png" alt="Progresso NH S.A." style="width:100%;height:100%;object-fit:contain;display:block"></div>
     <h1>Progresso NH</h1>
-    <p class="auth-sub">Ingresá para continuar</p>
     <form id="frmLogin">
       <label>Email</label>
       <input type="email" name="email" required autocomplete="username" placeholder="tu@email.com">
@@ -203,7 +202,6 @@
       <button class="btn auth-submit" type="submit">Entrar</button>
     </form>
     <p id="authMsg" class="auth-msg"></p>
-    <p class="auth-sub" style="margin:14px 0 0;">¿No tenés cuenta? Pedile acceso al administrador.</p>
   </div>
 </div>
 
@@ -384,9 +382,6 @@ function goTab(id){
   history.pushState({view:id}, '');
 }
 
-// ============================================================
-// RECEPCION MP  (como la planilla: un camión = una carga, con N parcelas)
-// ============================================================
 let MP_ROWS = [];
 let mpEditId = null;
 let mpHumMax = 8;
@@ -404,7 +399,6 @@ async function renderMP(){
   main.innerHTML = `<div class="card">
     <div class="row-flex" style="align-items:flex-start;">
       <div><h2 id="mpTitle">${ICONS.mp} Recepción de materia prima</h2>
-      <div class="desc">Un camión = una carga. Si viene de varias parcelas, el sistema reparte solo el peso y el descuento, como en la planilla.</div></div>
       <div style="flex:0 0 150px;"><label>Humedad máx. admitida (%)</label><input id="mpHumMax" type="number" step="0.1" value="${mpHumMax}" oninput="mpSetHumMax()"></div>
     </div>
     <form id="frmMP">
@@ -438,10 +432,8 @@ async function renderMP(){
         <div class="field-computed"><label>% Total descuento</label><input id="mpTotal" disabled></div>
         <div><label>Laboratorio</label><select name="laboratorio"><option>Calado</option><option>Sin calar</option></select></div>
       </div>
-      <div class="note">Total descuento = impureza gruesa + fina + descuento calidad + exceso de humedad sobre el máximo (igual que la planilla).</div>
 
       <div class="section-title">Parcelas</div>
-      <div class="desc" style="margin-bottom:8px;">Una sola parcela: dejá 100. Si viene mezclada, agregá las que hagan falta; los % deben sumar 100.</div>
       <div id="parcelaRows"></div>
       <button type="button" class="btn secondary small" onclick="mpAddParcela()">+ Agregar parcela</button>
       <div id="mpPctCheck" class="pct-check"></div>
@@ -464,13 +456,11 @@ async function renderMP(){
 
   <div class="card">
     <h2>Kg ingresados por silo bolsa</h2>
-    <div class="desc">Se suman solos con cada recepción (peso final, ya con descuentos).</div>
     <div id="mpSiloCards" class="silo-cards"><div class="empty">Cargando...</div></div>
   </div>
 
   <div class="card">
     <h2>Planilla de recepciones</h2>
-    <div class="desc">Una fila por camión y parcela, como el Excel.</div>
     <div class="tools">
       <div><label>Buscar</label><input id="mpQ" placeholder="remisión, chofer, proveedor…" oninput="mpRenderList()"></div>
       <div><label>Silo</label><select id="mpFSilo" onchange="mpRenderList()"><option value="">Todos</option></select></div>
@@ -747,14 +737,10 @@ function mpExport(){
   a.click();
 }
 
-// ============================================================
-// SILOS BOLSA
-// ============================================================
 async function renderSilo(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
     <h2>${ICONS.silo} Nuevo silo bolsa</h2>
-    <div class="desc">La categoría/calidad se define acá, no por carga individual.</div>
     <form id="frmSilo">
       <div class="grid">
         <div><label>Número *</label><input name="numero" required></div>
@@ -808,9 +794,6 @@ async function cerrarSilo(id){
   loadSiloList();
 }
 
-// ============================================================
-// LOTES
-// ============================================================
 let LOTE_ROWS = [];
 let loteSel = new Set();
 let loteFiltro = { q:'', silo:'', prov:'', solo:false };
@@ -823,7 +806,6 @@ async function renderLote(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
     <h2>${ICONS.lote} Crear lote</h2>
-    <div class="desc">1) Completá los datos del lote. 2) Elegí las cargas de abajo (podés filtrar por silo, proveedor o buscar). 3) Si de una carga vas a usar solo una parte, cambiá los kg en la columna <b>Usar kg</b>; el resto queda disponible para otro lote. 4) Creá el lote.</div>
     <div class="grid">
       <div><label>Producto *</label><select id="loteProducto">${opt(PRODUCTOS)}</select></div>
       <div><label>Calidad</label><select id="loteCategoria"><option value="">-</option>${opt(CATEGORIAS)}</select></div>
@@ -885,7 +867,6 @@ function ltFiltradas(){
 }
 
 function ltRender(){
-  // chips por silo
   const porSilo = {};
   LOTE_ROWS.forEach(r => { const s = porSilo[r.silo_bolsa_id] = porSilo[r.silo_bolsa_id] || { id:r.silo_bolsa_id, num:ltSiloNum(r), n:0, kg:0, sel:0 }; s.n++; s.kg += ltSaldo(r); if(loteSel.has(r.id)) s.sel++; });
   const silos = Object.values(porSilo).sort((a,b) => String(a.num).localeCompare(String(b.num), 'es', {numeric:true}));
@@ -893,7 +874,6 @@ function ltRender(){
   document.getElementById('ltSilos').innerHTML =
     `<button type="button" class="lt-chip${loteFiltro.silo===''?' on':''}" onclick="ltSilo('')"><b>Todos</b><span>${LOTE_ROWS.length} cargas · ${ltN(totKg)} kg</span></button>` +
     silos.map(s => `<button type="button" class="lt-chip${loteFiltro.silo===s.id?' on':''}" onclick="ltSilo('${s.id}')"><b>${mpEsc(s.num)}</b><span>${s.n} cargas · ${ltN(s.kg)} kg</span>${s.sel?`<i>${s.sel} elegida${s.sel===1?'':'s'}</i>`:''}</button>`).join('');
-  // tabla
   const fs = ltFiltradas();
   const todasSel = fs.length > 0 && fs.every(r => loteSel.has(r.id));
   const el = document.getElementById('ltTabla');
@@ -1020,12 +1000,8 @@ function loteListRender(){
   </tbody></table>`;
 }
 
-// ============================================================
-// CARGA POR BIGBAG
-// ============================================================
 let loteActivoId = null;
 
-// Selector de lote con buscador (escala a muchos lotes)
 function loteSelectorHTML(pref){
   return `<div class="lote-sel">
     <input type="search" id="${pref}Buscar" class="lote-sel-q" placeholder="Buscar lote, código de laboratorio, producto o calidad..." autocomplete="off">
@@ -1058,13 +1034,10 @@ function loteSelectorInit(pref, lotes, onPick, key){
   pick(current);
 }
 
-
-
 async function renderBigbag(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
     <h2>${ICONS.bigbag} Análisis físicos del producto terminado · bigbag</h2>
-    <div class="desc">Registro de los análisis físicos del producto terminado, bigbag por bigbag. <b>Solo registro: acá no se descuenta nada</b> por pureza, humedad ni otros conceptos.</div>
     ${loteSelectorHTML("bb")}
     <div id="bbLoteInfo" style="display:none;margin:10px 0;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);font-size:14px"></div>
     <form id="frmBigbag" style="display:none">
@@ -1148,14 +1121,10 @@ async function loadBigbagList(){
   </tbody><tfoot><tr style="font-weight:700;background:var(--surface-2)"><td colspan="6">PROMEDIO del lote (${data.length} bigbag${data.length===1?'':'s'})</td><td></td><td>${avg('pureza_pct')===null?'-':fa(avg('pureza_pct'),2)+'%'}</td><td>${avg('humedad_grano_pct')===null?'-':fa(avg('humedad_grano_pct'),2)+'%'}</td><td>${fa(avg('temperatura_ambiente_c'),1)}</td><td>${fa(avg('temperatura_grano_c'),1)}</td><td></td><td></td></tr></tfoot></table>`;
 }
 
-// ============================================================
-// CIERRE (turno + lote)
-// ============================================================
 async function renderCierre(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
     <h2>${ICONS.cierre} Actualización diaria (por turno)</h2>
-    <div class="desc">Ajuste con los números reales del turno: kg procesados y mermas.</div>
     ${loteSelectorHTML("cl")}
     <form id="frmTurno" style="display:none">
       <div class="grid">
@@ -1170,7 +1139,6 @@ async function renderCierre(){
   </div>
   <div class="card" id="cierreLoteCard" style="display:none">
     <h2>Cierre final del lote</h2>
-    <div class="desc">Se hace una sola vez, cuando termina de procesarse todo el lote.</div>
     <div class="grid">
       <div><label>Kg ingresado MP (sugerido)</label><input id="cfKgMp" disabled></div>
       <div><label>Kg procesado total *</label><input id="cfKgProc" type="number" step="0.01"></div>
@@ -1250,13 +1218,9 @@ async function cerrarLoteFinal(){
   renderCierre();
 }
 
-// ============================================================
-// RESUMEN
-// ============================================================
 async function renderResumen(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card"><h2>${ICONS.resumen} Resumen de producción</h2>
-  <div class="desc">Vista simple por ahora - se va a ampliar cuando conectemos con COMEX.</div>
   <div id="resumenBody"><div class="empty">Cargando...</div></div></div>`;
 
   const { data, error } = await sb.from('v_resumen_lotes').select('*').order('fecha_creacion',{ascending:false});
@@ -1280,14 +1244,10 @@ async function renderResumen(){
   </tbody></table></div>`;
 }
 
-// ============================================================
-// USUARIOS (solo admin)
-// ============================================================
 async function renderUsuarios(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
     <h2>${ICONS.usuarios} Gestión de usuarios</h2>
-    <div class="desc">Para crear una cuenta nueva: Supabase → Authentication → Users → Add user (email + contraseña). Acá asignás el rol y activás/desactivás el acceso.</div>
     <div id="usuariosList" class="table-wrap"><div class="empty">Cargando...</div></div>
   </div>`;
   loadUsuarios();
@@ -1319,12 +1279,6 @@ async function guardarUsuario(id){
   loadUsuarios();
 }
 
-// ============================================================
-// CAMBIAR CONTRASEÑA (solo usuario logueado, sobre su propia cuenta)
-// - Pide la contraseña actual, o un código enviado por mail si no la recuerda
-// - Mínimo 8 caracteres con letras y números; bloqueo tras 5 intentos fallidos
-// - Al cambiarla, cierra las sesiones abiertas en otros dispositivos
-// ============================================================
 let pwdModo = 'actual';
 let pwdFallos = 0;
 let pwdBloqueoHasta = 0;
