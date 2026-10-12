@@ -471,7 +471,9 @@ function navGo(id){
   if(activeTab === id) return;
   setNavOn(id);
   const tok = ++navTok;
-  requestAnimationFrame(() => requestAnimationFrame(() => { if(tok === navTok) goTab(id); }));
+  const run = () => { if(tok === navTok) goTab(id); };
+  requestAnimationFrame(() => setTimeout(run, 0));
+  setTimeout(run, 90);
 }
 
 function abrirMas(){
