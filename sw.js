@@ -5,7 +5,7 @@
  * Supabase (oulrdijjdrfsmbeezolt.supabase.co) NUNCA se cachean: siempre van a
  * red, para no mostrar datos de stock/produccion desactualizados.
  */
-var CACHE_NAME = 'progresso-pwa-v4';
+var CACHE_NAME = 'progresso-pwa-v5';
 var APP_SHELL = [
   './',
   './index.html',
@@ -54,7 +54,8 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
-  // App shell: cache-first, con actualizacion en segundo plano.
+  // App shell: red primero (siempre la version nueva si hay internet), con
+  // respaldo en cache si no hay red o tarda mas de 2.5 s (campo / señal mala).
   if (req.method === 'GET') {
     event.respondWith(
       caches.match(req).then(function (cached) {
@@ -65,10 +66,27 @@ self.addEventListener('fetch', function (event) {
             caches.open(CACHE_NAME).then(function (cache) { cache.put(req, clone); });
           }
           return res;
-        }).catch(function () {
-          if (req.mode === 'navigate') return caches.match('./index.html');
         });
-        return cached || network;
+        if (!cached) {
+          return network.catch(function () {
+            if (req.mode === 'navigate') return caches.match('./index.html');
+            return Response.error();
+          });
+        }
+        if (!sameOrigin) return cached;
+        return new Promise(function (resolve) {
+          var done = false;
+          var t = setTimeout(function () { if (!done) { done = true; resolve(cached); } }, 2500);
+          network.then(function (res) {
+            if (done) return;
+            done = true; clearTimeout(t);
+            resolve(res && res.status === 200 ? res : cached);
+          }).catch(function () {
+            if (done) return;
+            done = true; clearTimeout(t);
+            resolve(cached);
+          });
+        });
       })
     );
   }
