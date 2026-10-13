@@ -229,6 +229,32 @@
   .anim-u{animation:viewInU .17s ease-out;}
   @media (prefers-reduced-motion:reduce){.anim-r,.anim-l,.anim-u{animation:none;}.sheet,.sheet-bg{transition:none;}}
   .sheet-bg{will-change:opacity;}
+  /* ===== v13: version de escritorio (barra lateral) ===== */
+  .sidebar{display:none;}
+  @media(min-width:960px){
+    body{padding:0;background:var(--surface-1);}
+    .app-shell{max-width:none;width:100%;display:grid;grid-template-columns:250px minmax(0,1fr);grid-template-rows:auto 1fr;overflow:visible;min-height:100vh;border:none;border-radius:0;box-shadow:none;}
+    header.appbar{grid-column:1 / -1;border-radius:0;padding-left:28px;padding-right:28px;}
+    .sidebar{display:block;background:var(--surface-2);border-right:1px solid var(--gridline);}
+    .sidebar-in{position:sticky;top:0;padding:18px 12px 20px;display:flex;flex-direction:column;gap:3px;max-height:100vh;overflow:auto;}
+    .sb-title{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text-muted);padding:2px 14px 8px;}
+    .sb-sep{height:1px;background:var(--gridline);margin:8px 10px;}
+    .sb-item{appearance:none;border:none;background:none;font-family:inherit;display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 14px;border-radius:11px;font-size:14px;font-weight:700;color:var(--text-secondary);cursor:pointer;position:relative;transition:background .12s,color .12s;}
+    .sb-item .icon{width:19px;height:19px;flex:none;}
+    .sb-item:hover{background:rgba(var(--accent-rgb),.09);color:var(--accent-dark);}
+    .sb-item:active{background:rgba(var(--accent-rgb),.16);}
+    .sb-item.on{background:rgba(var(--accent-rgb),.15);color:var(--accent-dark);}
+    .sb-item.on::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(180deg,var(--accent),#f2c93a);}
+    .sb-item:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+    main{max-width:none;margin:0;padding:26px 32px 44px;min-width:0;}
+    .navbar,.sheet,.sheet-bg{display:none !important;}
+    .toast{bottom:24px;}
+    .lt-barra{bottom:12px;}
+    .card{padding:22px;}
+    .vista-menu-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;}
+    .vista-menu-card{padding:34px 16px;}
+    .lt-scroll{max-height:calc(100vh - 300px);min-height:320px;}
+  }
 </style>
 </head>
 <body>
@@ -265,6 +291,8 @@
     </div>
     <div class="appbar-glow"></div>
   </header>
+
+  <aside class="sidebar" id="sidebar" aria-label="Navegación"><div class="sidebar-in" id="sidebarIn"></div></aside>
 
   <main id="mainWrap">
     <button id="volverBtn" class="volver-btn hidden" onclick="history.back()">
@@ -454,9 +482,24 @@ function renderNavbar(){
     nb.innerHTML = NAV_BAR.map(id => `<button type="button" class="navb" data-id="${id}" onclick="navGo('${id}')" aria-label="${lbl[id]}">${ic[id]}<span>${lbl[id]}</span></button>`).join('') +
       `<button type="button" class="navb" data-id="mas" onclick="abrirMas()" aria-label="Más">${ICONS.mas}<span>Más</span></button>`;
   }
+  renderSidebar();
   setNavOn(activeTab || 'home');
 }
+function renderSidebar(){
+  const sb = document.getElementById('sidebarIn');
+  const rol = miRol === 'admin' ? 'a' : 'o';
+  if(sb.dataset.rol !== rol){
+    sb.dataset.rol = rol;
+    const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
+    const item = t => `<button type="button" class="sb-item" data-id="${t.id}" onclick="navGo('${t.id}')">${t.icon}<span>${t.label}</span></button>`;
+    sb.innerHTML = '<div class="sb-title">Menú</div>' + item({id:'home', label:'Inicio', icon:ICONS.home}) + '<div class="sb-sep"></div>' + tabs.map(item).join('');
+  }
+}
 function setNavOn(id){
+  document.querySelectorAll('#sidebarIn .sb-item').forEach(b => {
+    const on = b.dataset.id === id;
+    if(on !== b.classList.contains('on')) b.classList.toggle('on', on);
+  });
   const key = NAV_BAR.includes(id) ? id : 'mas';
   document.querySelectorAll('#navbarIn .navb').forEach(b => {
     const on = b.dataset.id === key;
