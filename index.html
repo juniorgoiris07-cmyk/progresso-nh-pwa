@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Progresso NH - Producción</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#171511">
+<meta name="theme-color" content="#fcfcfb">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -255,6 +255,111 @@
     .vista-menu-card{padding:34px 16px;}
     .lt-scroll{max-height:calc(100vh - 300px);min-height:320px;}
   }
+  /* ===== v16: barra superior minimalista ===== */
+  :root{--hdr-h:54px;}
+  header.appbar{position:sticky;top:0;z-index:55;overflow:visible;height:calc(var(--hdr-h) + env(safe-area-inset-top));padding:env(safe-area-inset-top) 14px 0;background:var(--surface-1);color:var(--text-primary);border-bottom:1px solid var(--gridline);transition:box-shadow .2s;}
+  header.appbar.scrolled{box-shadow:0 6px 18px rgba(20,18,10,.07);}
+  header.appbar::before,header.appbar::after,.appbar-glow,.appbar-icon{display:none;}
+  .appbar-top{height:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .appbar-title{gap:10px;}
+  .brandmark{width:32px;height:32px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f6d34c,#d9a915);color:#1a1405;font-weight:900;font-size:13px;letter-spacing:-.02em;box-shadow:0 1px 3px rgba(120,90,0,.35);}
+  header.appbar h1{font-size:17px;font-weight:800;letter-spacing:-.02em;color:var(--text-primary);margin:0;line-height:1.15;}
+  .appbar-tag{display:block;margin:1px 0 0;padding:0;background:none;border:none;border-radius:0;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);}
+  header.appbar.is-tab .appbar-tag{display:none;}
+  #usuarioChip,.appbar-actions{display:none !important;}
+  .usermenu{position:relative;flex:none;}
+  .avatar-btn{appearance:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--gridline);background:rgba(var(--accent-rgb),.10);color:var(--accent-dark);font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s,background .15s,border-color .15s;}
+  .avatar-btn:hover{border-color:var(--accent);background:rgba(var(--accent-rgb),.16);}
+  .avatar-btn:active{transform:scale(.94);}
+  .userpop{position:absolute;right:0;top:calc(100% + 8px);min-width:230px;background:var(--card);border:1px solid var(--gridline);border-radius:14px;box-shadow:var(--shadow-md);padding:6px;z-index:90;transform-origin:top right;animation:popIn .14s ease-out;}
+  @keyframes popIn{from{opacity:0;transform:scale(.96) translateY(-4px);}to{opacity:1;transform:none;}}
+  .up-head{padding:10px 12px 9px;border-bottom:1px solid var(--gridline);margin-bottom:4px;}
+  .up-name{font-weight:800;font-size:14px;text-transform:capitalize;}
+  .up-rol{font-size:11.5px;color:var(--text-muted);margin-top:1px;}
+  .up-item{appearance:none;width:100%;display:flex;align-items:center;gap:10px;background:none;border:none;font-family:inherit;font-weight:700;font-size:13.5px;color:var(--text-primary);padding:11px 12px;border-radius:9px;cursor:pointer;text-align:left;}
+  .up-item:hover,.up-item:active{background:rgba(var(--accent-rgb),.10);}
+  .up-item.danger{color:var(--danger);}
+  .up-item.danger:hover,.up-item.danger:active{background:var(--danger-bg);}
+  .up-item svg{width:17px;height:17px;flex:none;}
+  .sb-brand{display:none;}
+  @media(min-width:960px){
+    :root{--hdr-h:64px;}
+    header.appbar{grid-column:2;grid-row:1;padding-left:32px;padding-right:32px;}
+    .sidebar{grid-column:1;grid-row:1 / span 2;}
+    main{grid-column:2;grid-row:2;}
+    header.appbar .brandmark{display:none;}
+    header.appbar h1{font-size:20px;}
+    .sidebar-in{top:0;max-height:100vh;padding-top:18px;}
+    .sb-brand{display:flex;align-items:center;gap:11px;height:var(--hdr-h);margin:-18px -12px 12px;padding:0 26px;border-bottom:1px solid var(--gridline);}
+    .sb-bn{font-size:16px;font-weight:800;letter-spacing:-.02em;line-height:1.15;}
+    .sb-bt{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-top:1px;}
+  }
+  /* ===== v18: logo real ===== */
+  img.brandmark{width:36px;height:auto;border-radius:0;background:none;box-shadow:none;object-fit:contain;display:block;}
+  /* ===== v17: estilo ERP (barra blanca, buscador, menu lateral colapsable) ===== */
+  header.appbar{background:#fff;}
+  .avatar-btn{width:38px;height:38px;border:none;background:linear-gradient(135deg,#8a6d00,#5c4400);color:#fff;font-size:13px;letter-spacing:.02em;box-shadow:0 1px 4px rgba(60,45,0,.35);}
+  .avatar-btn:hover{background:linear-gradient(135deg,#9a7b05,#6a4f00);border:none;}
+  .gsearch{display:none;}
+  .sb-toggle{display:none;}
+  @media(min-width:960px){
+    body{background:var(--surface-2);}
+    .app-shell{--sbw:76px;background:var(--surface-2);grid-template-columns:var(--sbw) minmax(0,1fr);transition:grid-template-columns .2s ease;}
+    .app-shell.sb-open{--sbw:244px;}
+    header.appbar .appbar-title{display:none;}
+    header.appbar{padding-left:28px;padding-right:28px;}
+    /* buscador */
+    .gsearch{display:flex;align-items:center;gap:9px;position:relative;width:min(360px,46vw);height:38px;padding:0 12px;border:1px solid var(--gridline);border-radius:19px;background:#fff;color:var(--text-muted);transition:border-color .15s,box-shadow .15s;}
+    .gsearch:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.12);}
+    .gsearch > svg{width:16px;height:16px;flex:none;}
+    .gsearch input{border:none;background:none;box-shadow:none;padding:0;height:100%;font-size:13.5px;font-weight:600;color:var(--text-primary);outline:none;min-width:0;flex:1;}
+    .gsearch input:focus{box-shadow:none;border:none;}
+    .gsearch kbd{font-family:inherit;font-size:10.5px;font-weight:700;color:var(--text-muted);border:1px solid var(--gridline);border-radius:5px;padding:1px 5px;background:var(--surface-2);}
+    .gsearch:focus-within kbd{display:none;}
+    .gs-list{position:absolute;left:0;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--gridline);border-radius:14px;box-shadow:var(--shadow-md);padding:6px;z-index:95;max-height:340px;overflow:auto;}
+    .gs-item{appearance:none;width:100%;display:flex;align-items:center;gap:11px;background:none;border:none;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--text-primary);padding:10px 11px;border-radius:9px;cursor:pointer;text-align:left;}
+    .gs-item .icon{width:18px;height:18px;color:var(--accent-dark);}
+    .gs-item.sel,.gs-item:hover{background:rgba(var(--accent-rgb),.11);}
+    .gs-empty{padding:12px;font-size:13px;color:var(--text-muted);}
+    /* menu lateral colapsable */
+    .sidebar{background:#fff;position:relative;z-index:56;}
+    .sidebar-in{align-items:stretch;}
+    .sb-toggle{display:flex;position:absolute;right:-12px;top:calc(var(--hdr-h) - 12px);z-index:6;width:24px;height:24px;border-radius:50%;border:1px solid var(--gridline);background:#fff;color:var(--text-secondary);align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 1px 4px rgba(20,18,10,.12);transition:transform .2s,border-color .15s,color .15s;}
+    .sb-toggle:hover{border-color:var(--accent);color:var(--accent-dark);}
+    .sb-toggle svg{width:12px;height:12px;}
+    .app-shell.sb-open .sb-toggle{transform:rotate(180deg);}
+    .sb-title,.sb-bn,.sb-bt,.sb-item span{display:none;}
+    .app-shell.sb-open .sb-title,.app-shell.sb-open .sb-bn,.app-shell.sb-open .sb-bt{display:block;}
+    .app-shell.sb-open .sb-item span{display:inline;}
+    .sb-brand{padding:0;justify-content:center;gap:11px;}
+    .sb-brand img.brandmark{width:42px;}
+    .app-shell.sb-open .sb-brand{justify-content:flex-start;padding:0 26px;}
+    .sb-item{justify-content:center;width:50px;height:46px;padding:0;margin:0 auto;}
+    .app-shell.sb-open .sb-item{justify-content:flex-start;width:100%;height:auto;padding:11px 14px;margin:0;}
+    .sb-item .icon{width:21px;height:21px;}
+    .app-shell.sb-open .sb-item .icon{width:19px;height:19px;}
+    .sb-sep{margin:8px 14px;}
+    .sidebar-in{padding-left:8px;padding-right:8px;}
+    .sb-brand{margin-left:-8px;margin-right:-8px;}
+    /* tarjetas de inicio */
+    .vista-menu-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;}
+    .vista-menu-card{padding:40px 16px 32px;border-radius:12px;box-shadow:none;gap:16px;}
+    .vista-menu-card .vmc-icon{width:auto;height:auto;background:none;border-radius:0;color:var(--accent-dark);}
+    .vista-menu-card .vmc-icon svg{width:44px;height:44px;stroke-width:1.5;}
+    .vista-menu-card .vmc-label{font-size:14px;font-weight:600;color:var(--text-secondary);}
+    .vista-menu-card:hover{box-shadow:0 8px 24px rgba(20,18,10,.08);transform:none;}
+    .vista-menu-card:hover .vmc-label{color:var(--accent-dark);}
+  }
+  /* ===== v19: logo completo sin recortar ===== */
+  img.brandmark{width:auto;height:44px;max-width:none;}
+  header.appbar:not(.is-tab) h1,header.appbar:not(.is-tab) .appbar-tag{display:none;}
+  @media(min-width:960px){
+    :root{--hdr-h:64px;}
+    .sb-brand img.brandmark{height:42px;width:auto;}
+    .sb-brand{gap:0;}
+    .app-shell:not(.sb-open) .sb-brand img.brandmark{height:auto;width:60px;}
+    .app-shell.sb-open .sb-brand{justify-content:center;padding:0;}
+  }
 </style>
 </head>
 <body>
@@ -275,12 +380,12 @@
 </div>
 
 <div class="app-shell hidden" id="appShell">
-  <header class="appbar">
+  <header class="appbar" id="appbar">
     <div class="appbar-top">
       <div class="appbar-title">
-        <span class="appbar-icon"><img src="icon-192.png" alt="Progresso NH S.A." style="width:100%;height:100%;object-fit:contain;display:block"></span>
+        <img class="brandmark" src="data:image/png;base64,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" alt="Progresso NH S.A." width="320" height="157">
         <div>
-          <h1>Progresso NH</h1>
+          <h1 id="abTitle">Progresso NH</h1>
           <span class="appbar-tag">Producción</span>
         </div>
       </div>
@@ -288,11 +393,24 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         <span id="usuarioChipText">Cargando...</span>
       </button>
+      <div class="gsearch" id="gsearch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="gsInput" type="text" placeholder="Buscar módulo" autocomplete="off" spellcheck="false" aria-label="Buscar módulo">
+        <kbd>Ctrl K</kbd>
+        <div class="gs-list hidden" id="gsList" role="listbox"></div>
+      </div>
+      <div class="usermenu" id="usermenu">
+        <button type="button" class="avatar-btn" id="userMenuBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Menú de usuario" onclick="toggleUserMenu(event)"><span id="avTxt">?</span></button>
+        <div class="userpop hidden" id="userPop" role="menu">
+          <div class="up-head"><div class="up-name" id="upName">Usuario</div><div class="up-rol" id="upRol"></div></div>
+          <button type="button" class="up-item" role="menuitem" onclick="cerrarUserMenu();abrirCambioPass()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3L21 2M16 7l3 3M14 9l2 2"/></svg>Cambiar contraseña</button>
+          <button type="button" class="up-item danger" role="menuitem" onclick="cerrarUserMenu();cerrarSesion()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>Cerrar sesión</button>
+        </div>
+      </div>
     </div>
-    <div class="appbar-glow"></div>
   </header>
 
-  <aside class="sidebar" id="sidebar" aria-label="Navegación"><div class="sidebar-in" id="sidebarIn"></div></aside>
+  <aside class="sidebar" id="sidebar" aria-label="Navegación"><button type="button" class="sb-toggle" id="sbToggle" onclick="toggleSidebar()" aria-label="Expandir o contraer menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button><div class="sidebar-in" id="sidebarIn"></div></aside>
 
   <main id="mainWrap">
     <button id="volverBtn" class="volver-btn hidden" onclick="history.back()">
@@ -344,6 +462,7 @@ function showAuthScreen(){
   document.getElementById('authScreen').classList.remove('hidden');
   document.getElementById('appShell').classList.add('hidden');
   document.getElementById('navbar').classList.add('hidden');
+  cerrarUserMenu();
   if(typeof sheetOpen !== 'undefined' && sheetOpen) cerrarMas(true);
   usuario = null;
   currentUser = null;
@@ -368,6 +487,9 @@ async function onLogin(session){
   miRol = perfil ? perfil.rol : 'operario';
   usuario = nombre || (session.user.email ? session.user.email.split('@')[0] : 'Usuario');
   document.getElementById('usuarioChipText').textContent = usuario;
+  document.getElementById('avTxt').textContent = iniciales(usuario);
+  document.getElementById('upName').textContent = usuario;
+  document.getElementById('upRol').textContent = miRol === 'admin' ? 'Administrador' : 'Operario';
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('appShell').classList.remove('hidden');
   renderHomeMenu();
@@ -491,11 +613,85 @@ function renderSidebar(){
   if(sb.dataset.rol !== rol){
     sb.dataset.rol = rol;
     const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
-    const item = t => `<button type="button" class="sb-item" data-id="${t.id}" onclick="navGo('${t.id}')">${t.icon}<span>${t.label}</span></button>`;
-    sb.innerHTML = '<div class="sb-title">Menú</div>' + item({id:'home', label:'Inicio', icon:ICONS.home}) + '<div class="sb-sep"></div>' + tabs.map(item).join('');
+    const item = t => `<button type="button" class="sb-item" data-id="${t.id}" title="${t.label}" onclick="navGo('${t.id}')">${t.icon}<span>${t.label}</span></button>`;
+    sb.innerHTML = '<div class="sb-brand"><img class="brandmark" src="'+LOGO_SRC+'" alt="Progresso NH S.A." width="320" height="157"></div><div class="sb-title">Menú</div>' + item({id:'home', label:'Inicio', icon:ICONS.home}) + '<div class="sb-sep"></div>' + tabs.map(item).join('');
   }
 }
+function iniciales(n){
+  const p = String(n || '').trim().split(/\s+/).filter(Boolean);
+  if(!p.length) return '?';
+  return (p.length > 1 ? p[0].charAt(0) + p[1].charAt(0) : p[0].slice(0,2)).toUpperCase();
+}
+function toggleSidebar(){
+  const sh = document.getElementById('appShell');
+  const open = sh.classList.toggle('sb-open');
+  try{ localStorage.setItem('nh_sb_open', open ? '1' : '0'); }catch(e){}
+}
+try{ if(localStorage.getItem('nh_sb_open') === '1') document.getElementById('appShell').classList.add('sb-open'); }catch(e){}
+
+const gsNorm = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+let gsSel = 0, gsItemsCur = [];
+function gsCompute(){
+  const all = [{id:'home', label:'Inicio', icon:ICONS.home}, ...(miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS)];
+  const q = gsNorm(document.getElementById('gsInput').value.trim());
+  gsItemsCur = all.filter(t => gsNorm(t.label).includes(q));
+}
+function gsRender(){
+  gsCompute();
+  if(gsSel >= gsItemsCur.length) gsSel = 0;
+  const l = document.getElementById('gsList');
+  l.innerHTML = gsItemsCur.length ? gsItemsCur.map((t,i) => `<button type="button" class="gs-item ${i===gsSel?'sel':''}" role="option" onmousedown="event.preventDefault();gsGo('${t.id}')">${t.icon}<span>${t.label}</span></button>`).join('') : '<div class="gs-empty">Sin resultados</div>';
+  l.classList.remove('hidden');
+}
+function gsClose(){ document.getElementById('gsList').classList.add('hidden'); }
+function gsGo(id){
+  const i = document.getElementById('gsInput'); i.value = ''; i.blur(); gsClose();
+  navGo(id);
+}
+(function(){
+  const i = document.getElementById('gsInput'); if(!i) return;
+  i.addEventListener('focus', () => { gsSel = 0; gsRender(); });
+  i.addEventListener('input', () => { gsSel = 0; gsRender(); });
+  i.addEventListener('blur', () => setTimeout(gsClose, 120));
+  i.addEventListener('keydown', e => {
+    if(e.key === 'ArrowDown'){ e.preventDefault(); gsSel = Math.min(gsSel + 1, Math.max(gsItemsCur.length - 1, 0)); gsRender(); }
+    else if(e.key === 'ArrowUp'){ e.preventDefault(); gsSel = Math.max(gsSel - 1, 0); gsRender(); }
+    else if(e.key === 'Enter'){ e.preventDefault(); if(gsItemsCur[gsSel]) gsGo(gsItemsCur[gsSel].id); }
+    else if(e.key === 'Escape'){ i.value = ''; i.blur(); gsClose(); }
+  });
+  document.addEventListener('keydown', e => {
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && mqDesk.matches){ e.preventDefault(); i.focus(); i.select(); }
+  });
+})();
+function cerrarUserMenu(){
+  const p = document.getElementById('userPop'); if(!p || p.classList.contains('hidden')) return;
+  p.classList.add('hidden');
+  document.getElementById('userMenuBtn').setAttribute('aria-expanded','false');
+}
+function toggleUserMenu(e){
+  if(e) e.stopPropagation();
+  const p = document.getElementById('userPop');
+  const abrir = p.classList.contains('hidden');
+  if(abrir){ p.classList.remove('hidden'); document.getElementById('userMenuBtn').setAttribute('aria-expanded','true'); vibrar(8); }
+  else cerrarUserMenu();
+}
+document.addEventListener('click', e => { const m = document.getElementById('usermenu'); if(m && !m.contains(e.target)) cerrarUserMenu(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarUserMenu(); });
+window.addEventListener('scroll', () => { const h = document.getElementById('appbar'); if(h) h.classList.toggle('scrolled', window.scrollY > 4); }, {passive:true});
+const mqDesk = window.matchMedia('(min-width:960px)');
+const LOGO_SRC = document.querySelector('#appbar img.brandmark').src;
+function setAppbarTitle(id){
+  const h1 = document.getElementById('abTitle'); if(!h1) return;
+  const all = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
+  const f = id ? all.find(x => x.id === id) : null;
+  const txt = f ? f.label : (mqDesk.matches ? 'Inicio' : 'Progresso NH');
+  if(h1.textContent !== txt) h1.textContent = txt;
+  document.getElementById('appbar').classList.toggle('is-tab', !!f);
+}
+if(mqDesk.addEventListener) mqDesk.addEventListener('change', () => setAppbarTitle(activeTab));
 function setNavOn(id){
+  setAppbarTitle(id === 'home' ? null : id);
+  cerrarUserMenu();
   document.querySelectorAll('#sidebarIn .sb-item').forEach(b => {
     const on = b.dataset.id === id;
     if(on !== b.classList.contains('on')) b.classList.toggle('on', on);
