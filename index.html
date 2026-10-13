@@ -814,6 +814,7 @@ try { const hv = parseFloat(localStorage.getItem('mp_hum_max')); if(!isNaN(hv)) 
 const mpN = v => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
 const mpFk = (v,d) => Number(v||0).toLocaleString('es-PY',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});
 const mpFd = s => { if(!s) return '-'; const p = String(s).slice(0,10).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; };
+const hoyLocal = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
 const mpEsc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mpDescHum = h => (h === '' || h === null || h === undefined) ? 0 : Math.max(0, mpN(h) - mpHumMax);
 let mpParcelaCount = 0;
@@ -896,7 +897,7 @@ async function renderMP(){
   </div>`;
 
   const f = document.getElementById('frmMP');
-  f.fecha.value = new Date().toISOString().slice(0,10);
+  f.fecha.value = hoyLocal();
   f.addEventListener('submit', mpSubmit);
 
   const { data: silos } = await sb.from('silos_bolsa').select('*').eq('estado','ABIERTO').order('creado_en',{ascending:false});
@@ -978,7 +979,7 @@ function mpResetForm(keep){
   const f = document.getElementById('frmMP');
   const k = keep ? {fecha:f.fecha.value, proveedor:f.proveedor.value, tipo_cosecha:f.tipo_cosecha.value, destino:f.destino.value, silo_bolsa_id:f.silo_bolsa_id.value, patio_destino:f.patio_destino.value, laboratorio:f.laboratorio.value} : null;
   f.reset();
-  f.fecha.value = new Date().toISOString().slice(0,10);
+  f.fecha.value = hoyLocal();
   mpFillSilos(window.mpSilosAbiertos || [], null);
   if(k) Object.keys(k).forEach(x => { f[x].value = k[x]; });
   document.getElementById('parcelaRows').innerHTML = '';
@@ -1202,7 +1203,7 @@ async function loadSiloList(){
   if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay silos bolsa.</div>'; return; }
   el.innerHTML = `<table><thead><tr><th>ID</th><th>Nº</th><th>Producto</th><th>Categoría</th><th>Patio</th><th>Estado</th><th></th></tr></thead><tbody>
-    ${data.map(s => `<tr><td>${s.id}</td><td>${s.numero}</td><td>${s.producto}</td><td><select onchange="setSiloCategoria('${s.id}', this.value)" style="min-width:150px"><option value=""${s.categoria?'':' selected'}>Pendiente (lab)</option>${CATEGORIAS.map(c => `<option${s.categoria===c?' selected':''}>${c}</option>`).join('')}</select></td><td>${s.patio||'-'}</td><td><span class="badge ${s.estado==='ABIERTO'?'ok':'off'}">${s.estado}</span></td>
+    ${data.map(s => `<tr><td>${mpEsc(s.id)}</td><td>${mpEsc(s.numero)}</td><td>${mpEsc(s.producto)}</td><td><select onchange="setSiloCategoria('${s.id}', this.value)" style="min-width:150px"><option value=""${s.categoria?'':' selected'}>Pendiente (lab)</option>${CATEGORIAS.map(c => `<option${s.categoria===c?' selected':''}>${c}</option>`).join('')}</select></td><td>${mpEsc(s.patio||'-')}</td><td><span class="badge ${s.estado==='ABIERTO'?'ok':'off'}">${mpEsc(s.estado)}</span></td>
     <td>${s.estado==='ABIERTO' ? `<button class="btn secondary small" onclick="cerrarSilo('${s.id}')">Cerrar</button>` : ''}</td></tr>`).join('')}
   </tbody></table>`;
 }
@@ -1422,7 +1423,7 @@ function loteListRender(){
   const list = LOTE_LIST.filter(l => { const h = norm([l.id, l.codigo_lab, l.producto, l.categoria, l.responsable, l.estado].join(' ')); return t.every(w => h.includes(w)); });
   if(!list.length){ el.innerHTML = '<div class="empty">Ningún lote coincide.</div>'; return; }
   el.innerHTML = `<table><thead><tr><th>Lote</th><th>Cód. laboratorio</th><th>Producto</th><th>Calidad</th><th class="num">Cargas</th><th class="num">Kg MP</th><th class="num">Bigbags</th><th>Creado</th><th>Estado</th></tr></thead><tbody>
-    ${list.map(l => `<tr><td><b>${l.id}</b></td><td>${mpEsc(l.codigo_lab||'-')}</td><td>${l.producto}</td><td>${l.categoria||'-'}</td><td class="num">${l._r.cantidad_cargas_mp ?? '-'}</td><td class="num">${l._r.kg_mp_asignado != null ? ltN(l._r.kg_mp_asignado) : '-'}</td><td class="num">${l._r.cantidad_bigbags ?? '-'}</td><td>${fmtDate(l.fecha_creacion)}</td><td><span class="badge ${l.estado==='EN_PROCESO'?'warn':'ok'}">${l.estado}</span></td></tr>`).join('')}
+    ${list.map(l => `<tr><td><b>${mpEsc(l.id)}</b></td><td>${mpEsc(l.codigo_lab||'-')}</td><td>${mpEsc(l.producto)}</td><td>${mpEsc(l.categoria||'-')}</td><td class="num">${l._r.cantidad_cargas_mp ?? '-'}</td><td class="num">${l._r.kg_mp_asignado != null ? ltN(l._r.kg_mp_asignado) : '-'}</td><td class="num">${l._r.cantidad_bigbags ?? '-'}</td><td>${fmtDate(l.fecha_creacion)}</td><td><span class="badge ${l.estado==='EN_PROCESO'?'warn':'ok'}">${l.estado}</span></td></tr>`).join('')}
   </tbody></table>`;
 }
 
@@ -1437,14 +1438,14 @@ function loteSelectorHTML(pref){
 }
 function loteSelectorInit(pref, lotes, onPick, key){
   const q = document.getElementById(pref+'Buscar'), sel = document.getElementById(pref+'Sel'), cnt = document.getElementById(pref+'Cnt');
-  const label = l => `${l.id}${l.codigo_lab ? ' · ' + l.codigo_lab : ''} · ${l.producto}${l.categoria ? ' · ' + l.categoria : ''}`;
+  const label = l => `${mpEsc(l.id)}${l.codigo_lab ? ' · ' + mpEsc(l.codigo_lab) : ''} · ${mpEsc(l.producto)}${l.categoria ? ' · ' + mpEsc(l.categoria) : ''}`;
   const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   let last = null; try { last = localStorage.getItem(key); } catch(e){}
   let current = (last && lotes.some(l => l.id === last)) ? last : lotes[0].id;
   function fill(){
     const t = norm(q.value).trim().split(/\s+/).filter(Boolean);
     const list = lotes.filter(l => { const h = norm(label(l)); return t.every(w => h.includes(w)); });
-    sel.innerHTML = list.map(l => `<option value="${l.id}">${label(l)}</option>`).join('') || '<option value="">Ningún lote coincide</option>';
+    sel.innerHTML = list.map(l => `<option value="${mpEsc(l.id)}">${label(l)}</option>`).join('') || '<option value="">Ningún lote coincide</option>';
     cnt.textContent = t.length ? `${list.length} de ${lotes.length} lotes en proceso` : `${lotes.length} lote${lotes.length===1?'':'s'} en proceso`;
     if(list.some(l => l.id === current)) sel.value = current;
     else if(list.length){ sel.value = list[0].id; pick(list[0].id); }
@@ -1501,7 +1502,7 @@ function elegirLote(id){
   const info = document.getElementById('bbLoteInfo');
   if(info){
     info.style.display = 'block';
-    info.innerHTML = `<b>Lote:</b> ${id}${l.codigo_lab ? ' (' + l.codigo_lab + ')' : ''} &nbsp;·&nbsp; <b>Producto:</b> ${l.producto||'-'} &nbsp;·&nbsp; <b>Calidad:</b> ${l.categoria||'-'}`;
+    info.innerHTML = `<b>Lote:</b> ${mpEsc(id)}${l.codigo_lab ? ' (' + mpEsc(l.codigo_lab) + ')' : ''} &nbsp;·&nbsp; <b>Producto:</b> ${mpEsc(l.producto||'-')} &nbsp;·&nbsp; <b>Calidad:</b> ${mpEsc(l.categoria||'-')}`;
   }
   const f = document.getElementById('frmBigbag');
   f.style.display = 'block';
@@ -1543,7 +1544,7 @@ async function loadBigbagList(){
   const avg = k => { const v = data.map(b => b[k]).filter(x => x!==null && x!==undefined && x!=='').map(Number); return v.length ? v.reduce((a,x)=>a+x,0)/v.length : null; };
   const fa = (v,d) => v===null ? '-' : v.toFixed(d).replace('.',',');
   el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Hora</th><th>Turno</th><th>Producto</th><th>Lote</th><th>Calidad</th><th>Nº Bigbag</th><th>Pureza</th><th>Hum. grano</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th></tr></thead><tbody>
-    ${data.map(b => `<tr><td>${fmtDate(b.fecha)}</td><td>${hh(b.hora)}</td><td>${b.turno}</td><td>${l.producto||'-'}</td><td>${b.lote_id}</td><td>${l.categoria||'-'}</td><td>${b.nro_bigbag}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${b.encargado||'-'}</td><td>${b.observaciones||''}</td></tr>`).join('')}
+    ${data.map(b => `<tr><td>${fmtDate(b.fecha)}</td><td>${hh(b.hora)}</td><td>${mpEsc(b.turno)}</td><td>${mpEsc(l.producto||'-')}</td><td>${mpEsc(b.lote_id)}</td><td>${mpEsc(l.categoria||'-')}</td><td>${mpEsc(b.nro_bigbag)}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado||'-')}</td><td>${mpEsc(b.observaciones||'')}</td></tr>`).join('')}
   </tbody><tfoot><tr style="font-weight:700;background:var(--surface-2)"><td colspan="6">PROMEDIO del lote (${data.length} bigbag${data.length===1?'':'s'})</td><td></td><td>${avg('pureza_pct')===null?'-':fa(avg('pureza_pct'),2)+'%'}</td><td>${avg('humedad_grano_pct')===null?'-':fa(avg('humedad_grano_pct'),2)+'%'}</td><td>${fa(avg('temperatura_ambiente_c'),1)}</td><td>${fa(avg('temperatura_grano_c'),1)}</td><td></td><td></td></tr></tfoot></table>`;
 }
 
@@ -1589,7 +1590,7 @@ async function renderCierre(){
 async function elegirLoteCierre(id){
   loteActivoId = id;
   document.getElementById('frmTurno').style.display = 'block';
-  document.getElementById('frmTurno').fecha.value = new Date().toISOString().slice(0,10);
+  document.getElementById('frmTurno').fecha.value = hoyLocal();
 
   document.getElementById('cierreLoteCard').style.display = 'block';
   const { data: sumRow } = await sb.from('v_resumen_lotes').select('*').eq('lote_id', id).single();
@@ -1618,7 +1619,7 @@ async function loadTurnoList(){
   if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay ajustes cargados para este lote.</div>'; return; }
   el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Turno</th><th>Kg reales</th><th>Mermas</th><th>Ajustó</th></tr></thead><tbody>
-    ${data.map(t => `<tr><td>${fmtDate(t.fecha)}</td><td>${t.turno}</td><td>${fmtKg(t.kg_reales_procesados)}</td><td>${fmtKg(t.mermas_kg)}</td><td>${t.ajustado_por||'-'}</td></tr>`).join('')}
+    ${data.map(t => `<tr><td>${fmtDate(t.fecha)}</td><td>${mpEsc(t.turno)}</td><td>${fmtKg(t.kg_reales_procesados)}</td><td>${fmtKg(t.mermas_kg)}</td><td>${mpEsc(t.ajustado_por||'-')}</td></tr>`).join('')}
   </tbody></table>`;
 }
 
@@ -1666,7 +1667,7 @@ async function renderResumen(){
     <div class="stat"><div class="n">${fmtKg(totalProc)}</div><div class="l">Procesado</div></div>
   </div>
   <div class="table-wrap"><table><thead><tr><th>Lote</th><th>Cód. lab.</th><th>Producto</th><th>Estado</th><th>Cargas MP</th><th>Kg MP</th><th>Bigbags</th><th>Rendimiento</th></tr></thead><tbody>
-    ${data.map(r => `<tr><td>${r.lote_id}</td><td>${mpEsc(labDe[r.lote_id]||'-')}</td><td>${r.producto}</td><td><span class="badge ${r.estado==='EN_PROCESO'?'warn':'ok'}">${r.estado}</span></td><td>${r.cantidad_cargas_mp}</td><td>${fmtKg(r.kg_mp_asignado)}</td><td>${r.cantidad_bigbags}</td><td>${fmtPct(r.rendimiento_pct)}</td></tr>`).join('')}
+    ${data.map(r => `<tr><td>${mpEsc(r.lote_id)}</td><td>${mpEsc(labDe[r.lote_id]||'-')}</td><td>${mpEsc(r.producto)}</td><td><span class="badge ${r.estado==='EN_PROCESO'?'warn':'ok'}">${r.estado}</span></td><td>${r.cantidad_cargas_mp}</td><td>${fmtKg(r.kg_mp_asignado)}</td><td>${r.cantidad_bigbags}</td><td>${fmtPct(r.rendimiento_pct)}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
 
@@ -1686,8 +1687,8 @@ async function loadUsuarios(){
   if(!data || !data.length){ el.innerHTML = '<div class="empty">No hay usuarios todavía.</div>'; return; }
   el.innerHTML = `<table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th><th></th></tr></thead><tbody>
     ${data.map(u => `<tr>
-      <td>${u.nombre||'-'}</td>
-      <td>${u.email||'-'}</td>
+      <td>${mpEsc(u.nombre||'-')}</td>
+      <td>${mpEsc(u.email||'-')}</td>
       <td><select id="rol-${u.id}" style="width:auto;margin:0;"><option value="operario" ${u.rol==='operario'?'selected':''}>Operario</option><option value="admin" ${u.rol==='admin'?'selected':''}>Admin</option></select></td>
       <td><input type="checkbox" id="activo-${u.id}" style="width:auto;margin:0;" ${u.activo?'checked':''}></td>
       <td><button class="btn small" onclick="guardarUsuario('${u.id}')">Guardar</button></td>
