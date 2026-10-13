@@ -578,6 +578,18 @@ sb.auth.onAuthStateChange((event, session) => {
   if(session){ onLogin(session); } else { showAuthScreen(); }
 });
 
+const _busy = {};
+async function _once(clave, fn, e){
+  if(_busy[clave]) return;
+  _busy[clave] = true;
+  const btn = e && e.target && e.target.querySelector ? e.target.querySelector('button[type=submit]') : null;
+  if(btn) btn.disabled = true;
+  try{ return await fn(e); }
+  finally{ _busy[clave] = false; if(btn) btn.disabled = false; }
+}
+const _normTxt = x => String(x==null?'':x).trim().replace(/\s+/g,' ').toLowerCase();
+const _esDup = err => !!err && (err.code === '23505' || /duplicate key|unique constraint/i.test(err.message||''));
+
 function toast(msg, type){
   let box = document.getElementById('toasts');
   if(!box){
@@ -1200,10 +1212,14 @@ async function renderSilo(){
   loadSiloList();
 }
 
-async function submitSilo(e){
-  e.preventDefault();
+async function submitSilo(e){ e.preventDefault(); return _once('silo', _submitSilo, e); }
+async function _submitSilo(e){
   const payload = Object.fromEntries(new FormData(e.target).entries());
+  payload.numero = String(payload.numero||'').trim();
   payload.creado_por = usuario || null;
+  const ex = await sb.from('silos_bolsa').select('id,numero');
+  const igual = ((ex && ex.data) || []).find(x => _normTxt(x.numero) === _normTxt(payload.numero));
+  if(igual){ toast('Ya existe el silo ' + igual.numero + ' (' + igual.id + ')', 'err'); return; }
   const { data, error } = await sb.from('silos_bolsa').insert(payload).select().single();
   if(error){ toast('Error: ' + error.message, 'err'); return; }
   toast('Silo ' + data.id + ' creado', 'ok');
@@ -1385,7 +1401,8 @@ function ltFila(ev, id){
   const sc2 = document.getElementById('ltTabla'); if(sc2) sc2.scrollTop = top;
 }
 
-async function crearLote(){
+async function crearLote(){ return _once('crearLote', _crearLote); }
+async function _crearLote(){
   const seleccionadas = LOTE_ROWS.filter(r => loteSel.has(r.id));
   if(!seleccionadas.length){ toast('Elegí al menos una carga', 'err'); return; }
   const producto = document.getElementById('loteProducto').value;
@@ -1395,6 +1412,11 @@ async function crearLote(){
   const uso = seleccionadas.map(r => ({ r, kg: Math.min(Math.round((Number(ltUsar(r))||0)*100)/100, ltSaldo(r)) }));
   const mala = uso.find(u => !(u.kg > 0));
   if(mala){ toast('Revisá los kg a usar de la remisión ' + mala.r.nro_boleta, 'err'); return; }
+  if(codigo_lab){
+    const exl = await sb.from('lotes').select('id,codigo_lab');
+    const igual = ((exl && exl.data) || []).find(x => x.codigo_lab && _normTxt(x.codigo_lab) === _normTxt(codigo_lab));
+    if(igual){ toast('Ya existe el lote ' + igual.id + ' con el código ' + igual.codigo_lab, 'err'); return; }
+  }
   const kg = uso.reduce((a,u) => a + u.kg, 0);
   const parciales = uso.filter(u => u.kg < ltSaldo(u.r) - 0.5).length;
   if(!confirm('¿Crear un lote de ' + producto + (categoria ? ' (' + categoria + ')' : '') + (codigo_lab ? ' · ' + codigo_lab : '') + ' con ' + seleccionadas.length + ' carga(s) y ' + ltN(kg) + ' kg líquidos' + (parciales ? ' (' + parciales + ' con uso parcial)' : '') + '?')) return;
@@ -1411,7 +1433,7 @@ async function crearLote(){
     return fila;
   });
   const { error: e2 } = await sb.from('lote_recepcion').insert(rows);
-  if(e2){ toast('Lote creado pero error asignando cargas: ' + e2.message, 'err'); return; }
+  if(e2){ toast('Lote creado pero error asignando cargas: ' + (_esDup(e2) ? 'alguna carga ya está en este lote' : e2.message), 'err'); return; }
 
   toast('Lote ' + lote.id + ' creado con ' + seleccionadas.length + ' carga(s)', 'ok');
   renderLote();
@@ -1527,8 +1549,8 @@ function elegirLote(id){
   loadBigbagList();
 }
 
-async function submitBigbag(e){
-  e.preventDefault();
+async function submitBigbag(e){ e.preventDefault(); return _once('bigbag', _submitBigbag, e); }
+async function _submitBigbag(e){
   if(!loteActivoId){ toast('Elegí un lote primero', 'err'); return; }
   const payload = Object.fromEntries(new FormData(e.target).entries());
   payload.lote_id = loteActivoId;
@@ -1540,7 +1562,7 @@ async function submitBigbag(e){
   payload.encargado = payload.encargado || usuario || null;
 
   const { data, error } = await sb.from('produccion_bigbag').insert(payload).select().single();
-  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  if(error){ toast(_esDup(error) ? 'Ya existe el bigbag Nº ' + payload.nro_bigbag + ' en este lote' : 'Error: ' + error.message, 'err'); return; }
   toast('Bigbag Nº' + data.nro_bigbag + ' registrado', 'ok');
   e.target.reset();
   elegirLote(loteActivoId);
@@ -1612,14 +1634,17 @@ async function elegirLoteCierre(id){
   loadTurnoList();
 }
 
-async function submitTurno(e){
-  e.preventDefault();
+async function submitTurno(e){ e.preventDefault(); return _once('turno', _submitTurno, e); }
+async function _submitTurno(e){
   const payload = Object.fromEntries(new FormData(e.target).entries());
   payload.lote_id = loteActivoId;
   payload.kg_reales_procesados = payload.kg_reales_procesados === '' ? null : Number(payload.kg_reales_procesados);
   payload.mermas_kg = payload.mermas_kg === '' ? 0 : Number(payload.mermas_kg);
   payload.ajustado_por = usuario || null;
 
+  const prev = await sb.from('lote_turno_cierre').select('*').eq('lote_id', loteActivoId).eq('fecha', payload.fecha).eq('turno', payload.turno);
+  const hay = prev && prev.data && prev.data[0];
+  if(hay && !confirm('Ya hay un ajuste cargado para ' + (payload.turno === 'DIA' ? 'el turno Día' : 'el turno Noche') + ' de esa fecha (' + fmtKg(hay.kg_reales_procesados) + ', mermas ' + fmtKg(hay.mermas_kg) + '). ¿Reemplazarlo con estos datos?')) return;
   const { error } = await sb.from('lote_turno_cierre').upsert(payload, {onConflict:'lote_id,fecha,turno'});
   if(error){ toast('Error: ' + error.message, 'err'); return; }
   toast('Ajuste de turno guardado', 'ok');
@@ -1636,7 +1661,8 @@ async function loadTurnoList(){
   </tbody></table>`;
 }
 
-async function cerrarLoteFinal(){
+async function cerrarLoteFinal(){ return _once('cierre', _cerrarLoteFinal); }
+async function _cerrarLoteFinal(){
   const kgProc = parseFloat(document.getElementById('cfKgProc').value);
   if(!kgProc){ toast('Cargá el kg procesado total', 'err'); return; }
   if(!confirm('¿Cerrar definitivamente el lote ' + loteActivoId + '? No se puede deshacer desde acá.')) return;
@@ -1653,7 +1679,7 @@ async function cerrarLoteFinal(){
     cerrado_por: usuario || null
   };
   const { error } = await sb.from('lote_cierre').insert(payload);
-  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  if(error){ toast(_esDup(error) ? 'Este lote ya fue cerrado' : 'Error: ' + error.message, 'err'); return; }
   toast('Lote ' + loteActivoId + ' cerrado', 'ok');
   renderCierre();
 }
