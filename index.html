@@ -398,6 +398,82 @@
   /* ===== v26: login con logo real ===== */
   .auth-logo-img{display:block;width:230px;max-width:80%;height:auto;margin:4px auto 24px;}
   .auth-card{padding:30px 26px 4px;}
+
+  /* ===== Panel de inicio (colores planos) ===== */
+  .dash{margin-top:18px;display:flex;flex-direction:column;gap:14px;}
+  .dash-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  .dkpi{background:var(--card);border:1px solid var(--gridline);border-radius:14px;padding:14px 16px;min-width:0;}
+  .dkpi .l{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);}
+  .dkpi .n{font-size:26px;font-weight:800;color:var(--text-primary);margin-top:6px;line-height:1.15;display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+  .dkpi .s{font-size:12px;color:var(--text-secondary);margin-top:4px;}
+  .dchip{font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:999px;}
+  .dchip.up{background:#e4f1e5;color:var(--good);}
+  .dchip.down{background:#f8e3e0;color:var(--danger);}
+  .dash-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+  .dcard{background:var(--card);border:1px solid var(--gridline);border-radius:14px;padding:16px;min-width:0;}
+  .dcard-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .dcard-h h3{font-size:14.5px;font-weight:800;color:var(--text-primary);margin:0;}
+  .dsel{display:flex;gap:8px;}
+  .dsel select{width:auto;height:36px;padding:0 28px 0 10px;font-size:13px;font-weight:700;}
+  .dbadge{min-width:26px;height:26px;padding:0 8px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;}
+  .dbadge.warn{background:#f6e7c8;color:var(--warn);}
+  .dbadge.ok{background:#e4f1e5;color:var(--good);}
+  .dwarn{color:var(--warn);}
+  .dalerts{display:flex;flex-direction:column;gap:8px;}
+  .dalert{appearance:none;font-family:inherit;display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface-2);border:1px solid var(--gridline);border-radius:12px;padding:11px 12px;cursor:pointer;}
+  .dalert:hover{border-color:var(--accent);}
+  .dalert-n{flex:none;min-width:34px;height:34px;border-radius:10px;background:#f6e7c8;color:var(--warn);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;}
+  .dalert-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+  .dalert-t b{font-size:13px;color:var(--text-primary);line-height:1.3;}
+  .dalert-t small{font-size:12px;color:var(--text-secondary);}
+  .dalert-c{flex:none;font-size:22px;color:var(--text-muted);}
+  .dok{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:18px 8px;color:var(--text-secondary);font-size:13px;}
+  .dok b{color:var(--good);font-size:15px;}
+  .dok-i{width:46px;height:46px;border-radius:50%;background:#e4f1e5;color:var(--good);display:flex;align-items:center;justify-content:center;}
+  .dok-i svg{width:24px;height:24px;}
+  .dbars{display:flex;flex-direction:column;gap:10px;}
+  .dbar{display:grid;grid-template-columns:118px 1fr 64px;gap:10px;align-items:center;}
+  .dbar-l{display:flex;flex-direction:column;min-width:0;}
+  .dbar-l b{font-size:13px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dbar-l small{font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dbar-t{height:12px;background:var(--surface-2);border-radius:6px;overflow:hidden;}
+  .dbar-f{height:100%;background:var(--accent);border-radius:6px;}
+  .dbar-v{font-size:12.5px;font-weight:800;color:var(--text-primary);text-align:right;}
+  .ddona{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center;}
+  .ddona svg{flex:none;max-width:100%;}
+  .dlegs{flex:1;min-width:180px;display:flex;flex-direction:column;gap:8px;}
+  .dleg{display:flex;align-items:center;gap:8px;font-size:12.5px;}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none;}
+  .dleg-n{flex:1;min-width:0;color:var(--text-primary);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dleg-v{color:var(--text-secondary);white-space:nowrap;}
+  .dleg-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--text-secondary);}
+  .dleg-row span{display:inline-flex;align-items:center;gap:6px;}
+  #homeMenu .vista-menu-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;}
+  #homeMenu .vista-menu-card{padding:14px 8px;gap:8px;border-radius:14px;}
+  #homeMenu .vista-menu-card .vmc-icon{width:40px;height:40px;}
+  #homeMenu .vista-menu-card .vmc-icon svg{width:20px;height:20px;}
+  #homeMenu .vista-menu-card .vmc-label{font-size:12.5px;}
+  .dash{margin-top:14px;}
+
+  .res-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .res-h h2{margin:0;}
+  .mez{border:1px solid var(--gridline);border-radius:12px;background:var(--surface-2);padding:12px 14px;margin:12px 0;}
+  .mez-h{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
+  .mez-h b{font-size:14px;color:var(--text-primary);}
+  .mez-h span{font-size:12.5px;color:var(--text-secondary);}
+  .mez-lista{display:flex;flex-wrap:wrap;gap:8px;}
+  .mez-item{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--gridline);border-radius:10px;padding:8px 12px;cursor:pointer;margin:0;}
+  .mez-item.on{border-color:var(--accent);background:#f1ead2;}
+  .mez-item input{width:18px;height:18px;margin:0;flex:none;}
+  .mez-item span{display:flex;flex-direction:column;}
+  .mez-item b{font-size:13px;color:var(--text-primary);}
+  .mez-item small{font-size:11.5px;color:var(--text-secondary);}
+  .mez-rep{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:12.5px;color:var(--text-secondary);}
+  .mez-rep b{color:var(--text-primary);}
+  .mez-aviso{background:#f1ead2;border:1px solid var(--accent);color:var(--accent-dark);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;margin:8px 0;}
+  @media (min-width:760px){.dash-kpis{grid-template-columns:repeat(4,1fr);}}
+  @media (min-width:960px){.dash-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:420px){.dbar{grid-template-columns:96px 1fr 58px;}}
 </style>
 </head>
 <body>
@@ -457,6 +533,7 @@
 
     <div id="homeMenu">
       <div class="vista-menu-grid" id="vistaMenuGrid"></div>
+      <div id="homeDash"></div>
     </div>
 
     <div id="main"></div>
@@ -629,6 +706,251 @@ const TAB_ADMIN = {id:'usuarios', label:'Usuarios', icon:ICONS.usuarios};
 let activeTab = null;
 let navInitialized = false;
 
+/* ================= PANEL DE INICIO ================= */
+const DASH = { rec:[], silos:[], lotes:[], bbs:[], ok:false, anio:null, mes:null, tok:0 };
+const D_MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const D_MES3 = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const D_MES1 = ['E','F','M','A','M','J','J','A','S','O','N','D'];
+const D_COL = ['#8a6d00','#2f6f8f','#5c8a3a','#b5532f','#7a5ea8','#938d79'];
+const D_DIAS_STOCK = 30, D_DIAS_BIGBAG = 7;
+
+const dT = kg => (Number(kg||0)/1000).toLocaleString('es-PY',{maximumFractionDigits:1});
+const dN = (v,d) => Number(v||0).toLocaleString('es-PY',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});
+const dSaldo = r => Math.max(0, Number(r.kg_liquido_carga||0) - Number(r.kg_liquido_usado||0));
+const dDias = f => { if(!f) return 0; const a = new Date(String(f).slice(0,10) + 'T00:00:00'), b = new Date(hoyLocal() + 'T00:00:00'); return Math.round((b - a) / 864e5); };
+
+async function dashAll(tabla, cols, ord){
+  let out = [], desde = 0;
+  for(;;){
+    let q = sb.from(tabla).select(cols);
+    if(ord) q = q.order(ord, {ascending:false});
+    const { data, error } = await q.range(desde, desde + 999);
+    if(error) throw error;
+    out = out.concat(data || []);
+    if(!data || data.length < 1000) break;
+    desde += 1000;
+  }
+  return out;
+}
+
+async function renderDash(){
+  const host = document.getElementById('homeDash');
+  if(!host) return;
+  const tok = ++DASH.tok;
+  if(!DASH.ok) host.innerHTML = '<div class="dash"><div class="dcard"><div class="empty">Cargando panel...</div></div></div>';
+  try{
+    const [rec, silos, lotes, bbs] = await Promise.all([
+      dashAll('recepcion_mp', 'id,fecha,proveedor,silo_bolsa_id,peso_neto_kg,kg_liquido_carga,kg_liquido_usado,pct_humedad,pct_impureza_gruesa,pct_impureza_fina,estado,laboratorio', 'fecha'),
+      dashAll('silos_bolsa', '*', 'creado_en'),
+      dashAll('v_resumen_lotes', '*', 'fecha_creacion'),
+      dashAll('produccion_bigbag', 'lote_id,fecha', 'fecha')
+    ]);
+    if(tok !== DASH.tok) return;
+    DASH.rec = rec; DASH.silos = silos; DASH.lotes = lotes; DASH.bbs = bbs;
+    const h = hoyLocal();
+    if(!DASH.ok){ DASH.anio = Number(h.slice(0,4)); DASH.mes = Number(h.slice(5,7)); }
+    DASH.ok = true;
+    dashPintar();
+  }catch(e){
+    host.innerHTML = '<div class="dash"><div class="dcard"><div class="empty">No se pudo cargar el panel: ' + mpEsc(e && e.message || e) + '</div></div></div>';
+  }
+}
+
+function dashAnios(){
+  const s = new Set([Number(hoyLocal().slice(0,4))]);
+  DASH.rec.forEach(r => { if(r.fecha) s.add(Number(String(r.fecha).slice(0,4))); });
+  DASH.lotes.forEach(l => { if(l.fecha_cierre) s.add(Number(String(l.fecha_cierre).slice(0,4))); });
+  return Array.from(s).sort((a,b) => b - a);
+}
+const dOpt = (arr, sel) => arr.map(([v,t]) => `<option value="${v}"${String(v)===String(sel)?' selected':''}>${t}</option>`).join('');
+const dSelAnio = (id, fn) => `<select id="${id}" onchange="${fn}(this.value)" aria-label="Año">${dOpt(dashAnios().map(a => [a,a]), DASH.anio)}</select>`;
+function dSetAnio(v){ DASH.anio = Number(v); dashPintar(); }
+function dSetMes(v){ DASH.mes = Number(v); dashPintar(); }
+
+/* ---- datos agregados ---- */
+function dMensual(){
+  const a = DASH.anio, rec = new Array(12).fill(0), proc = new Array(12).fill(0);
+  const hn = new Array(12).fill(0), im = new Array(12).fill(0), pn = new Array(12).fill(0);
+  DASH.rec.forEach(r => {
+    if(!r.fecha || Number(String(r.fecha).slice(0,4)) !== a) return;
+    const m = Number(String(r.fecha).slice(5,7)) - 1, neto = Number(r.peso_neto_kg||0);
+    rec[m] += Number(r.kg_liquido_carga||0);
+    if(neto > 0){ pn[m] += neto; hn[m] += neto * Number(r.pct_humedad||0); im[m] += neto * (Number(r.pct_impureza_gruesa||0) + Number(r.pct_impureza_fina||0)); }
+  });
+  DASH.lotes.forEach(l => {
+    if(l.estado !== 'CERRADO' || !l.fecha_cierre || Number(String(l.fecha_cierre).slice(0,4)) !== a) return;
+    proc[Number(String(l.fecha_cierre).slice(5,7)) - 1] += Number(l.kg_procesado_total||0);
+  });
+  return { rec, proc, hum: pn.map((p,i) => p ? hn[i]/p : null), imp: pn.map((p,i) => p ? im[i]/p : null), pn };
+}
+function dMesesVisibles(){ const h = hoyLocal(); return DASH.anio === Number(h.slice(0,4)) ? Number(h.slice(5,7)) : 12; }
+
+/* ---- gráficos SVG ---- */
+function dNice(max){
+  if(!(max > 0)) return { max:1, step:.25 };
+  const p = Math.pow(10, Math.floor(Math.log10(max))), m = max / p;
+  const n = m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10;
+  return { max:n*p, step:n*p/4 };
+}
+function dAncho(id, def){ const el = document.getElementById(id); const w = el ? el.clientWidth : 0; return w > 120 ? w : def; }
+
+function dLinea(id, series, nMes, fmtY, unidad){
+  const W = dAncho(id, 560), H = 230, L = 46, R = 14, T = 14, B = 26;
+  const labels = W < 430 ? D_MES1 : D_MES3;
+  const all = series.flatMap(s => s.v.slice(0, nMes)).filter(v => v != null);
+  const nz = dNice(Math.max(0, ...all));
+  const X = i => L + (nMes === 1 ? (W-L-R)/2 : i * (W-L-R) / (nMes-1));
+  const Y = v => T + (H-T-B) * (1 - v / nz.max);
+  let g = '';
+  for(let k = 0; k <= 4; k++){
+    const v = nz.step * k, y = Y(v);
+    g += `<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e3e0d3" stroke-width="1"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#938d79">${fmtY(v)}</text>`;
+  }
+  for(let i = 0; i < nMes; i++) g += `<text x="${X(i)}" y="${H-7}" text-anchor="middle" font-size="11" fill="#938d79">${labels[i]}</text>`;
+  series.forEach(s => {
+    let d = '', abierto = false, pts = '', area = '';
+    for(let i = 0; i < nMes; i++){
+      const v = s.v[i];
+      if(v == null){ abierto = false; continue; }
+      d += (abierto ? 'L' : 'M') + X(i) + ' ' + Y(v) + ' '; abierto = true;
+      pts += `<circle cx="${X(i)}" cy="${Y(v)}" r="4" fill="#fff" stroke="${s.c}" stroke-width="2"><title>${D_MESES[i]}: ${fmtY(v)} ${unidad}</title></circle>`;
+    }
+    if(s.area && all.length > 1){
+      const idx = s.v.slice(0, nMes).map((v,i) => v == null ? null : i).filter(i => i != null);
+      if(idx.length > 1) area = `<path d="M${X(idx[0])} ${Y(0)} ` + idx.map(i => `L${X(i)} ${Y(s.v[i])}`).join(' ') + ` L${X(idx[idx.length-1])} ${Y(0)} Z" fill="${s.c}" fill-opacity=".10"/>`;
+    }
+    g += area + `<path d="${d}" fill="none" stroke="${s.c}" stroke-width="2.2" stroke-linejoin="round"/>` + pts;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img">${g}</svg>`;
+}
+
+function dBarras(id, series, fmtY, unidad){
+  const W = dAncho(id, 560), H = 230, L = 46, R = 10, T = 14, B = 26;
+  const labels = W < 430 ? D_MES1 : D_MES3;
+  const nz = dNice(Math.max(0, ...series.flatMap(s => s.v)));
+  const Y = v => T + (H-T-B) * (1 - v / nz.max);
+  const gw = (W-L-R) / 12, bw = Math.max(3, Math.min(14, (gw - 6) / series.length));
+  let g = '';
+  for(let k = 0; k <= 4; k++){
+    const v = nz.step * k, y = Y(v);
+    g += `<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e3e0d3" stroke-width="1"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#938d79">${fmtY(v)}</text>`;
+  }
+  for(let m = 0; m < 12; m++){
+    const cx = L + gw * m + gw / 2;
+    g += `<text x="${cx}" y="${H-7}" text-anchor="middle" font-size="11" fill="#938d79">${labels[m]}</text>`;
+    series.forEach((s, j) => {
+      const v = s.v[m]; if(!(v > 0)) return;
+      const x = cx - (series.length * bw) / 2 + j * bw;
+      g += `<rect x="${x}" y="${Y(v)}" width="${bw - 1}" height="${Y(0) - Y(v)}" rx="2" fill="${s.c}"><title>${D_MESES[m]} · ${s.n}: ${fmtY(v)} ${unidad}</title></rect>`;
+    });
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img">${g}</svg>`;
+}
+
+function dDona(items, total){
+  const S = 190, c = S/2, r = 74, sw = 30;
+  if(!(total > 0)) return '<div class="empty">Sin recepciones en este mes.</div>';
+  let ang = -Math.PI/2, arcs = '';
+  items.forEach(it => {
+    const fr = it.v / total, a2 = ang + fr * Math.PI * 2;
+    if(fr >= .9999) arcs += `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${it.c}" stroke-width="${sw}"><title>${mpEsc(it.n)}: ${dT(it.v)} t</title></circle>`;
+    else{
+      const x1 = c + r*Math.cos(ang), y1 = c + r*Math.sin(ang), x2 = c + r*Math.cos(a2), y2 = c + r*Math.sin(a2);
+      arcs += `<path d="M${x1} ${y1} A${r} ${r} 0 ${fr > .5 ? 1 : 0} 1 ${x2} ${y2}" fill="none" stroke="${it.c}" stroke-width="${sw}"><title>${mpEsc(it.n)}: ${dT(it.v)} t</title></path>`;
+    }
+    ang = a2;
+  });
+  const leg = items.map(it => `<div class="dleg"><span class="dot" style="background:${it.c}"></span><span class="dleg-n">${mpEsc(it.n)}</span><span class="dleg-v">${dT(it.v)} t · ${dN(it.v/total*100,0)}%</span></div>`).join('');
+  return `<div class="ddona"><svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}" role="img">${arcs}<text x="${c}" y="${c-2}" text-anchor="middle" font-size="22" font-weight="800" fill="#17150f">${dT(total)}</text><text x="${c}" y="${c+16}" text-anchor="middle" font-size="12" fill="#938d79">toneladas</text></svg><div class="dlegs">${leg}</div></div>`;
+}
+
+/* ---- bloques ---- */
+function dashPintar(){
+  const host = document.getElementById('homeDash'); if(!host) return;
+  const h = hoyLocal(), mesKey = h.slice(0,7);
+  const prev = new Date(h.slice(0,4), Number(h.slice(5,7)) - 2, 1), prevKey = prev.getFullYear() + '-' + String(prev.getMonth()+1).padStart(2,'0');
+  const recMes = DASH.rec.filter(r => String(r.fecha||'').slice(0,7) === mesKey);
+  const kgMes = recMes.reduce((a,r) => a + Number(r.kg_liquido_carga||0), 0);
+  const kgPrev = DASH.rec.filter(r => String(r.fecha||'').slice(0,7) === prevKey).reduce((a,r) => a + Number(r.kg_liquido_carga||0), 0);
+  const delta = kgPrev > 0 ? (kgMes - kgPrev) / kgPrev * 100 : null;
+  const libres = DASH.rec.filter(r => dSaldo(r) > 0.5);
+  const stock = libres.reduce((a,r) => a + dSaldo(r), 0);
+  const enProc = DASH.lotes.filter(l => l.estado === 'EN_PROCESO');
+  const kgEnProc = enProc.reduce((a,l) => a + Number(l.kg_mp_asignado||0), 0);
+  const anioHoy = Number(h.slice(0,4));
+  const cerr = DASH.lotes.filter(l => l.estado === 'CERRADO' && l.fecha_cierre && Number(String(l.fecha_cierre).slice(0,4)) === anioHoy && Number(l.kg_ingresado_mp) > 0);
+  const kgIng = cerr.reduce((a,l) => a + Number(l.kg_ingresado_mp), 0), kgProc = cerr.reduce((a,l) => a + Number(l.kg_procesado_total||0), 0);
+  const rend = kgIng > 0 ? kgProc / kgIng * 100 : null;
+
+  const chip = delta == null ? '' : `<span class="dchip ${delta >= 0 ? 'up' : 'down'}">${delta >= 0 ? '▲' : '▼'} ${dN(Math.abs(delta),0)}%</span>`;
+  const kpis = `<div class="dash-kpis">
+    <div class="dkpi"><div class="l">Recibido en ${D_MESES[Number(h.slice(5,7))-1].toLowerCase()}</div><div class="n">${dT(kgMes)} t ${chip}</div><div class="s">${recMes.length} carga${recMes.length===1?'':'s'}${delta == null ? '' : ' · vs mes anterior'}</div></div>
+    <div class="dkpi"><div class="l">Stock sin asignar</div><div class="n">${dT(stock)} t</div><div class="s">${libres.length} carga${libres.length===1?'':'s'} con kg libres</div></div>
+    <div class="dkpi"><div class="l">Lotes en proceso</div><div class="n">${enProc.length}</div><div class="s">${dT(kgEnProc)} t de MP asignada</div></div>
+    <div class="dkpi"><div class="l">Rendimiento ${anioHoy}</div><div class="n">${rend == null ? '-' : dN(rend,1) + '%'}</div><div class="s">${cerr.length ? dT(kgProc) + ' t procesadas · ' + cerr.length + ' lote' + (cerr.length===1?'':'s') + ' cerrado' + (cerr.length===1?'':'s') : 'Todavía sin lotes cerrados'}</div></div>
+  </div>`;
+
+  host.innerHTML = `<div class="dash">${kpis}
+    <div class="dash-grid">
+      <div class="dcard" id="dcAtencion"></div>
+      <div class="dcard"><div class="dcard-h"><h3>Recepción del año (t líquidas)</h3><div class="dsel">${dSelAnio('dSelA1','dSetAnio')}</div></div><div id="dGLinea"></div></div>
+      <div class="dcard" id="dcSilos"></div>
+      <div class="dcard"><div class="dcard-h"><h3>Proveedores del mes</h3><div class="dsel"><select onchange="dSetMes(this.value)" aria-label="Mes">${dOpt(D_MESES.map((m,i) => [i+1,m]), DASH.mes)}</select>${dSelAnio('dSelA2','dSetAnio')}</div></div><div id="dGDona"></div></div>
+      <div class="dcard"><div class="dcard-h"><h3>Recibido vs procesado (t)</h3><div class="dsel">${dSelAnio('dSelA3','dSetAnio')}</div></div><div id="dGBar"></div><div class="dleg-row"><span><i class="dot" style="background:${D_COL[0]}"></i>Recibido</span><span><i class="dot" style="background:${D_COL[1]}"></i>Procesado (lotes cerrados)</span></div></div>
+      <div class="dcard"><div class="dcard-h"><h3>Calidad de lo recibido (%)</h3><div class="dsel">${dSelAnio('dSelA4','dSetAnio')}</div></div><div id="dGCal"></div><div class="dleg-row"><span><i class="dot" style="background:${D_COL[1]}"></i>Humedad promedio</span><span><i class="dot" style="background:${D_COL[3]}"></i>Impureza promedio</span></div></div>
+    </div></div>`;
+
+  dashAtencion(libres);
+  dashSilos(libres);
+  dashGraficos();
+}
+
+function dashAtencion(libres){
+  const items = [];
+  const pend = DASH.silos.filter(s => s.estado === 'ABIERTO' && !s.categoria);
+  if(pend.length) items.push({ n:pend.length, t:`Silo${pend.length===1?'':'s'} con calidad pendiente de laboratorio`, d: pend.slice(0,4).map(s => s.numero).join(', ') + (pend.length > 4 ? '…' : ''), go:'silo' });
+  const viejas = libres.filter(r => dDias(r.fecha) > D_DIAS_STOCK);
+  if(viejas.length) items.push({ n:viejas.length, t:`Carga${viejas.length===1?'':'s'} con más de ${D_DIAS_STOCK} días sin asignar a un lote`, d: dT(viejas.reduce((a,r) => a + dSaldo(r), 0)) + ' t libres', go:'lote' });
+  const sinCalar = libres.filter(r => r.laboratorio === 'Sin calar');
+  if(sinCalar.length) items.push({ n:sinCalar.length, t:`Carga${sinCalar.length===1?'':'s'} disponible${sinCalar.length===1?'':'s'} sin calar`, d: dT(sinCalar.reduce((a,r) => a + dSaldo(r), 0)) + ' t', go:'mp' });
+  const conBB = new Set(DASH.bbs.map(b => b.lote_id));
+  const sinBB = DASH.lotes.filter(l => l.estado === 'EN_PROCESO' && !conBB.has(l.lote_id) && dDias(l.fecha_creacion) > D_DIAS_BIGBAG);
+  if(sinBB.length) items.push({ n:sinBB.length, t:`Lote${sinBB.length===1?'':'s'} en proceso sin bigbags hace más de ${D_DIAS_BIGBAG} días`, d: sinBB.slice(0,4).map(l => l.lote_id).join(', ') + (sinBB.length > 4 ? '…' : ''), go:'bigbag' });
+  const tot = items.reduce((a,i) => a + i.n, 0);
+  const cuerpo = items.length ? items.map(i => `<button type="button" class="dalert" onclick="goTab('${i.go}')"><span class="dalert-n">${i.n}</span><span class="dalert-t"><b>${i.t}</b><small>${mpEsc(i.d)}</small></span><span class="dalert-c" aria-hidden="true">›</span></button>`).join('')
+    : `<div class="dok"><div class="dok-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></div><b>¡Todo en orden!</b><span>No hay nada pendiente que requiera atención.</span></div>`;
+  document.getElementById('dcAtencion').innerHTML = `<div class="dcard-h"><h3><span class="dwarn">⚠</span> Atención</h3><span class="dbadge ${tot ? 'warn' : 'ok'}">${tot}</span></div><div class="dalerts">${cuerpo}</div>`;
+}
+
+function dashSilos(libres){
+  const porSilo = {};
+  libres.forEach(r => { porSilo[r.silo_bolsa_id] = (porSilo[r.silo_bolsa_id] || 0) + dSaldo(r); });
+  const filas = Object.keys(porSilo).map(id => ({ s: DASH.silos.find(x => x.id === id), kg: porSilo[id] })).filter(x => x.s).sort((a,b) => b.kg - a.kg).slice(0, 10);
+  const max = filas.length ? filas[0].kg : 1;
+  const cuerpo = filas.length ? filas.map(f => `<div class="dbar"><div class="dbar-l"><b>${mpEsc(f.s.numero)}</b><small>${mpEsc(f.s.categoria || 'Pendiente (lab)')}${f.s.estado === 'CERRADO' ? ' · cerrado' : ''}</small></div><div class="dbar-t"><div class="dbar-f" style="width:${Math.max(2, f.kg / max * 100)}%"></div></div><div class="dbar-v">${dT(f.kg)} t</div></div>`).join('')
+    : '<div class="empty">No hay stock sin asignar en los silos.</div>';
+  document.getElementById('dcSilos').innerHTML = `<div class="dcard-h"><h3>Stock sin asignar por silo</h3></div><div class="dbars">${cuerpo}</div>`;
+}
+
+function dashGraficos(){
+  const m = dMensual(), n = dMesesVisibles();
+  const t = v => (v/1000).toLocaleString('es-PY',{maximumFractionDigits:1});
+  const g1 = document.getElementById('dGLinea'); if(g1) g1.innerHTML = dLinea('dGLinea', [{ v:m.rec.map(v => v/1000), c:D_COL[0], area:true }], n, v => dN(v, v < 10 && v % 1 ? 1 : 0), 't');
+  const g3 = document.getElementById('dGBar'); if(g3) g3.innerHTML = dBarras('dGBar', [{ n:'Recibido', v:m.rec.map(v => v/1000), c:D_COL[0] }, { n:'Procesado', v:m.proc.map(v => v/1000), c:D_COL[1] }], v => dN(v, v < 10 && v % 1 ? 1 : 0), 't');
+  const g4 = document.getElementById('dGCal'); if(g4) g4.innerHTML = dLinea('dGCal', [{ v:m.hum, c:D_COL[1] }, { v:m.imp, c:D_COL[3] }], n, v => dN(v, 1), '%');
+  const g2 = document.getElementById('dGDona');
+  if(g2){
+    const mk = DASH.anio + '-' + String(DASH.mes).padStart(2,'0'), por = {};
+    DASH.rec.forEach(r => { if(String(r.fecha||'').slice(0,7) === mk) por[r.proveedor || 'Sin proveedor'] = (por[r.proveedor || 'Sin proveedor'] || 0) + Number(r.kg_liquido_carga||0); });
+    const arr = Object.keys(por).map(k => ({ n:k, v:por[k] })).sort((a,b) => b.v - a.v);
+    const top = arr.slice(0,5).map((x,i) => ({ ...x, c:D_COL[i] })), resto = arr.slice(5).reduce((a,x) => a + x.v, 0);
+    if(resto > 0) top.push({ n:'Otros', v:resto, c:D_COL[5] });
+    g2.innerHTML = dDona(top, arr.reduce((a,x) => a + x.v, 0));
+  }
+}
+let _dashRz = null;
+window.addEventListener('resize', () => { clearTimeout(_dashRz); _dashRz = setTimeout(() => { if(DASH.ok && document.getElementById('dGLinea') && document.getElementById('dGLinea').clientWidth) dashGraficos(); }, 180); });
+
 function renderHomeMenu(){
   const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
   document.getElementById('vistaMenuGrid').innerHTML = tabs.map(t =>
@@ -637,6 +959,7 @@ function renderHomeMenu(){
       <span class="vmc-label">${t.label}</span>
     </button>`
   ).join('');
+  renderDash();
 }
 
 const NAV_ORDER = ['home','mp','lote','bigbag','silo','cierre','resumen','usuarios'];
@@ -810,6 +1133,7 @@ function goHome(push){
   document.getElementById('main').innerHTML = '';
   if(push !== false) history.pushState({view:'home'}, '');
   animar(document.getElementById('homeMenu'), -1);
+  renderDash();
   renderNavbar();
   window.scrollTo(0,0);
 }
@@ -1178,15 +1502,147 @@ function mpRenderList(){
   }${fs.length > mpLimit ? `<tr><td colspan="26" style="text-align:center;padding:12px"><button type="button" class="btn secondary small" onclick="mpLimit+=80;mpRenderList()">Mostrar más (${fs.length - mpLimit} restantes)</button></td></tr>` : ''}</tbody><tfoot><tr><td colspan="8">Totales · ${fs.length} filas</td><td class="num sep">${mpFk(tb)}</td><td></td><td class="num">${mpFk(tn)}</td><td class="num sep">${mpFk(hp,1)} prom.</td><td colspan="4" class="num">${mpFk(pp,2)} prom.</td><td class="num sep">${mpFk(td)}</td><td class="num">${mpFk(tf)}</td><td colspan="8" class="sep"></td></tr></tfoot></table>`;
 }
 
+/* ================= EXPORTAR A EXCEL (.xlsx real, sin librerías) ================= */
+const XL_CRC = (() => { const t = []; for(let n = 0; n < 256; n++){ let c = n; for(let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function xlCrc(b){ let c = 0xFFFFFFFF; for(let i = 0; i < b.length; i++) c = XL_CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function xlZip(files){
+  const enc = new TextEncoder(), partes = [], central = []; let pos = 0;
+  const u16 = v => [v & 255, (v >>> 8) & 255], u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+  files.forEach(f => {
+    const nom = enc.encode(f.n), dat = enc.encode(f.d), crc = xlCrc(dat);
+    const cab = Uint8Array.from([0x50,0x4B,3,4, 20,0, 0,8, 0,0, 0,0, 0x21,0, ...u32(crc), ...u32(dat.length), ...u32(dat.length), ...u16(nom.length), 0,0]);
+    partes.push(cab, nom, dat);
+    central.push(Uint8Array.from([0x50,0x4B,1,2, 20,0, 20,0, 0,8, 0,0, 0,0, 0x21,0, ...u32(crc), ...u32(dat.length), ...u32(dat.length), ...u16(nom.length), 0,0, 0,0, 0,0, 0,0, 0,0,0,0, ...u32(pos)]), nom);
+    pos += cab.length + nom.length + dat.length;
+  });
+  const cl = central.reduce((a, b) => a + b.length, 0);
+  const fin = Uint8Array.from([0x50,0x4B,5,6, 0,0, 0,0, ...u16(files.length), ...u16(files.length), ...u32(cl), ...u32(pos), 0,0]);
+  return new Blob(partes.concat(central, [fin]), { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+const xlEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+function xlCol(i){ let s = ''; for(i++; i > 0; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + (i - 1) % 26) + s; return s; }
+function xlFecha(s){ if(!s) return null; const m = String(s).slice(0,10).split('-').map(Number); if(m.length < 3 || !m[0]) return null; return Math.round((Date.UTC(m[0], m[1]-1, m[2]) - Date.UTC(1899, 11, 30)) / 864e5); }
+/* estilos: 0 normal, 1 encabezado, 2 texto, 3 entero, 4 1 dec, 5 2 dec, 6 fecha, 7-10 totales (texto,0,1,2 dec), 11 título, 12 %, 13 % total, 14 texto largo (ajusta línea), 15 subtítulo */
+const XL_TIPO = { t:2, n0:3, n1:4, n2:5, f:6, p:12, l:14 }, XL_TOT = { t:7, n0:8, n1:9, n2:10, f:7, p:13, l:7 };
+const XL_STYLES = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+ + '<numFmts count="4"><numFmt numFmtId="164" formatCode="#,##0"/><numFmt numFmtId="165" formatCode="#,##0.0"/><numFmt numFmtId="166" formatCode="#,##0.00"/><numFmt numFmtId="167" formatCode="dd/mm/yyyy"/></numFmts>'
+ + '<fonts count="5"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="15"/><color rgb="FF5C4400"/><name val="Calibri"/></font><font><sz val="10"/><color rgb="FF57523F"/><name val="Calibri"/></font></fonts>'
+ + '<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF8A6D00"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF5F4EE"/><bgColor indexed="64"/></patternFill></fill></fills>'
+ + '<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFE3E0D3"/></left><right style="thin"><color rgb="FFE3E0D3"/></right><top style="thin"><color rgb="FFE3E0D3"/></top><bottom style="thin"><color rgb="FFE3E0D3"/></bottom><diagonal/></border></borders>'
+ + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+ + '<cellXfs count="16">'
+ + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+ + '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+ + '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>'
+ + '<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>'
+ + '<xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>'
+ + '<xf numFmtId="166" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>'
+ + '<xf numFmtId="167" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'
+ + '<xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>'
+ + '<xf numFmtId="164" fontId="2" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right"/></xf>'
+ + '<xf numFmtId="165" fontId="2" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right"/></xf>'
+ + '<xf numFmtId="166" fontId="2" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right"/></xf>'
+ + '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+ + '<xf numFmtId="10" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>'
+ + '<xf numFmtId="10" fontId="2" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right"/></xf>'
+ + '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>'
+ + '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+ + '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+
+function xlHoja(h){
+  const nc = h.cols.length, filas = [];
+  const cel = (c, r, v, st, tipo) => {
+    const ref = xlCol(c) + r;
+    if(v == null || v === '' || (typeof v === 'number' && !isFinite(v))) return `<c r="${ref}" s="${st}"/>`;
+    if(tipo === 'f'){ const n = typeof v === 'number' ? v : xlFecha(v); return n == null ? `<c r="${ref}" s="${st}"/>` : `<c r="${ref}" s="${st}"><v>${n}</v></c>`; }
+    if(tipo === 't' || tipo === 'l' || typeof v === 'string') return `<c r="${ref}" s="${st}" t="inlineStr"><is><t xml:space="preserve">${xlEsc(v)}</t></is></c>`;
+    return `<c r="${ref}" s="${st}"><v>${+Number(v).toFixed(6)}</v></c>`;
+  };
+  let r = 1;
+  filas.push(`<row r="${r}" ht="24" customHeight="1">${cel(0, r, h.titulo, 11, 't')}</row>`); r++;
+  filas.push(`<row r="${r}">${cel(0, r, h.sub || '', 15, 't')}</row>`); r++;
+  r++;
+  const rEnc = r;
+  filas.push(`<row r="${r}" ht="32" customHeight="1">${h.cols.map((c, i) => cel(i, r, c.t, 1, 't')).join('')}</row>`); r++;
+  h.filas.forEach(f => { filas.push(`<row r="${r}">${h.cols.map((c, i) => cel(i, r, f[i], XL_TIPO[c.k || 't'], c.k || 't')).join('')}</row>`); r++; });
+  if(h.tot){ filas.push(`<row r="${r}">${h.cols.map((c, i) => cel(i, r, h.tot[i], XL_TOT[c.k || 't'], typeof h.tot[i] === 'string' ? 't' : (c.k || 't'))).join('')}</row>`); r++; }
+  const fin = h.filas.length ? rEnc + h.filas.length : rEnc;
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    + '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>'
+    + `<sheetViews><sheetView workbookViewId="0" showGridLines="0"><pane ySplit="${rEnc}" ${h.fijas ? `xSplit="${h.fijas}" topLeftCell="${xlCol(h.fijas)}${rEnc + 1}" ` : `topLeftCell="A${rEnc + 1}" `}activePane="${h.fijas ? 'bottomRight' : 'bottomLeft'}" state="frozen"/></sheetView></sheetViews>`
+    + '<sheetFormatPr defaultRowHeight="15"/>'
+    + `<cols>${h.cols.map((c, i) => `<col min="${i + 1}" max="${i + 1}" width="${c.w || 12}" customWidth="1"/>`).join('')}</cols>`
+    + `<sheetData>${filas.join('')}</sheetData>`
+    + `<autoFilter ref="A${rEnc}:${xlCol(nc - 1)}${fin}"/>`
+    + '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/>'
+    + '</worksheet>';
+}
+
+function xlsxDescargar(nombre, hojas){
+  const nom = h => xlEsc(String(h.nombre).replace(/[\[\]:*?\/\\]/g, ' ').slice(0, 31));
+  const files = [
+    { n:'[Content_Types].xml', d:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + hojas.map((h, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('') + '</Types>' },
+    { n:'_rels/.rels', d:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+    { n:'xl/workbook.xml', d:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' + hojas.map((h, i) => `<sheet name="${nom(h)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets></workbook>' },
+    { n:'xl/_rels/workbook.xml.rels', d:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + hojas.map((h, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('') + `<Relationship Id="rId${hojas.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>` },
+    { n:'xl/styles.xml', d:XL_STYLES }
+  ].concat(hojas.map((h, i) => ({ n:`xl/worksheets/sheet${i + 1}.xml`, d:xlHoja(h) })));
+  const blob = xlZip(files);
+  window.__XLSX_ULTIMO = { nombre, hojas };
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+const xlTs = () => { const h = hoyLocal().split('-'); return h[2] + '/' + h[1] + '/' + h[0]; };
+
 function mpExport(){
   const fs = mpFiltradas();
-  const H = ['N° Remisión','Fecha','Placa Camión','Chofer','Proveedor / Productor','Parcela','% de la parcela','Tipo','Peso Bruto','Peso Tara','Peso Neto','Humedad (%)','Temperatura (°C)','Impureza gruesa (%)','Impureza fina (%)','Descuento Calidad (%)','Descuento Humedad (%)','Total Descuento %','Descuento (kg)','Peso Final (kg)','Observaciones','Ubicación','Silo Bolsa','Lote','Para','Estado','Laboratorio'];
-  const L = fs.map(x => { const r = x.r; return [r.nro_boleta, mpFd(r.fecha), r.chapa_camion, r.chofer, r.proveedor, x.nro, x.pct, r.tipo_cosecha, x.bruto.toFixed(2), r.peso_tara_kg, x.neto.toFixed(2), r.pct_humedad, r.temperatura_c, r.pct_impureza_gruesa, r.pct_impureza_fina, r.pct_descuento_calidad, x.dh.toFixed(2), x.tot.toFixed(2), x.desc.toFixed(2), x.fin.toFixed(2), r.observaciones, r.patio_destino, r.silos_bolsa ? r.silos_bolsa.numero : '', mpLoteDe(r), r.destino, r.estado === 'ASIGNADA' ? 'Procesado' : 'Sin procesar', r.laboratorio]; });
-  const csv = '﻿' + [H].concat(L).map(r => r.map(c => '"' + String(c==null?'':c).replace(/"/g,'""') + '"').join(';')).join('\r\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
-  a.download = 'recepcion_materia_prima.csv';
-  a.click();
+  if(!fs.length){ toast('No hay filas para exportar', 'err'); return; }
+  const sel = document.getElementById('mpFSilo'), q = (document.getElementById('mpQ').value || '').trim();
+  const filtros = [sel && sel.value ? 'Silo ' + sel.options[sel.selectedIndex].text : '', q ? 'Búsqueda: ' + q : ''].filter(Boolean).join(' · ');
+  const cols = [
+    {t:'Remisión',w:13},{t:'Fecha',k:'f',w:12},{t:'Placa',w:11},{t:'Chofer',w:20},{t:'Proveedor / Productor',w:28},{t:'Parcela',w:11},{t:'% parcela',k:'n2',w:10},{t:'Tipo',w:14},
+    {t:'Peso bruto (kg)',k:'n0',w:14},{t:'Peso tara (kg)',k:'n0',w:14},{t:'Peso neto (kg)',k:'n0',w:14},{t:'Humedad %',k:'n1',w:11},{t:'Temp °C',k:'n0',w:9},{t:'Impurezas %',k:'n2',w:12},
+    {t:'Desc. calidad %',k:'n2',w:12},{t:'Desc. humedad %',k:'n2',w:12},{t:'Total desc. %',k:'n2',w:12},{t:'Descuento (kg)',k:'n0',w:14},{t:'Peso final (kg)',k:'n0',w:14},
+    {t:'Observaciones',w:32},{t:'Ubicación',w:14},{t:'Silo bolsa',w:11},{t:'Lote',w:12},{t:'Para',w:14},{t:'Estado',w:13},{t:'Laboratorio',w:13}
+  ];
+  const filas = fs.map(x => { const r = x.r; return [r.nro_boleta, r.fecha, r.chapa_camion, r.chofer, r.proveedor, x.nro, x.pct, r.tipo_cosecha,
+    x.bruto, Number(r.peso_tara_kg||0), x.neto, r.pct_humedad == null ? null : Number(r.pct_humedad), r.temperatura_c == null ? null : Number(r.temperatura_c), Number(r.pct_impureza_gruesa||0) + Number(r.pct_impureza_fina||0),
+    Number(r.pct_descuento_calidad||0), x.dh, x.tot, x.desc, x.fin, r.observaciones, r.patio_destino, r.silos_bolsa ? r.silos_bolsa.numero : '', mpLoteDe(r), r.destino, r.estado === 'ASIGNADA' ? 'Procesado' : 'Sin procesar', r.laboratorio]; });
+  const sum = i => filas.reduce((a, f) => a + (Number(f[i]) || 0), 0);
+  const hs = [], vistos = {}; fs.forEach(x => { if(!vistos[x.r.id] && x.r.pct_humedad != null){ vistos[x.r.id] = 1; hs.push(Number(x.r.pct_humedad)); } });
+  const tn = sum(10), pp = fs.reduce((a, x) => a + x.tot * x.neto, 0) / (tn || 1);
+  const tot = cols.map(() => null);
+  tot[0] = 'Totales · ' + fs.length + ' filas'; tot[8] = sum(8); tot[10] = tn; tot[11] = hs.length ? hs.reduce((a, b) => a + b, 0) / hs.length : null; tot[16] = pp; tot[17] = sum(17); tot[18] = sum(18);
+  xlsxDescargar('recepcion_materia_prima_' + hoyLocal() + '.xlsx', [{ nombre:'Recepciones', titulo:'Planilla de recepciones · Progresso NH S.A.', sub:'Exportado el ' + xlTs() + ' · ' + fs.length + ' filas' + (filtros ? ' · ' + filtros : '') + ' · Humedad y descuento total en la fila de totales = promedio', cols, filas, tot, fijas:1 }]);
+}
+
+let RES_ROWS = [], RES_LAB = {};
+async function resumenExport(){
+  if(!RES_ROWS.length){ toast('No hay lotes para exportar', 'err'); return; }
+  const { data: cie } = await sb.from('lote_cierre').select('*');
+  const ci = {}; (cie || []).forEach(c => { ci[c.lote_id] = c; });
+  const tr = RES_ROWS.slice().sort((a, b) => String(a.lote_id).localeCompare(String(b.lote_id), 'es', {numeric:true}));
+  const n = v => v == null ? null : Number(v);
+  const colsA = [{t:'Lote',w:12},{t:'Cód. laboratorio',w:18},{t:'Producto',w:22},{t:'Calidad',w:18},{t:'Estado',w:13},{t:'Responsable',w:18},{t:'Fecha creación',k:'f',w:13},{t:'Fecha cierre',k:'f',w:13},
+    {t:'Cargas MP',k:'n0',w:10},{t:'Kg MP asignada',k:'n0',w:15},{t:'Bigbags',k:'n0',w:10},{t:'Kg procesado',k:'n0',w:14},{t:'Mermas (kg)',k:'n0',w:13},{t:'Rendimiento',k:'p',w:13}];
+  const filasA = tr.map(r => [r.lote_id, RES_LAB[r.lote_id] || '', r.producto, r.categoria || '', r.estado === 'EN_PROCESO' ? 'En proceso' : 'Cerrado', r.responsable || '', r.fecha_creacion, r.fecha_cierre,
+    n(r.cantidad_cargas_mp), n(r.kg_mp_asignado), n(r.cantidad_bigbags), n(r.kg_procesado_total), n(r.mermas_totales_kg), r.rendimiento_pct == null ? null : Number(r.rendimiento_pct) / 100]);
+  const sA = i => filasA.reduce((a, f) => a + (Number(f[i]) || 0), 0);
+  const totA = colsA.map(() => null); totA[0] = 'Totales · ' + filasA.length + (filasA.length === 1 ? ' lote' : ' lotes'); totA[8] = sA(8); totA[9] = sA(9); totA[10] = sA(10); totA[11] = sA(11); totA[12] = sA(12);
+  const hojas = [{ nombre:'Resumen de lotes', titulo:'Resumen de producción · Progresso NH S.A.', sub:'Exportado el ' + xlTs() + ' · ' + filasA.length + (filasA.length === 1 ? ' lote' : ' lotes'), cols:colsA, filas:filasA, tot:totA, fijas:1 }];
+  const cerr = tr.filter(r => r.estado === 'CERRADO');
+  if(cerr.length){
+    const colsB = [{t:'Lote',w:12},{t:'Cód. laboratorio',w:18},{t:'Producto',w:22},{t:'Calidad',w:18},{t:'Fecha cierre',k:'f',w:13},{t:'Kg ingresado MP',k:'n0',w:16},{t:'Kg procesado',k:'n0',w:14},{t:'Mermas (kg)',k:'n0',w:13},{t:'Rendimiento',k:'p',w:13},
+      {t:'Análisis MP',k:'l',w:40},{t:'Análisis producto terminado',k:'l',w:40},{t:'Diferencia / observaciones',k:'l',w:40},{t:'Cerrado por',w:18}];
+    const filasB = cerr.map(r => { const c = ci[r.lote_id] || {}; return [r.lote_id, RES_LAB[r.lote_id] || '', r.producto, r.categoria || '', r.fecha_cierre, n(c.kg_ingresado_mp != null ? c.kg_ingresado_mp : r.kg_ingresado_mp), n(c.kg_procesado_total != null ? c.kg_procesado_total : r.kg_procesado_total), n(c.mermas_totales_kg != null ? c.mermas_totales_kg : r.mermas_totales_kg),
+      r.rendimiento_pct == null ? null : Number(r.rendimiento_pct) / 100, c.analisis_mp_resumen, c.analisis_pt_resumen, c.diferencia_analisis, c.cerrado_por]; });
+    const sB = i => filasB.reduce((a, f) => a + (Number(f[i]) || 0), 0);
+    const totB = colsB.map(() => null); totB[0] = 'Totales · ' + filasB.length + (filasB.length === 1 ? ' cerrado' : ' cerrados'); totB[5] = sB(5); totB[6] = sB(6); totB[7] = sB(7); totB[8] = sB(5) > 0 ? sB(6) / sB(5) : null;
+    hojas.push({ nombre:'Lotes cerrados', titulo:'Lotes cerrados · Progresso NH S.A.', sub:'Exportado el ' + xlTs() + ' · ' + filasB.length + (filasB.length === 1 ? ' lote cerrado' : ' lotes cerrados'), cols:colsB, filas:filasB, tot:totB, fijas:1 });
+  }
+  xlsxDescargar('resumen_produccion_' + hoyLocal() + '.xlsx', hojas);
 }
 
 async function renderSilo(){
@@ -1588,6 +2044,8 @@ async function renderCierre(){
   main.innerHTML = `<div class="card">
     <h2>${ICONS.cierre} Actualización diaria (por turno)</h2>
     ${loteSelectorHTML("cl")}
+    <div id="mezBox" style="display:none"></div>
+    <div id="mezAviso" class="mez-aviso" style="display:none"></div>
     <form id="frmTurno" style="display:none">
       <div class="grid">
         <div><label>Fecha *</label><input name="fecha" type="date" required></div>
@@ -1601,6 +2059,7 @@ async function renderCierre(){
   </div>
   <div class="card" id="cierreLoteCard" style="display:none">
     <h2>Cierre final del lote</h2>
+    <div id="mezAviso2" class="mez-aviso" style="display:none"></div>
     <div class="grid">
       <div><label>Kg ingresado MP (sugerido)</label><input id="cfKgMp" disabled></div>
       <div><label>Kg procesado total *</label><input id="cfKgProc" type="number" step="0.01"></div>
@@ -1631,23 +2090,65 @@ async function elegirLoteCierre(id){
   const { data: sumRow } = await sb.from('v_resumen_lotes').select('*').eq('lote_id', id).single();
   document.getElementById('cfKgMp').value = sumRow ? fmtKg(sumRow.kg_mp_asignado) : '-';
 
+  mezCargar();
   loadTurnoList();
+}
+
+/* ================= MEZCLA DE LOTES (2 o más lotes que funcionan como uno) ================= */
+let MEZ = { ids:new Set(), info:{} };
+function mezReparto(total, pesos){
+  let s = pesos.reduce((a, b) => a + b, 0), w = pesos;
+  if(!(s > 0)){ w = pesos.map(() => 1); s = w.length; }
+  let acum = 0;
+  return w.map((p, i) => { const v = i === w.length - 1 ? Math.round((total - acum) * 100) / 100 : Math.round(total * p / s * 100) / 100; acum += v; return v; });
+}
+function mezGrupo(){ return [loteActivoId].concat(Array.from(MEZ.ids).filter(id => id !== loteActivoId && MEZ.info[id])); }
+function mezPesos(ids){ return ids.map(id => Number((MEZ.info[id] || {}).kg_mp_asignado || 0)); }
+async function mezCargar(){
+  MEZ.ids = new Set(); MEZ.info = {};
+  const { data } = await sb.from('v_resumen_lotes').select('*').eq('estado', 'EN_PROCESO');
+  (data || []).forEach(l => { MEZ.info[l.lote_id] = l; });
+  mezRender();
+}
+function mezToggle(id, on){ if(on) MEZ.ids.add(id); else MEZ.ids.delete(id); mezRender(); }
+function mezRender(){
+  const box = document.getElementById('mezBox'); if(!box) return;
+  const otros = Object.keys(MEZ.info).filter(id => id !== loteActivoId).sort((a, b) => String(a).localeCompare(String(b), 'es', {numeric:true}));
+  const g = mezGrupo(), pesos = mezPesos(g), tot = pesos.reduce((a, b) => a + b, 0);
+  const cf = document.getElementById('cfKgMp'); if(cf) cf.value = fmtKg(tot || (MEZ.info[loteActivoId] ? MEZ.info[loteActivoId].kg_mp_asignado : 0));
+  const aviso = document.getElementById('mezAviso'), aviso2 = document.getElementById('mezAviso2');
+  const txt = g.length > 1 ? 'Mezcla: ' + g.map(mpEsc).join(' + ') + ' · lo que cargues vale para toda la mezcla y se reparte entre los lotes.' : '';
+  [aviso, aviso2].forEach(a => { if(a){ a.textContent = ''; a.innerHTML = txt; a.style.display = txt ? 'block' : 'none'; } });
+  if(!otros.length){ box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'block';
+  const filaRep = g.length > 1 ? `<div class="mez-rep">${g.map((id, i) => `<span><b>${mpEsc(id)}</b> ${fmtKg(pesos[i])} MP · ${tot > 0 ? Math.round(pesos[i] / tot * 100) : Math.round(100 / g.length)}%</span>`).join('')}</div>` : '';
+  box.innerHTML = `<div class="mez"><div class="mez-h"><b>¿Se procesa mezclado con otro lote?</b><span>Tildá los lotes que funcionan como uno. Los kg y mermas se cargan una sola vez y se reparten según la MP de cada lote.</span></div>
+    <div class="mez-lista">${otros.map(id => { const l = MEZ.info[id]; return `<label class="mez-item${MEZ.ids.has(id) ? ' on' : ''}"><input type="checkbox" ${MEZ.ids.has(id) ? 'checked' : ''} onchange="mezToggle('${mpEsc(id)}',this.checked)"><span><b>${mpEsc(id)}</b><small>${mpEsc(l.producto || '')}${l.categoria ? ' · ' + mpEsc(l.categoria) : ''} · ${fmtKg(l.kg_mp_asignado)} MP</small></span></label>`; }).join('')}</div>${filaRep}</div>`;
 }
 
 async function submitTurno(e){ e.preventDefault(); return _once('turno', _submitTurno, e); }
 async function _submitTurno(e){
-  const payload = Object.fromEntries(new FormData(e.target).entries());
-  payload.lote_id = loteActivoId;
-  payload.kg_reales_procesados = payload.kg_reales_procesados === '' ? null : Number(payload.kg_reales_procesados);
-  payload.mermas_kg = payload.mermas_kg === '' ? 0 : Number(payload.mermas_kg);
-  payload.ajustado_por = usuario || null;
+  const f = Object.fromEntries(new FormData(e.target).entries());
+  const grupo = mezGrupo(), pesos = mezPesos(grupo);
+  const kgTot = f.kg_reales_procesados === '' ? null : Number(f.kg_reales_procesados);
+  const merTot = f.mermas_kg === '' ? 0 : Number(f.mermas_kg);
+  const kgs = kgTot == null ? grupo.map(() => null) : mezReparto(kgTot, pesos);
+  const mers = mezReparto(merTot, pesos);
+  const mez = grupo.length > 1;
+  const obsMez = mez ? 'Mezcla ' + grupo.join(' + ') + ' (total ' + fmtKg(kgTot) + ', mermas ' + fmtKg(merTot) + ').' : '';
+  const obs = [obsMez, (f.observaciones || '').trim()].filter(Boolean).join(' ');
+  const filas = grupo.map((id, i) => ({ lote_id:id, fecha:f.fecha, turno:f.turno, kg_reales_procesados:kgs[i], mermas_kg:mers[i], observaciones:obs, ajustado_por:usuario || null }));
 
-  const prev = await sb.from('lote_turno_cierre').select('*').eq('lote_id', loteActivoId).eq('fecha', payload.fecha).eq('turno', payload.turno);
-  const hay = prev && prev.data && prev.data[0];
-  if(hay && !confirm('Ya hay un ajuste cargado para ' + (payload.turno === 'DIA' ? 'el turno Día' : 'el turno Noche') + ' de esa fecha (' + fmtKg(hay.kg_reales_procesados) + ', mermas ' + fmtKg(hay.mermas_kg) + '). ¿Reemplazarlo con estos datos?')) return;
-  const { error } = await sb.from('lote_turno_cierre').upsert(payload, {onConflict:'lote_id,fecha,turno'});
+  const previos = [];
+  for(const id of grupo){
+    const prev = await sb.from('lote_turno_cierre').select('*').eq('lote_id', id).eq('fecha', f.fecha).eq('turno', f.turno);
+    const hay = prev && prev.data && prev.data[0];
+    if(hay) previos.push(id + ' (' + fmtKg(hay.kg_reales_procesados) + ', mermas ' + fmtKg(hay.mermas_kg) + ')');
+  }
+  if(previos.length && !confirm('Ya hay un ajuste cargado para ' + (f.turno === 'DIA' ? 'el turno Día' : 'el turno Noche') + ' de esa fecha en: ' + previos.join('; ') + '. ¿Reemplazarlo?')) return;
+  const { error } = await sb.from('lote_turno_cierre').upsert(filas, {onConflict:'lote_id,fecha,turno'});
   if(error){ toast('Error: ' + error.message, 'err'); return; }
-  toast('Ajuste de turno guardado', 'ok');
+  toast(mez ? 'Ajuste de turno guardado en ' + grupo.length + ' lotes (mezcla)' : 'Ajuste de turno guardado', 'ok');
   loadTurnoList();
 }
 
@@ -1665,28 +2166,38 @@ async function cerrarLoteFinal(){ return _once('cierre', _cerrarLoteFinal); }
 async function _cerrarLoteFinal(){
   const kgProc = parseFloat(document.getElementById('cfKgProc').value);
   if(!kgProc){ toast('Cargá el kg procesado total', 'err'); return; }
-  if(!confirm('¿Cerrar definitivamente el lote ' + loteActivoId + '? No se puede deshacer desde acá.')) return;
+  const grupo = mezGrupo(), mez = grupo.length > 1;
+  if(!confirm(mez ? '¿Cerrar definitivamente la mezcla ' + grupo.join(' + ') + '? Se cierran los ' + grupo.length + ' lotes juntos y no se puede deshacer desde acá.' : '¿Cerrar definitivamente el lote ' + loteActivoId + '? No se puede deshacer desde acá.')) return;
 
-  const { data: sumRow } = await sb.from('v_resumen_lotes').select('*').eq('lote_id', loteActivoId).single();
-  const payload = {
-    lote_id: loteActivoId,
-    kg_ingresado_mp: sumRow ? sumRow.kg_mp_asignado : 0,
-    kg_procesado_total: kgProc,
-    mermas_totales_kg: parseFloat(document.getElementById('cfMermas').value) || null,
+  const mps = [];
+  for(const id of grupo){
+    const { data: sumRow } = await sb.from('v_resumen_lotes').select('*').eq('lote_id', id).single();
+    mps.push(sumRow ? Number(sumRow.kg_mp_asignado || 0) : 0);
+  }
+  const merTot = parseFloat(document.getElementById('cfMermas').value);
+  const kgs = mezReparto(kgProc, mps);
+  const mers = isNaN(merTot) || !merTot ? grupo.map(() => null) : mezReparto(merTot, mps);
+  const dif = document.getElementById('cfDif').value || '';
+  const difMez = mez ? 'Mezcla ' + grupo.join(' + ') + ' (total procesado ' + fmtKg(kgProc) + (merTot ? ', mermas ' + fmtKg(merTot) : '') + ').' : '';
+  const filas = grupo.map((id, i) => ({
+    lote_id: id,
+    kg_ingresado_mp: mps[i],
+    kg_procesado_total: kgs[i],
+    mermas_totales_kg: mers[i],
     analisis_mp_resumen: document.getElementById('cfAnalisisMp').value || null,
     analisis_pt_resumen: document.getElementById('cfAnalisisPt').value || null,
-    diferencia_analisis: document.getElementById('cfDif').value || null,
+    diferencia_analisis: [difMez, dif].filter(Boolean).join(' ') || null,
     cerrado_por: usuario || null
-  };
-  const { error } = await sb.from('lote_cierre').insert(payload);
-  if(error){ toast(_esDup(error) ? 'Este lote ya fue cerrado' : 'Error: ' + error.message, 'err'); return; }
-  toast('Lote ' + loteActivoId + ' cerrado', 'ok');
+  }));
+  const { error } = await sb.from('lote_cierre').insert(filas);
+  if(error){ toast(_esDup(error) ? (mez ? 'Alguno de los lotes ya fue cerrado' : 'Este lote ya fue cerrado') : 'Error: ' + error.message, 'err'); return; }
+  toast(mez ? 'Mezcla cerrada: ' + grupo.join(' + ') : 'Lote ' + loteActivoId + ' cerrado', 'ok');
   renderCierre();
 }
 
 async function renderResumen(){
   const main = document.getElementById('main');
-  main.innerHTML = `<div class="card"><h2>${ICONS.resumen} Resumen de producción</h2>
+  main.innerHTML = `<div class="card"><div class="res-h"><h2>${ICONS.resumen} Resumen de producción</h2><button class="btn secondary" type="button" onclick="resumenExport()">Exportar a Excel</button></div>
   <div id="resumenBody"><div class="empty">Cargando...</div></div></div>`;
 
   const { data, error } = await sb.from('v_resumen_lotes').select('*').order('fecha_creacion',{ascending:false});
@@ -1695,6 +2206,7 @@ async function renderResumen(){
   if(error){ el.innerHTML = `<div class="empty">Error: ${error.message}</div>`; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay lotes.</div>'; return; }
 
+  RES_ROWS = data; RES_LAB = labDe;
   const totalMp = data.reduce((a,r)=>a+(Number(r.kg_mp_asignado)||0),0);
   const totalProc = data.reduce((a,r)=>a+(Number(r.kg_procesado_total)||0),0);
   const cerrados = data.filter(r=>r.estado==='CERRADO').length;
