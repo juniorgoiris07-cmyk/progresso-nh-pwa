@@ -483,6 +483,36 @@
   @keyframes dSpin{to{transform:rotate(360deg);}}
   .dash-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
   .dash-kpis.k5 .dkpi:last-child{grid-column:1/-1;}
+  .dkpi-btn{font:inherit;text-align:left;cursor:pointer;width:100%;color:inherit;}
+  .dkpi-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .dkpi-btn .dprog-l{color:var(--accent-dark);font-weight:700;}
+  .dtr{position:fixed;inset:0;z-index:400;background:rgba(23,21,15,.55);display:none;align-items:center;justify-content:center;padding:16px;}
+  .dtr.on{display:flex;}
+  .dtr-box{background:var(--card);border-radius:16px;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(23,21,15,.25);overflow:hidden;}
+  .dtr-h{display:flex;align-items:center;gap:8px;padding:14px 14px 12px;border-bottom:1px solid var(--gridline);}
+  .dtr-t{flex:1;min-width:0;text-align:center;}
+  .dtr-t h3{margin:0;font-size:17px;color:var(--text-primary);}
+  .dtr-t small{font-size:12px;color:var(--text-secondary);}
+  .dtr-b{width:38px;height:38px;border-radius:10px;border:1px solid var(--gridline);background:var(--card);color:var(--text-primary);font-size:20px;line-height:1;cursor:pointer;flex:none;}
+  .dtr-b:disabled{opacity:.35;cursor:default;}
+  .dtr-b.x{border-color:transparent;font-size:22px;}
+  .dtr-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 14px;}
+  .dtr-sum div{background:var(--surface-2);border-radius:10px;padding:9px 10px;min-width:0;}
+  .dtr-sum b{display:block;font-size:20px;color:var(--text-primary);font-variant-numeric:tabular-nums;line-height:1.15;}
+  .dtr-sum span{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);}
+  .dtr-sum small{display:block;font-size:11.5px;color:var(--text-secondary);margin-top:1px;}
+  .dtr-list{overflow:auto;padding:0 14px 14px;}
+  .dtr-row{display:grid;grid-template-columns:62px 1fr auto;gap:4px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--gridline);}
+  .dtr-d{font-size:15px;font-weight:800;color:var(--text-primary);line-height:1.15;}
+  .dtr-d small{display:block;font-size:11.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;}
+  .dtr-m{font-size:13px;color:var(--text-primary);font-weight:700;}
+  .dtr-m small{display:block;font-size:12px;font-weight:400;color:var(--text-secondary);}
+  .dtr-c{display:flex;gap:6px;justify-content:flex-end;}
+  .dtr-chip{font-size:12px;font-weight:800;border-radius:999px;padding:4px 10px;}
+  .dtr-chip.d{background:#f1ead2;color:var(--accent-dark);}
+  .dtr-chip.n{background:#e4e0d4;color:var(--text-primary);}
+  .dtr-vacio{padding:26px 14px 30px;text-align:center;color:var(--text-secondary);font-size:14px;}
+  @media (max-width:520px){.dtr{padding:10px;}.dtr-sum{grid-template-columns:repeat(2,1fr);}.dtr-row{grid-template-columns:54px 1fr;}.dtr-c{grid-column:1 / -1;justify-content:flex-start;}}
   .dkpi{background:var(--card);border:1px solid var(--gridline);border-radius:14px;padding:15px 16px 14px;min-width:0;display:flex;flex-direction:column;transition:border-color .2s,transform .2s,box-shadow .2s;}
   .dkpi:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 18px rgba(23,21,15,.07);}
   .dkpi .l{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);display:flex;flex-direction:column;gap:2px;}
@@ -608,7 +638,7 @@
   .dash.anim .dprog i,.canim .dbar-f,.canim .dlote-bar i,.dash.anim .dlote-bar i,.dash.anim .dbar-f{animation:dGrowX .9s cubic-bezier(.2,.7,.2,1) .35s both;}
   .canim .dsl{animation:dSweep .9s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--k) * 90ms);}
   @media (prefers-reduced-motion:reduce){.dash *,.dash *::before,.dash *::after,.canim *{animation:none !important;transition:none !important;}}
-  @media (min-width:760px){.dash-kpis.k4{grid-template-columns:repeat(4,1fr);}.dash-kpis.k5{grid-template-columns:repeat(6,1fr);}.dash-kpis.k5 .dkpi{grid-column:span 2;}.dash-kpis.k5 .dkpi:nth-child(n+4){grid-column:span 3;}}
+  @media (min-width:760px){.dash-kpis.k6{grid-template-columns:repeat(3,1fr);}.dash-kpis.k4{grid-template-columns:repeat(4,1fr);}.dash-kpis.k5{grid-template-columns:repeat(6,1fr);}.dash-kpis.k5 .dkpi{grid-column:span 2;}.dash-kpis.k5 .dkpi:nth-child(n+4){grid-column:span 3;}}
   @media (min-width:1180px){.dash-kpis.k5{grid-template-columns:repeat(5,1fr);}.dash-kpis.k5 .dkpi,.dash-kpis.k5 .dkpi:nth-child(n+4){grid-column:auto;}}
   @media (min-width:960px){.dash-grid{grid-template-columns:1fr 1fr;}.dash-grid .dwide{grid-column:1/-1;}}
   @media (max-width:520px){.dlote{grid-template-columns:1fr 92px;}.dlote-bar{display:none;}.dbar{grid-template-columns:92px 1fr 56px;gap:10px;}.dcard{padding:15px;}.dkpi .n{font-size:25px;}}
@@ -685,7 +715,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v36';
+const APP_VERSION = 'v37';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -754,6 +784,7 @@ async function onLogin(session){
     navInitialized = true;
     history.replaceState({view:'home'}, '');
     window.addEventListener('popstate', (e) => {
+      diasCerrar();
       const view = e.state ? e.state.view : 'home';
       if(sheetOpen){ sheetPushed = false; cerrarMas(true); return; }
       if(skipPop){ skipPop = false; return; }
@@ -887,7 +918,7 @@ let activeTab = null;
 let navInitialized = false;
 
 /* ================= PANEL DE INICIO ================= */
-const DASH = { rec:[], silos:[], lotes:[], bbs:[], labs:{}, ok:false, anio:null, mes:null, tok:0, ts:0, metrica:'t', hideBar:{}, hideCal:{}, todosSilos:false, abierto:-1, pintado:false };
+const DASH = { rec:[], silos:[], lotes:[], bbs:[], tcs:[], labs:{}, ok:false, anio:null, mes:null, tok:0, ts:0, metrica:'t', hideBar:{}, hideCal:{}, todosSilos:false, abierto:-1, pintado:false };
 const D_MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const D_MES3 = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const D_MES1 = ['E','F','M','A','M','J','J','A','S','O','N','D'];
@@ -924,15 +955,16 @@ async function renderDash(forzar){
   const tok = ++DASH.tok;
   if(!DASH.ok) host.innerHTML = `<div class="dash"><div class="dash-kpis">${'<div class="dkpi dskel"><i></i><i></i><i></i></div>'.repeat(4)}</div><div class="dash-grid">${'<div class="dcard dskel"><i></i><i></i><i></i><i></i></div>'.repeat(4)}</div></div>`;
   try{
-    const [rec, silos, lotes, bbs, lb] = await Promise.all([
+    const [rec, silos, lotes, bbs, lb, tcs] = await Promise.all([
       dashAll('recepcion_mp', 'id,nro_boleta,fecha,proveedor,silo_bolsa_id,peso_neto_kg,kg_liquido_carga,kg_liquido_usado,pct_humedad,pct_impureza_gruesa,pct_impureza_fina,estado,laboratorio', 'fecha'),
       dashAll('silos_bolsa', '*', 'creado_en'),
       dashAll('v_resumen_lotes', '*', 'fecha_creacion'),
-      dashAll('produccion_bigbag', 'lote_id,fecha,mezcla_id', 'fecha'),
-      dashAll('lotes', 'id,codigo_lab', 'creado_en')
+      dashAll('produccion_bigbag', 'lote_id,fecha,turno,mezcla_id', 'fecha'),
+      dashAll('lotes', 'id,codigo_lab', 'creado_en'),
+      dashAll('lote_turno_cierre', 'lote_id,fecha,turno,kg_reales_procesados', 'fecha')
     ]);
     if(tok !== DASH.tok) return;
-    DASH.rec = rec; DASH.silos = silos; DASH.lotes = lotes; DASH.bbs = bbs;
+    DASH.rec = rec; DASH.silos = silos; DASH.lotes = lotes; DASH.bbs = bbs; DASH.tcs = tcs;
     DASH.labs = {}; lb.forEach(l => { DASH.labs[l.id] = l.codigo_lab; });
     if(!DASH.ok){ const r = dRefMes(); DASH.anio = Number(r.slice(0,4)); DASH.mes = Number(r.slice(5,7)); }
     const anim = forzar === false ? false : (!DASH.pintado || forzar === true || (Date.now() - DASH.ts > 60000));
@@ -1099,6 +1131,67 @@ function dDonaHi(host, i){
 }
 
 /* ---- tarjetas ---- */
+/* ---- días trabajados (contador del panel + detalle) ---- */
+const DIAS = { k:null, abierto:false };
+function diasData(k){
+  const mapa = {};
+  const dia = f => (mapa[f] = mapa[f] || { f, turnos:new Set(), mez:new Set(), bb:0, kg:0, lotes:new Set() });
+  (DASH.bbs || []).forEach(b => {
+    if(!b.fecha || dKey(b.fecha) !== k) return;
+    const d = dia(String(b.fecha).slice(0,10));
+    if(b.turno) d.turnos.add(b.turno);
+    if(b.mezcla_id){ if(!d.mez.has(b.mezcla_id)){ d.mez.add(b.mezcla_id); d.bb++; } } else d.bb++;
+    d.lotes.add(b.lote_id);
+  });
+  (DASH.tcs || []).forEach(t => {
+    if(!t.fecha || dKey(t.fecha) !== k || !(Number(t.kg_reales_procesados) > 0)) return;
+    const d = dia(String(t.fecha).slice(0,10));
+    if(t.turno) d.turnos.add(t.turno);
+    d.kg += Number(t.kg_reales_procesados);
+    d.lotes.add(t.lote_id);
+  });
+  const dias = Object.values(mapa).sort((a, b) => b.f.localeCompare(a.f));
+  const cnt = t => dias.filter(d => d.turnos.has(t)).length;
+  return { dias, turnos:dias.reduce((a, d) => a + d.turnos.size, 0), dia:cnt('DIA'), noche:cnt('NOCHE'), bb:dias.reduce((a, d) => a + d.bb, 0), kg:dias.reduce((a, d) => a + d.kg, 0) };
+}
+function diasMesMin(){
+  let m = null;
+  (DASH.bbs || []).forEach(b => { if(b.fecha){ const k = dKey(b.fecha); if(!m || k < m) m = k; } });
+  (DASH.tcs || []).forEach(t => { if(t.fecha && Number(t.kg_reales_procesados) > 0){ const k = dKey(t.fecha); if(!m || k < m) m = k; } });
+  return m;
+}
+function diasAbrir(k){ DIAS.k = k || dRefMes(); DIAS.abierto = true; diasModal(); }
+function diasCerrar(){ DIAS.abierto = false; const m = document.getElementById('dtr'); if(m) m.classList.remove('on'); }
+function diasMes(delta){
+  const k = DIAS.k || dRefMes(), d = new Date(Number(k.slice(0,4)), Number(k.slice(5,7)) - 1 + delta, 1);
+  const nk = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2,'0'), min = diasMesMin();
+  if(nk > dRefMes() || (min && nk < min)) return;
+  DIAS.k = nk; diasModal();
+}
+function diasModal(){
+  let m = document.getElementById('dtr');
+  if(!m){
+    m = document.createElement('div');
+    m.id = 'dtr'; m.className = 'dtr'; m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true'); m.setAttribute('aria-label','Días trabajados');
+    m.addEventListener('click', e => { if(e.target === m) diasCerrar(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape' && DIAS.abierto) diasCerrar(); });
+    document.body.appendChild(m);
+  }
+  const k = DIAS.k || dRefMes(), D = diasData(k), min = diasMesMin();
+  const nombre = D_MESES[Number(k.slice(5,7)) - 1] + ' ' + k.slice(0,4);
+  const antes = !!min && k > min, desp = k < dRefMes();
+  const fila = d => {
+    const dt = new Date(d.f + 'T00:00:00');
+    const sem = dt.toLocaleDateString('es-PY', { weekday:'short' }).replace('.', '');
+    const lotes = Array.from(d.lotes).sort((a, b) => String(a).localeCompare(String(b), 'es', {numeric:true})).map(mpEsc).join(' · ');
+    return `<div class="dtr-row"><div class="dtr-d">${dt.getDate()}<small>${mpEsc(sem)}</small></div><div class="dtr-m">${d.bb ? d.bb + ' bigbag' + (d.bb===1?'':'s') : 'Sin bigbags'}${d.kg > 0 ? ' · ' + dT(d.kg) + ' t procesadas' : ''}<small>${lotes}</small></div><div class="dtr-c">${d.turnos.has('DIA') ? '<span class="dtr-chip d">Día</span>' : ''}${d.turnos.has('NOCHE') ? '<span class="dtr-chip n">Noche</span>' : ''}</div></div>`;
+  };
+  m.innerHTML = `<div class="dtr-box"><div class="dtr-h"><button type="button" class="dtr-b" onclick="diasMes(-1)" ${antes ? '' : 'disabled'} aria-label="Mes anterior">‹</button><div class="dtr-t"><h3>${nombre}</h3><small>Días trabajados</small></div><button type="button" class="dtr-b" onclick="diasMes(1)" ${desp ? '' : 'disabled'} aria-label="Mes siguiente">›</button><button type="button" class="dtr-b x" onclick="diasCerrar()" aria-label="Cerrar">×</button></div>
+    <div class="dtr-sum"><div><span>Días</span><b>${D.dias.length}</b></div><div><span>Turnos</span><b>${D.turnos}</b><small>${D.dia} día · ${D.noche} noche</small></div><div><span>Bigbags</span><b>${D.bb}</b></div><div><span>Procesado</span><b>${D.kg > 0 ? dT(D.kg) + ' t' : '—'}</b></div></div>
+    ${D.dias.length ? '<div class="dtr-list">' + D.dias.map(fila).join('') + '</div>' : '<div class="dtr-vacio">No hay días trabajados cargados en este mes.</div>'}</div>`;
+  m.classList.add('on');
+}
+
 function dashPintar(anim){
   const host = document.getElementById('homeDash'); if(!host) return;
   const h = hoyLocal(), hoyK = dKey(h), refK = dRefMes(), prevK = dMesAnterior(refK);
@@ -1128,11 +1221,13 @@ function dashPintar(anim){
   const hora = new Date(DASH.ts || Date.now()).toLocaleTimeString('es-PY', { hour:'2-digit', minute:'2-digit' });
   const saludo = (() => { const hh = new Date().getHours(); return hh < 12 ? 'Buen día' : hh < 19 ? 'Buenas tardes' : 'Buenas noches'; })();
 
-  const kpis = `<div class="dash-kpis ${cerr.length ? 'k5' : 'k4'}">
+  const dT0 = diasData(refK), diasTrans = refK === hoyK ? diaHoy : new Date(Number(refK.slice(0,4)), Number(refK.slice(5,7)), 0).getDate();
+  const kpis = `<div class="dash-kpis ${cerr.length ? 'k6' : 'k5'}">
     <div class="dkpi" style="--i:0"><div class="l">Recibido en ${mesRefNom.toLowerCase()}</div><div class="n">${dCu(kgRef/1000, 1, 't')} ${recRef.length ? dChip(dPct(kgRef, kgPrevP), `vs ${refK === hoyK ? 'el mismo período (1 al ' + diaHoy + ')' : 'el mes anterior'} de ${D_MESES[Number(prevK.slice(5,7)) - 1].toLowerCase()}: ${dT(kgPrevP)} t`) : ''}</div><div class="s">${recRef.length ? recRef.length + ' carga' + (recRef.length===1?'':'s') + ' · ' + dT(kgRef / recRef.length) + ' t por carga' : 'Sin recepciones este mes' + (kgPrev > 0 ? ' · ' + D_MESES[Number(prevK.slice(5,7)) - 1].toLowerCase() + ': ' + dT(kgPrev) + ' t' : '')}</div>${dSpark(serie6, D_COL[0])}</div>
     <div class="dkpi" style="--i:1"><div class="l">Recibido en ${anioRef}</div><div class="n">${dCu(kgAnio/1000, 1, 't')}</div><div class="s">${recAnio.length} cargas · ${provAnio} proveedor${provAnio===1?'':'es'}</div>${dMiniBarras(mAn.rec.map(v => v/1000), D_COL[1], Number(refK.slice(5,7)) - 1)}</div>
     <div class="dkpi" style="--i:2"><div class="l">Stock sin asignar</div><div class="n">${dCu(stock/1000, 1, 't')}</div><div class="s">${libres.length} carga${libres.length===1?'':'s'} libres${libres.length ? ' · la más vieja, ' + masVieja + ' días' : ''}</div><div class="dprog" title="${dN(pctStock,0)}% de lo recibido sigue sin asignar"><i style="--w:${Math.min(100, pctStock).toFixed(1)}%"></i></div><div class="dprog-l">${dN(pctStock,0)}% de lo recibido</div></div>
     <div class="dkpi" style="--i:3"><div class="l">Lotes en proceso</div><div class="n">${dCu(enProc.length, 0)}</div><div class="s">${dT(kgEnProc)} t de MP asignada · ${bbEnProc} bigbag${bbEnProc===1?'':'s'}</div><div class="dprog"><i style="--w:${enProc.length ? Math.round(enProc.filter(l => conBB.has(l.lote_id)).length / enProc.length * 100) : 0}%"></i></div><div class="dprog-l">${enProc.filter(l => conBB.has(l.lote_id)).length} de ${enProc.length} ya registran bigbags</div></div>
+    <button type="button" class="dkpi dkpi-btn" style="--i:4" onclick="diasAbrir()" aria-label="Ver detalle de días trabajados"><div class="l">Días trabajados en ${mesRefNom.toLowerCase()}</div><div class="n">${dCu(dT0.dias.length, 0)}<span class="u">de ${diasTrans} día${diasTrans===1?'':'s'}</span></div><div class="s">${dT0.dias.length ? dT0.turnos + ' turno' + (dT0.turnos===1?'':'s') + ' · ' + dT0.bb + ' bigbag' + (dT0.bb===1?'':'s') : 'Todavía no hay producción cargada este mes'}</div><div class="dprog"><i style="--w:${diasTrans ? Math.round(dT0.dias.length / diasTrans * 100) : 0}%"></i></div><div class="dprog-l">Ver detalle por día y turno ›</div></button>
     ${cerr.length ? `<div class="dkpi" style="--i:4"><div class="l">Rendimiento ${anioHoy}</div><div class="n">${rend == null ? '<span class="dnil">—</span>' : dCu(rend, 1, '%')}</div><div class="s">${cerr.length ? dT(kgProc) + ' t procesadas · ' + cerr.length + ' lote' + (cerr.length===1?'':'s') + ' cerrado' + (cerr.length===1?'':'s') : 'Aparece al cerrar el primer lote'}</div><div class="dprog ok"><i style="--w:${rend == null ? 0 : Math.min(100, rend).toFixed(1)}%"></i></div><div class="dprog-l">${rend == null ? 'Sin lotes cerrados' : 'de la MP ingresada'}</div></div>` : ''}
   </div>`;
 
@@ -1155,6 +1250,7 @@ function dashPintar(anim){
   dashSilos(libres);
   dashGraficos(anim);
   dLegSync();
+  if(DIAS.abierto) diasModal();
 }
 
 function dashAtencion(libres){
@@ -1471,6 +1567,7 @@ function goHome(push){
 }
 
 function goTab(id){
+  diasCerrar();
   if(!puedeVer(id)){ cerrarMas(); sinAcceso(id); return; }
   navTok++;
   _dirty = false;
