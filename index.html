@@ -485,7 +485,7 @@
   .dash-kpis.k5 .dkpi:last-child{grid-column:1/-1;}
   .dkpi-btn{font:inherit;text-align:left;cursor:pointer;width:100%;color:inherit;}
   .dkpi-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
-  .dkpi-btn .dprog-l{color:var(--accent-dark);font-weight:700;}
+  .dkpi-btn .dprog-l{color:var(--accent-dark);font-weight:700;margin-top:12px;}
   .dtr{position:fixed;inset:0;z-index:400;background:rgba(23,21,15,.55);display:none;align-items:center;justify-content:center;padding:16px;}
   .dtr.on{display:flex;}
   .dtr-box{background:var(--card);border-radius:16px;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(23,21,15,.25);overflow:hidden;}
@@ -715,7 +715,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v38';
+const APP_VERSION = 'v39';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -1221,13 +1221,13 @@ function dashPintar(anim){
   const hora = new Date(DASH.ts || Date.now()).toLocaleTimeString('es-PY', { hour:'2-digit', minute:'2-digit' });
   const saludo = (() => { const hh = new Date().getHours(); return hh < 12 ? 'Buen día' : hh < 19 ? 'Buenas tardes' : 'Buenas noches'; })();
 
-  const dT0 = diasData(refK), diasTrans = refK === hoyK ? diaHoy : new Date(Number(refK.slice(0,4)), Number(refK.slice(5,7)), 0).getDate();
+  const dT0 = diasData(refK);
   const kpis = `<div class="dash-kpis ${cerr.length ? 'k6' : 'k5'}">
     <div class="dkpi" style="--i:0"><div class="l">Recibido en ${mesRefNom.toLowerCase()}</div><div class="n">${dCu(kgRef/1000, 1, 't')} ${recRef.length ? dChip(dPct(kgRef, kgPrevP), `vs ${refK === hoyK ? 'el mismo período (1 al ' + diaHoy + ')' : 'el mes anterior'} de ${D_MESES[Number(prevK.slice(5,7)) - 1].toLowerCase()}: ${dT(kgPrevP)} t`) : ''}</div><div class="s">${recRef.length ? recRef.length + ' carga' + (recRef.length===1?'':'s') + ' · ' + dT(kgRef / recRef.length) + ' t por carga' : 'Sin recepciones este mes' + (kgPrev > 0 ? ' · ' + D_MESES[Number(prevK.slice(5,7)) - 1].toLowerCase() + ': ' + dT(kgPrev) + ' t' : '')}</div>${dSpark(serie6, D_COL[0])}</div>
     <div class="dkpi" style="--i:1"><div class="l">Recibido en ${anioRef}</div><div class="n">${dCu(kgAnio/1000, 1, 't')}</div><div class="s">${recAnio.length} cargas · ${provAnio} proveedor${provAnio===1?'':'es'}</div>${dMiniBarras(mAn.rec.map(v => v/1000), D_COL[1], Number(refK.slice(5,7)) - 1)}</div>
     <div class="dkpi" style="--i:2"><div class="l">Stock sin asignar</div><div class="n">${dCu(stock/1000, 1, 't')}</div><div class="s">${libres.length} carga${libres.length===1?'':'s'} libres${libres.length ? ' · la más vieja, ' + masVieja + ' días' : ''}</div><div class="dprog" title="${dN(pctStock,0)}% de lo recibido sigue sin asignar"><i style="--w:${Math.min(100, pctStock).toFixed(1)}%"></i></div><div class="dprog-l">${dN(pctStock,0)}% de lo recibido</div></div>
     <div class="dkpi" style="--i:3"><div class="l">Lotes en proceso</div><div class="n">${dCu(enProc.length, 0)}</div><div class="s">${dT(kgEnProc)} t de MP asignada · ${bbEnProc} bigbag${bbEnProc===1?'':'s'}</div><div class="dprog"><i style="--w:${enProc.length ? Math.round(enProc.filter(l => conBB.has(l.lote_id)).length / enProc.length * 100) : 0}%"></i></div><div class="dprog-l">${enProc.filter(l => conBB.has(l.lote_id)).length} de ${enProc.length} ya registran bigbags</div></div>
-    <button type="button" class="dkpi dkpi-btn" style="--i:4" onclick="diasAbrir()" aria-label="Ver detalle de días trabajados"><div class="l">Días trabajados en ${mesRefNom.toLowerCase()}</div><div class="n">${dCu(dT0.dias.length, 0)}<span class="u">de ${diasTrans} día${diasTrans===1?'':'s'}</span></div><div class="s">${dT0.dias.length ? dT0.turnos + ' turno' + (dT0.turnos===1?'':'s') + ' · ' + dT0.bb + ' bigbag' + (dT0.bb===1?'':'s') : 'Todavía no hay producción cargada este mes'}</div><div class="dprog"><i style="--w:${diasTrans ? Math.round(dT0.dias.length / diasTrans * 100) : 0}%"></i></div><div class="dprog-l">Ver detalle por día y turno ›</div></button>
+    <button type="button" class="dkpi dkpi-btn" style="--i:4" onclick="diasAbrir()" aria-label="Ver detalle de días trabajados"><div class="l">Días trabajados en ${mesRefNom.toLowerCase()}</div><div class="n">${dCu(dT0.dias.length, 0)}</div><div class="s">${dT0.dias.length ? dT0.turnos + ' turno' + (dT0.turnos===1?'':'s') + ' · ' + dT0.bb + ' bigbag' + (dT0.bb===1?'':'s') : 'Todavía no hay producción cargada este mes'}</div><div class="dprog-l">Ver detalle por día y turno ›</div></button>
     ${cerr.length ? `<div class="dkpi" style="--i:4"><div class="l">Rendimiento ${anioHoy}</div><div class="n">${rend == null ? '<span class="dnil">—</span>' : dCu(rend, 1, '%')}</div><div class="s">${cerr.length ? dT(kgProc) + ' t procesadas · ' + cerr.length + ' lote' + (cerr.length===1?'':'s') + ' cerrado' + (cerr.length===1?'':'s') : 'Aparece al cerrar el primer lote'}</div><div class="dprog ok"><i style="--w:${rend == null ? 0 : Math.min(100, rend).toFixed(1)}%"></i></div><div class="dprog-l">${rend == null ? 'Sin lotes cerrados' : 'de la MP ingresada'}</div></div>` : ''}
   </div>`;
 
