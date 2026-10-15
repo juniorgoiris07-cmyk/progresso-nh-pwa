@@ -400,6 +400,11 @@
   .auth-card{padding:30px 26px 4px;}
 
 
+
+  .verbar{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:350;background:var(--text-primary);color:#fff;border-radius:12px;padding:10px 12px 10px 16px;display:flex;align-items:center;gap:14px;font-size:13.5px;font-weight:700;box-shadow:0 8px 24px rgba(23,21,15,.28);max-width:calc(100vw - 32px);}
+  .verbar button{appearance:none;font-family:inherit;border:none;border-radius:9px;background:var(--accent);color:#fff;font-weight:800;font-size:13px;padding:8px 14px;cursor:pointer;}
+  @media(min-width:960px){.verbar{bottom:20px;}}
+
   /* ===== v34: pantallas bloqueadas por rol ===== */
   .vista-menu-card{position:relative;}
   .vista-menu-card.bloq{background:#e3e0d4;border-color:#d3cfc0;box-shadow:none;cursor:not-allowed;}
@@ -676,6 +681,7 @@
 </div>
 
 <script>
+const APP_VERSION = 'v35';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -815,7 +821,7 @@ function toast(msg, type){
   t.textContent = msg;
   box.appendChild(t);
   while(box.children.length > 3) box.firstChild.remove();
-  if(type === 'ok') vibrar(12); else if(type === 'err') vibrar([40,60,40]);
+  if(type === 'ok'){ vibrar(12); _dirty = false; } else if(type === 'err') vibrar([40,60,40]);
   t._t = setTimeout(()=>t.remove(), 3200);
 }
 
@@ -1446,6 +1452,8 @@ document.addEventListener('focusin', e => { if(e.target.matches && e.target.matc
 document.addEventListener('focusout', () => { setTimeout(()=>{ const a = document.activeElement; if(!(a && a.matches && a.matches('input,select,textarea'))) document.body.classList.remove('kb'); }, 120); });
 
 function goHome(push){
+  if(_verPend){ _recargarApp(); return; }
+  _dirty = false;
   activeTab = null;
   navExtra = 0;
   document.getElementById('homeMenu').classList.remove('hidden');
@@ -1461,6 +1469,7 @@ function goHome(push){
 function goTab(id){
   if(!puedeVer(id)){ cerrarMas(); sinAcceso(id); return; }
   navTok++;
+  _dirty = false;
   const prev = activeTab;
   const desdeSheet = sheetOpen;
   if(sheetOpen){ sheetOpen = false; document.getElementById('sheetBg').classList.remove('on'); document.getElementById('sheet').classList.remove('on'); }
@@ -2559,7 +2568,7 @@ async function loadUsuarios(){
   if(!data || !data.length){ el.innerHTML = '<div class="empty">No hay usuarios todavía.</div>'; return; }
   el.innerHTML = `<table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th><th></th></tr></thead><tbody>
     ${data.map(u => `<tr>
-      <td>${mpEsc(u.nombre||'-')}</td>
+      <td><input id="nom-${u.id}" type="text" value="${mpEsc(u.nombre||'')}" maxlength="60" placeholder="Nombre" aria-label="Nombre" style="margin:0;min-width:150px;"></td>
       <td>${mpEsc(u.email||'-')}</td>
       <td><select id="rol-${u.id}" style="width:auto;margin:0;"><option value="operario" ${u.rol==='operario'?'selected':''}>Operario</option><option value="laboratorio" ${u.rol==='laboratorio'?'selected':''}>Laboratorio</option><option value="admin" ${u.rol==='admin'?'selected':''}>Admin</option></select></td>
       <td><input type="checkbox" id="activo-${u.id}" style="width:auto;margin:0;" ${u.activo?'checked':''}></td>
@@ -2571,10 +2580,19 @@ async function loadUsuarios(){
 async function guardarUsuario(id){
   const rol = document.getElementById('rol-'+id).value;
   const activo = document.getElementById('activo-'+id).checked;
-  const { error } = await sb.from('perfiles').update({ rol, activo }).eq('id', id);
+  const nombre = String(document.getElementById('nom-'+id).value || '').trim().replace(/\s+/g, ' ');
+  if(!nombre){ toast('Escribí un nombre para este usuario', 'err'); return; }
+  const { error } = await sb.from('perfiles').update({ nombre, rol, activo }).eq('id', id);
   if(error){ toast('Error: ' + error.message, 'err'); return; }
   toast('Usuario actualizado', 'ok');
-  if(currentUser && id === currentUser.id){ miRol = rol; document.getElementById('upRol').textContent = rolLabel(miRol); renderHomeMenu(); renderNavbar(); }
+  if(currentUser && id === currentUser.id){
+    miRol = rol; usuario = nombre;
+    document.getElementById('upRol').textContent = rolLabel(miRol);
+    document.getElementById('usuarioChipText').textContent = usuario;
+    document.getElementById('avTxt').textContent = iniciales(usuario);
+    document.getElementById('upName').textContent = usuario;
+    renderHomeMenu(); renderNavbar();
+  }
   loadUsuarios();
 }
 
@@ -2736,6 +2754,50 @@ async function pwdGuardar(e){
 }
 
 initBotonPass();
+
+/* ===== auto-actualización: detecta una versión nueva publicada y recarga sola ===== */
+let _verPend = false, _verBusy = false, _verNueva = null, _dirty = false;
+['input','change'].forEach(ev => document.addEventListener(ev, e => { if(e.target && e.target.closest && e.target.closest('#main')) _dirty = true; }, true));
+document.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('#main .lt-chip,#main .lote-pill,#main input[type=checkbox]')) _dirty = true; }, true);
+function _campoActivo(){ const a = document.activeElement; return !!(a && a.matches && a.matches('input,textarea,select') && a.closest && a.closest('#main')); }
+function _recargarApp(){ try{ sessionStorage.setItem('nh_recarga_ver', String(_verNueva || '')); }catch(e){} location.reload(); }
+function _recargaFuerte(){
+  try{ if(navigator.serviceWorker) navigator.serviceWorker.getRegistration().then(r => { if(r) r.update(); }).catch(()=>{}); }catch(e){}
+  const fin = () => _recargarApp();
+  if(window.caches) caches.keys().then(ks => Promise.all(ks.map(k => caches.delete(k)))).then(fin, fin); else fin();
+}
+function _bannerVersion(){
+  if(document.getElementById('verBar')) return;
+  const b = document.createElement('div');
+  b.id = 'verBar'; b.className = 'verbar'; b.setAttribute('role','status');
+  b.innerHTML = '<span>Hay una versión nueva de la app</span><button type="button" onclick="_recargaFuerte()">Actualizar</button>';
+  document.body.appendChild(b);
+}
+function aplicarVersion(){
+  if(!_verPend) return;
+  let yaIntentada = false;
+  try{ yaIntentada = sessionStorage.getItem('nh_recarga_ver') === String(_verNueva); }catch(e){}
+  const seguro = !currentUser || activeTab === null || (!_dirty && !_campoActivo());
+  if(seguro && !_campoActivo() && !yaIntentada){ _recargarApp(); return; }
+  _bannerVersion();
+}
+async function verNuevaVersion(){
+  if(_verBusy || document.hidden || navigator.onLine === false) return;
+  _verBusy = true;
+  try{
+    const r = await fetch('index.html', { cache:'no-store' });
+    if(!r.ok) return;
+    const t = await r.text();
+    const m = t.match(/const APP_VERSION\s*=\s*'([^']+)'/);
+    if(m && m[1] !== APP_VERSION){ _verPend = true; _verNueva = m[1]; aplicarVersion(); }
+  }catch(e){}
+  finally{ _verBusy = false; }
+}
+setTimeout(verNuevaVersion, 8000);
+setInterval(() => { verNuevaVersion(); if(_verPend) aplicarVersion(); }, 90000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) setTimeout(() => { if(_verPend) aplicarVersion(); else verNuevaVersion(); }, 400); });
+window.addEventListener('focus', () => { if(_verPend) aplicarVersion(); else verNuevaVersion(); });
+window.addEventListener('online', verNuevaVersion);
 
 const RENDERERS = { mp: renderMP, silo: renderSilo, lote: renderLote, bigbag: renderBigbag, cierre: renderCierre, resumen: renderResumen, usuarios: renderUsuarios };
 
