@@ -399,11 +399,32 @@
   .auth-logo-img{display:block;width:230px;max-width:80%;height:auto;margin:4px auto 24px;}
   .auth-card{padding:30px 26px 4px;}
 
-  #homeMenu .vista-menu-grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;}
-  #homeMenu .vista-menu-card{padding:14px 8px;gap:8px;border-radius:14px;}
-  #homeMenu .vista-menu-card .vmc-icon{width:40px;height:40px;}
-  #homeMenu .vista-menu-card .vmc-icon svg{width:20px;height:20px;}
-  #homeMenu .vista-menu-card .vmc-label{font-size:12.5px;}
+  /* v33: accesos rápidos de inicio, tamaño cómodo */
+  #homeMenu .vista-menu-grid{grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px;}
+  #homeMenu .vista-menu-card{padding:20px 6px 16px;gap:10px;border-radius:14px;}
+  #homeMenu .vista-menu-card .vmc-icon{width:48px;height:48px;}
+  #homeMenu .vista-menu-card .vmc-icon svg{width:24px;height:24px;}
+  #homeMenu .vista-menu-card .vmc-label{font-size:13px;}
+  @media(max-width:599px){
+    #homeMenu .vista-menu-grid{grid-template-columns:1fr 1fr;gap:10px;}
+    #homeMenu .vista-menu-card{flex-direction:row;justify-content:flex-start;text-align:left;padding:12px 10px 12px 12px;gap:9px;}
+    #homeMenu .vista-menu-card .vmc-icon{width:36px;height:36px;flex:none;}
+    #homeMenu .vista-menu-card .vmc-icon svg{width:19px;height:19px;}
+    #homeMenu .vista-menu-card .vmc-label{font-size:13px;line-height:1.2;white-space:nowrap;}
+    #homeMenu .vista-menu-card:last-child:nth-child(odd){grid-column:1/-1;}
+  }
+  @media(min-width:600px){
+    #homeMenu .vista-menu-grid{grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:14px;}
+    #homeMenu .vista-menu-card{padding:26px 10px 22px;gap:12px;}
+    #homeMenu .vista-menu-card .vmc-label{font-size:14px;}
+  }
+  @media(min-width:960px){
+    #homeMenu .vista-menu-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:18px;}
+    #homeMenu .vista-menu-card{padding:34px 12px 28px;gap:16px;border-radius:12px;}
+    #homeMenu .vista-menu-card .vmc-icon{width:auto;height:auto;background:none;border-radius:0;}
+    #homeMenu .vista-menu-card .vmc-icon svg{width:40px;height:40px;stroke-width:1.5;}
+    #homeMenu .vista-menu-card .vmc-label{font-size:14.5px;}
+  }
 
   .res-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
   .res-h h2{margin:0;}
@@ -427,10 +448,6 @@
   .dash-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
   .dash-top h2{font-size:21px;font-weight:800;color:var(--text-primary);margin:0;letter-spacing:-.01em;}
   .dash-top p{margin:3px 0 0;font-size:13px;color:var(--text-secondary);}
-  .dref{appearance:none;font-family:inherit;display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--gridline);background:var(--card);color:var(--accent-dark);font-weight:800;font-size:13px;cursor:pointer;transition:border-color .2s,background .2s;}
-  .dref:hover{border-color:var(--accent);background:#f1ead2;}
-  .dref svg{width:16px;height:16px;}
-  .dref.spin svg{animation:dSpin .8s linear infinite;}
   @keyframes dSpin{to{transform:rotate(360deg);}}
   .dash-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
   .dash-kpis.k5 .dkpi:last-child{grid-column:1/-1;}
@@ -832,7 +849,6 @@ async function renderDash(forzar){
   if(!host) return;
   const tok = ++DASH.tok;
   if(!DASH.ok) host.innerHTML = `<div class="dash"><div class="dash-kpis">${'<div class="dkpi dskel"><i></i><i></i><i></i></div>'.repeat(4)}</div><div class="dash-grid">${'<div class="dcard dskel"><i></i><i></i><i></i><i></i></div>'.repeat(4)}</div></div>`;
-  const btn = document.getElementById('dRef'); if(btn) btn.classList.add('spin');
   try{
     const [rec, silos, lotes, bbs, lb] = await Promise.all([
       dashAll('recepcion_mp', 'id,nro_boleta,fecha,proveedor,silo_bolsa_id,peso_neto_kg,kg_liquido_carga,kg_liquido_usado,pct_humedad,pct_impureza_gruesa,pct_impureza_fina,estado,laboratorio', 'fecha'),
@@ -845,10 +861,11 @@ async function renderDash(forzar){
     DASH.rec = rec; DASH.silos = silos; DASH.lotes = lotes; DASH.bbs = bbs;
     DASH.labs = {}; lb.forEach(l => { DASH.labs[l.id] = l.codigo_lab; });
     if(!DASH.ok){ const r = dRefMes(); DASH.anio = Number(r.slice(0,4)); DASH.mes = Number(r.slice(5,7)); }
-    const anim = !DASH.pintado || forzar === true || (Date.now() - DASH.ts > 60000);
+    const anim = forzar === false ? false : (!DASH.pintado || forzar === true || (Date.now() - DASH.ts > 60000));
     DASH.ok = true; DASH.ts = Date.now();
     dashPintar(anim);
   }catch(e){
+    if(forzar === false && DASH.ok) return;
     host.innerHTML = '<div class="dash"><div class="dcard"><div class="empty">No se pudo cargar el panel: ' + mpEsc(e && e.message || e) + '</div></div></div>';
   }
 }
@@ -1046,7 +1063,7 @@ function dashPintar(anim){
   </div>`;
 
   host.innerHTML = `<div class="dash${anim ? ' anim' : ''}">
-    <div class="dash-top"><div><h2>${saludo}${usuario ? ', ' + mpEsc(String(usuario).split(' ')[0]) : ''}</h2><p>${hoyTxt.charAt(0).toUpperCase() + hoyTxt.slice(1)} · actualizado ${hora}</p></div><button type="button" id="dRef" class="dref" onclick="renderDash(true)" aria-label="Actualizar panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg><span>Actualizar</span></button></div>
+    <div class="dash-top"><div><h2>${saludo}${usuario ? ', ' + mpEsc(String(usuario).split(' ')[0]) : ''}</h2><p>${hoyTxt.charAt(0).toUpperCase() + hoyTxt.slice(1)} · actualizado ${hora}</p></div></div>
     ${kpis}
     <div class="dash-grid">
       <div class="dcard" id="dcAtencion" style="--i:5"></div>
@@ -1181,7 +1198,12 @@ function dashGraficos(anim, solo){
 })();
 let _dashRz = null;
 window.addEventListener('resize', () => { clearTimeout(_dashRz); _dashRz = setTimeout(() => { if(DASH.ok && document.getElementById('dGLinea') && document.getElementById('dGLinea').clientWidth) dashGraficos(false); }, 180); });
-setInterval(() => { const hm = document.getElementById('homeMenu'); if(DASH.ok && hm && !hm.classList.contains('hidden') && !document.hidden) renderDash(); }, 300000);
+/* actualización automática: cada 60 s con el inicio visible, y al volver a la app/pestaña */
+function dashAuto(minMs){ const hm = document.getElementById('homeMenu'); if(DASH.ok && hm && !hm.classList.contains('hidden') && !document.hidden && Date.now() - DASH.ts >= minMs) renderDash(false); }
+setInterval(() => dashAuto(50000), 60000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden) dashAuto(15000); });
+window.addEventListener('focus', () => dashAuto(15000));
+window.addEventListener('online', () => dashAuto(0));
 
 function renderHomeMenu(){
   const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
