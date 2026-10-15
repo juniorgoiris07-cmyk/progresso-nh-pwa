@@ -399,6 +399,29 @@
   .auth-logo-img{display:block;width:230px;max-width:80%;height:auto;margin:4px auto 24px;}
   .auth-card{padding:30px 26px 4px;}
 
+
+  /* ===== v34: pantallas bloqueadas por rol ===== */
+  .vista-menu-card{position:relative;}
+  .vista-menu-card.bloq{background:#e3e0d4;border-color:#d3cfc0;box-shadow:none;cursor:not-allowed;}
+  .vista-menu-card.bloq:hover,.vista-menu-card.bloq:active{background:#e3e0d4;border-color:#d3cfc0;box-shadow:none;transform:none;}
+  .vista-menu-card.bloq .vmc-icon,.vista-menu-card.bloq .vmc-label{opacity:.5;}
+  .vista-menu-card.bloq:hover .vmc-label{color:var(--text-secondary);}
+  .bloq-ic{position:absolute;top:8px;right:8px;width:17px;height:17px;color:var(--text-secondary);display:flex;}
+  .bloq-ic svg{width:100%;height:100%;}
+  .navb.bloq,.sb-item.bloq,.sheet-item.bloq,.gs-item.bloq{opacity:.45;cursor:not-allowed;}
+  .sb-item.bloq:hover,.sb-item.bloq:active{background:none;color:var(--text-secondary);}
+  .bloq-mini{display:inline-flex;margin-left:auto;flex:none;font-style:normal;}
+  .bloq-mini svg{width:14px;height:14px;}
+  .app-shell:not(.sb-open) .sb-item .bloq-mini{display:none;}
+  .nacc{position:fixed;inset:0;z-index:400;background:rgba(23,21,15,.55);display:none;align-items:center;justify-content:center;padding:20px;}
+  .nacc.on{display:flex;}
+  .nacc-box{background:var(--card);border-radius:16px;padding:26px 24px 22px;max-width:380px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(23,21,15,.25);}
+  .nacc-ic{width:54px;height:54px;border-radius:50%;background:var(--danger-bg);color:var(--danger);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+  .nacc-ic svg{width:26px;height:26px;}
+  .nacc-box h3{margin:0 0 8px;font-size:18px;color:var(--text-primary);}
+  .nacc-box p{margin:0 0 18px;font-size:14px;color:var(--text-secondary);line-height:1.45;}
+  .nacc-box .btn{width:100%;justify-content:center;}
+
   /* v33: accesos rápidos de inicio, tamaño cómodo */
   #homeMenu .vista-menu-grid{grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px;}
   #homeMenu .vista-menu-card{padding:20px 6px 16px;gap:10px;border-radius:14px;}
@@ -670,6 +693,7 @@ const ICONS = {
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
   usuarios: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  lock: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
   home: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>',
   mas: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>'
 };
@@ -709,12 +733,13 @@ async function onLogin(session){
   document.getElementById('usuarioChipText').textContent = usuario;
   document.getElementById('avTxt').textContent = iniciales(usuario);
   document.getElementById('upName').textContent = usuario;
-  document.getElementById('upRol').textContent = miRol === 'admin' ? 'Administrador' : 'Operario';
+  document.getElementById('upRol').textContent = rolLabel(miRol);
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('appShell').classList.remove('hidden');
   renderHomeMenu();
   document.getElementById('navbar').classList.remove('hidden');
   renderNavbar();
+  if(activeTab && !puedeVer(activeTab)) goHome(false);
   if(!navInitialized){
     navInitialized = true;
     history.replaceState({view:'home'}, '');
@@ -808,6 +833,45 @@ const TABS = [
   {id:'resumen', label:'Resumen', icon:ICONS.resumen},
 ];
 const TAB_ADMIN = {id:'usuarios', label:'Usuarios', icon:ICONS.usuarios};
+
+/* ===== roles y permisos por pantalla (tabs:null = todas) ===== */
+const ROLES = {
+  admin:       { label:'Administrador', tabs:null },
+  operario:    { label:'Operario',      tabs:null },
+  laboratorio: { label:'Laboratorio',   tabs:['bigbag'] }
+};
+const rolInfo = r => ROLES[r] || ROLES.operario;
+const rolLabel = r => rolInfo(r).label;
+function tabsMenu(){ return miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS; }
+function puedeVer(id){
+  if(id === 'home') return true;
+  if(id === 'usuarios') return miRol === 'admin';
+  const t = rolInfo(miRol).tabs;
+  return t ? t.includes(id) : true;
+}
+function accesoTxt(){
+  const t = rolInfo(miRol).tabs;
+  if(!t) return 'todas las pantallas';
+  const n = ['Inicio', ...TABS.filter(x => t.includes(x.id)).map(x => x.label)];
+  return n.length > 1 ? n.slice(0, -1).join(', ') + ' y ' + n[n.length - 1] : n[0];
+}
+function sinAcceso(id){
+  const f = [...TABS, TAB_ADMIN].find(x => x.id === id);
+  let m = document.getElementById('nacc');
+  if(!m){
+    m = document.createElement('div');
+    m.id = 'nacc'; m.className = 'nacc'; m.setAttribute('role','alertdialog'); m.setAttribute('aria-modal','true'); m.setAttribute('aria-labelledby','naccT');
+    m.innerHTML = '<div class="nacc-box"><div class="nacc-ic">' + ICONS.lock + '</div><h3 id="naccT">Sin acceso por rol</h3><p id="naccP"></p><button type="button" class="btn" id="naccB" onclick="cerrarSinAcceso()">Entendido</button></div>';
+    m.addEventListener('click', e => { if(e.target === m) cerrarSinAcceso(); });
+    document.body.appendChild(m);
+  }
+  document.getElementById('naccP').textContent = (f ? '«' + f.label + '»' : 'Esta pantalla') + ' no está habilitada para tu rol (' + rolLabel(miRol) + ').';
+  m.classList.add('on');
+  vibrar(20);
+  setTimeout(() => { const b = document.getElementById('naccB'); if(b) b.focus(); }, 30);
+}
+function cerrarSinAcceso(){ const m = document.getElementById('nacc'); if(m) m.classList.remove('on'); }
+document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarSinAcceso(); });
 
 let activeTab = null;
 let navInitialized = false;
@@ -1093,7 +1157,7 @@ function dashAtencion(libres){
   const sinBB = DASH.lotes.filter(l => l.estado === 'EN_PROCESO' && !conBB.has(l.lote_id) && dDias(l.fecha_creacion) > D_DIAS_BIGBAG).sort((a,b) => dDias(b.fecha_creacion) - dDias(a.fecha_creacion));
   if(sinBB.length) items.push({ sev:'warn', n:sinBB.length, t:`Lote${sinBB.length===1?'':'s'} en proceso sin bigbags hace más de ${D_DIAS_BIGBAG} días`, d:'Todavía no registran producción', go:'bigbag', ir:'Ir a Carga', rows:sinBB.slice(0,5).map(l => [mpEsc(l.lote_id) + (DASH.labs[l.lote_id] ? ' · ' + mpEsc(DASH.labs[l.lote_id]) : ''), dDias(l.fecha_creacion) + ' días', mpEsc(dCorto(l.producto,14))]), mas:sinBB.length - 5 });
   DASH.avisos = items;
-  const cuerpo = items.length ? items.map((i, k) => `<div class="dalert sev-${i.sev}${DASH.abierto === k ? ' open' : ''}" data-k="${k}"><button type="button" class="dalert-h" aria-expanded="${DASH.abierto === k}" onclick="dAbrir(${k})"><span class="dalert-n">${i.n}</span><span class="dalert-t"><b>${i.t}</b><small>${i.d}</small></span><span class="dalert-c" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="dalert-body"><div class="dalert-in">${i.rows.map(r => `<div class="drow"><span>${r[0]}</span><span>${r[1]}</span><b>${r[2]}</b></div>`).join('')}${i.mas > 0 ? `<div class="dmas">y ${i.mas} más…</div>` : ''}<button type="button" class="dir" onclick="goTab('${i.go}')">${i.ir} <span aria-hidden="true">→</span></button></div></div></div>`).join('')
+  const cuerpo = items.length ? items.map((i, k) => `<div class="dalert sev-${i.sev}${DASH.abierto === k ? ' open' : ''}" data-k="${k}"><button type="button" class="dalert-h" aria-expanded="${DASH.abierto === k}" onclick="dAbrir(${k})"><span class="dalert-n">${i.n}</span><span class="dalert-t"><b>${i.t}</b><small>${i.d}</small></span><span class="dalert-c" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="dalert-body"><div class="dalert-in">${i.rows.map(r => `<div class="drow"><span>${r[0]}</span><span>${r[1]}</span><b>${r[2]}</b></div>`).join('')}${i.mas > 0 ? `<div class="dmas">y ${i.mas} más…</div>` : ''}${puedeVer(i.go) ? `<button type="button" class="dir" onclick="goTab('${i.go}')">${i.ir} <span aria-hidden="true">→</span></button>` : ''}</div></div></div>`).join('')
     : `<div class="dok"><div class="dok-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></div><b>¡Todo en orden!</b><span>No hay nada pendiente que requiera atención.</span></div>`;
   document.getElementById('dcAtencion').innerHTML = `<div class="dcard-h"><div><h3><span class="dwarn">⚠</span> Atención</h3><div class="dsub">${items.length ? 'Tocá un aviso para ver el detalle' : 'Todo bajo control'}</div></div><span class="dbadge ${items.length ? 'warn' : 'ok'}">${items.length ? items.length + ' aviso' + (items.length===1?'':'s') : 'Al día'}</span></div><div class="dalerts">${cuerpo}</div>`;
 }
@@ -1206,11 +1270,11 @@ window.addEventListener('focus', () => dashAuto(15000));
 window.addEventListener('online', () => dashAuto(0));
 
 function renderHomeMenu(){
-  const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
+  const tabs = tabsMenu();
   document.getElementById('vistaMenuGrid').innerHTML = tabs.map(t =>
-    `<button type="button" class="vista-menu-card" onclick="goTab('${t.id}')">
+    `<button type="button" class="vista-menu-card${puedeVer(t.id) ? '' : ' bloq'}" onclick="goTab('${t.id}')"${puedeVer(t.id) ? '' : ' title="Sin acceso por rol"'}>
       <span class="vmc-icon">${t.icon}</span>
-      <span class="vmc-label">${t.label}</span>
+      <span class="vmc-label">${t.label}</span>${puedeVer(t.id) ? '' : '<span class="bloq-ic" aria-hidden="true">' + ICONS.lock + '</span>'}
     </button>`
   ).join('');
   renderDash();
@@ -1242,16 +1306,17 @@ function renderNavbar(){
     nb.innerHTML = NAV_BAR.map(id => `<button type="button" class="navb" data-id="${id}" onclick="navGo('${id}')" aria-label="${lbl[id]}">${ic[id]}<span>${lbl[id]}</span></button>`).join('') +
       `<button type="button" class="navb" data-id="mas" onclick="abrirMas()" aria-label="Más">${ICONS.mas}<span>Más</span></button>`;
   }
+  nb.querySelectorAll('.navb[data-id]').forEach(b => { const id = b.dataset.id; if(id === 'mas') return; const bl = !puedeVer(id); b.classList.toggle('bloq', bl); });
   renderSidebar();
   setNavOn(activeTab || 'home');
 }
 function renderSidebar(){
   const sb = document.getElementById('sidebarIn');
-  const rol = miRol === 'admin' ? 'a' : 'o';
+  const rol = String(miRol);
   if(sb.dataset.rol !== rol){
     sb.dataset.rol = rol;
-    const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
-    const item = t => `<button type="button" class="sb-item" data-id="${t.id}" title="${t.label}" onclick="navGo('${t.id}')">${t.icon}<span>${t.label}</span></button>`;
+    const tabs = tabsMenu();
+    const item = t => { const ok = puedeVer(t.id); return `<button type="button" class="sb-item${ok ? '' : ' bloq'}" data-id="${t.id}" title="${ok ? t.label : t.label + ' · sin acceso por rol'}" onclick="navGo('${t.id}')">${t.icon}<span>${t.label}</span>${ok ? '' : '<i class="bloq-mini" aria-hidden="true">' + ICONS.lock + '</i>'}</button>`; };
     sb.innerHTML = '<div class="sb-brand"><img class="brandmark" src="'+LOGO_SRC+'" alt="Progresso NH S.A." width="480" height="236"></div><div class="sb-title">Menú</div>' + item({id:'home', label:'Inicio', icon:ICONS.home}) + '<div class="sb-sep"></div>' + tabs.map(item).join('');
   }
 }
@@ -1270,7 +1335,7 @@ try{ if(localStorage.getItem('nh_sb_open') === '1') document.getElementById('app
 const gsNorm = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 let gsSel = 0, gsItemsCur = [];
 function gsCompute(){
-  const all = [{id:'home', label:'Inicio', icon:ICONS.home}, ...(miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS)];
+  const all = [{id:'home', label:'Inicio', icon:ICONS.home}, ...(tabsMenu())];
   const q = gsNorm(document.getElementById('gsInput').value.trim());
   gsItemsCur = all.filter(t => gsNorm(t.label).includes(q));
 }
@@ -1278,7 +1343,7 @@ function gsRender(){
   gsCompute();
   if(gsSel >= gsItemsCur.length) gsSel = 0;
   const l = document.getElementById('gsList');
-  l.innerHTML = gsItemsCur.length ? gsItemsCur.map((t,i) => `<button type="button" class="gs-item ${i===gsSel?'sel':''}" role="option" onmousedown="event.preventDefault();gsGo('${t.id}')">${t.icon}<span>${t.label}</span></button>`).join('') : '<div class="gs-empty">Sin resultados</div>';
+  l.innerHTML = gsItemsCur.length ? gsItemsCur.map((t,i) => `<button type="button" class="gs-item ${i===gsSel?'sel':''}${puedeVer(t.id) ? '' : ' bloq'}" role="option" onmousedown="event.preventDefault();gsGo('${t.id}')">${t.icon}<span>${t.label}</span>${puedeVer(t.id) ? '' : '<i class="bloq-mini" aria-hidden="true">' + ICONS.lock + '</i>'}</button>`).join('') : '<div class="gs-empty">Sin resultados</div>';
   l.classList.remove('hidden');
 }
 function gsClose(){ document.getElementById('gsList').classList.add('hidden'); }
@@ -1321,7 +1386,7 @@ const LOGO_SRC = document.querySelector('#appbar img.brandmark').src;
 { const li = document.querySelector('.auth-logo-img'); if(li) li.src = LOGO_SRC; }
 function setAppbarTitle(id){
   const h1 = document.getElementById('abTitle'); if(!h1) return;
-  const all = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
+  const all = tabsMenu();
   const f = id ? all.find(x => x.id === id) : null;
   const txt = f ? f.label : (mqDesk.matches ? 'Inicio' : 'Progresso NH');
   if(h1.textContent !== txt) h1.textContent = txt;
@@ -1344,6 +1409,7 @@ function setNavOn(id){
 }
 
 function navGo(id){
+  if(!puedeVer(id)){ cerrarMas(); sinAcceso(id); return; }
   vibrar(8);
   if(id === 'home'){ if(activeTab){ setNavOn('home'); history.go(-Math.max(1, navExtra)); } return; }
   if(activeTab === id) return;
@@ -1357,10 +1423,10 @@ function navGo(id){
 function abrirMas(){
   if(sheetOpen) return;
   vibrar(8);
-  const tabs = miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS;
+  const tabs = tabsMenu();
   const extra = tabs.filter(t => !NAV_BAR.includes(t.id));
   document.getElementById('sheetItems').innerHTML = extra.map(t =>
-    `<button type="button" class="sheet-item" onclick="goTab('${t.id}')"><span class="sheet-ic">${t.icon}</span>${t.label}</button>`
+    `<button type="button" class="sheet-item${puedeVer(t.id) ? '' : ' bloq'}" onclick="goTab('${t.id}')"><span class="sheet-ic">${t.icon}</span>${t.label}${puedeVer(t.id) ? '' : '<i class="bloq-mini" aria-hidden="true">' + ICONS.lock + '</i>'}</button>`
   ).join('');
   history.pushState({view: activeTab || 'home', sheet:true}, '');
   sheetOpen = true; sheetPushed = true;
@@ -1393,6 +1459,7 @@ function goHome(push){
 }
 
 function goTab(id){
+  if(!puedeVer(id)){ cerrarMas(); sinAcceso(id); return; }
   navTok++;
   const prev = activeTab;
   const desdeSheet = sheetOpen;
@@ -2494,7 +2561,7 @@ async function loadUsuarios(){
     ${data.map(u => `<tr>
       <td>${mpEsc(u.nombre||'-')}</td>
       <td>${mpEsc(u.email||'-')}</td>
-      <td><select id="rol-${u.id}" style="width:auto;margin:0;"><option value="operario" ${u.rol==='operario'?'selected':''}>Operario</option><option value="admin" ${u.rol==='admin'?'selected':''}>Admin</option></select></td>
+      <td><select id="rol-${u.id}" style="width:auto;margin:0;"><option value="operario" ${u.rol==='operario'?'selected':''}>Operario</option><option value="laboratorio" ${u.rol==='laboratorio'?'selected':''}>Laboratorio</option><option value="admin" ${u.rol==='admin'?'selected':''}>Admin</option></select></td>
       <td><input type="checkbox" id="activo-${u.id}" style="width:auto;margin:0;" ${u.activo?'checked':''}></td>
       <td><button class="btn small" onclick="guardarUsuario('${u.id}')">Guardar</button></td>
     </tr>`).join('')}
@@ -2507,7 +2574,7 @@ async function guardarUsuario(id){
   const { error } = await sb.from('perfiles').update({ rol, activo }).eq('id', id);
   if(error){ toast('Error: ' + error.message, 'err'); return; }
   toast('Usuario actualizado', 'ok');
-  if(currentUser && id === currentUser.id){ miRol = rol; }
+  if(currentUser && id === currentUser.id){ miRol = rol; document.getElementById('upRol').textContent = rolLabel(miRol); renderHomeMenu(); renderNavbar(); }
   loadUsuarios();
 }
 
