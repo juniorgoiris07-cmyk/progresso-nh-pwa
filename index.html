@@ -715,7 +715,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v37';
+const APP_VERSION = 'v38';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -1232,7 +1232,7 @@ function dashPintar(anim){
   </div>`;
 
   host.innerHTML = `<div class="dash${anim ? ' anim' : ''}">
-    <div class="dash-top"><div><h2>${saludo}${usuario ? ', ' + mpEsc(String(usuario).split(' ')[0]) : ''}</h2><p>${hoyTxt.charAt(0).toUpperCase() + hoyTxt.slice(1)} · actualizado ${hora}</p></div></div>
+    <div class="dash-top"><div><h2>${saludo}${usuario ? ', ' + mpEsc(String(usuario).trim().replace(/\s+/g, ' ')) : ''}</h2><p>${hoyTxt.charAt(0).toUpperCase() + hoyTxt.slice(1)} · actualizado ${hora}</p></div></div>
     ${kpis}
     <div class="dash-grid">
       <div class="dcard" id="dcAtencion" style="--i:5"></div>
