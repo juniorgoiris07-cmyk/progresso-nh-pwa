@@ -715,7 +715,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v44';
+const APP_VERSION = 'v45';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -732,6 +732,7 @@ const ICONS = {
   resumen: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
+  correcciones: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.4 2.4-2.6-.6-.6-2.6z"/></svg>',
   usuarios: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   lock: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
   home: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>',
@@ -874,7 +875,9 @@ const TABS = [
   {id:'cierre', label:'Cierre', icon:ICONS.cierre},
   {id:'resumen', label:'Resumen', icon:ICONS.resumen},
 ];
+const TAB_CORR = {id:'correcciones', label:'Correcciones', icon:ICONS.correcciones};
 const TAB_ADMIN = {id:'usuarios', label:'Usuarios', icon:ICONS.usuarios};
+const TABS_ADMIN = [TAB_CORR, TAB_ADMIN];
 
 /* ===== roles y permisos por pantalla (tabs:null = todas) ===== */
 const ROLES = {
@@ -884,10 +887,10 @@ const ROLES = {
 };
 const rolInfo = r => ROLES[r] || ROLES.operario;
 const rolLabel = r => rolInfo(r).label;
-function tabsMenu(){ return miRol === 'admin' ? [...TABS, TAB_ADMIN] : TABS; }
+function tabsMenu(){ return miRol === 'admin' ? [...TABS, ...TABS_ADMIN] : TABS; }
 function puedeVer(id){
   if(id === 'home') return true;
-  if(id === 'usuarios') return miRol === 'admin';
+  if(id === 'usuarios' || id === 'correcciones') return miRol === 'admin';
   const t = rolInfo(miRol).tabs;
   return t ? t.includes(id) : true;
 }
@@ -898,7 +901,7 @@ function accesoTxt(){
   return n.length > 1 ? n.slice(0, -1).join(', ') + ' y ' + n[n.length - 1] : n[0];
 }
 function sinAcceso(id){
-  const f = [...TABS, TAB_ADMIN].find(x => x.id === id);
+  const f = [...TABS, ...TABS_ADMIN].find(x => x.id === id);
   let m = document.getElementById('nacc');
   if(!m){
     m = document.createElement('div');
@@ -1388,7 +1391,7 @@ function renderHomeMenu(){
   renderDash();
 }
 
-const NAV_ORDER = ['home','mp','lote','bigbag','silo','cierre','resumen','usuarios'];
+const NAV_ORDER = ['home','mp','lote','bigbag','silo','cierre','resumen','correcciones','usuarios'];
 const NAV_BAR = ['home','mp','lote','bigbag'];
 let sheetOpen = false, sheetPushed = false, skipPop = false, navExtra = 0, navTok = 0;
 
@@ -2390,9 +2393,10 @@ function loteSelectorHTML(pref){
     <div id="${pref}Cnt" class="lote-sel-cnt"></div>
   </div>`;
 }
-function loteSelectorInit(pref, lotes, onPick, key){
+function loteSelectorInit(pref, lotes, onPick, key, opts){
+  const suf = (opts && opts.sufijo !== undefined) ? opts.sufijo : ' en proceso';
   const q = document.getElementById(pref+'Buscar'), sel = document.getElementById(pref+'Sel'), cnt = document.getElementById(pref+'Cnt');
-  const label = l => `${mpEsc(l.id)}${l.codigo_lab ? ' · ' + mpEsc(l.codigo_lab) : ''} · ${mpEsc(l.producto)}${l.categoria ? ' · ' + mpEsc(l.categoria) : ''}`;
+  const label = l => `${mpEsc(l.id)}${l.codigo_lab ? ' · ' + mpEsc(l.codigo_lab) : ''} · ${mpEsc(l.producto)}${l.categoria ? ' · ' + mpEsc(l.categoria) : ''}${opts && opts.estado ? ' · ' + (l.estado === 'CERRADO' ? 'cerrado' : 'en proceso') : ''}`;
   const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
   let last = null; try { last = localStorage.getItem(key); } catch(e){}
   let current = (last && lotes.some(l => l.id === last)) ? last : lotes[0].id;
@@ -2400,7 +2404,7 @@ function loteSelectorInit(pref, lotes, onPick, key){
     const t = norm(q.value).trim().split(/\s+/).filter(Boolean);
     const list = lotes.filter(l => { const h = norm(label(l)); return t.every(w => h.includes(w)); });
     sel.innerHTML = list.map(l => `<option value="${mpEsc(l.id)}">${label(l)}</option>`).join('') || '<option value="">Ningún lote coincide</option>';
-    cnt.textContent = t.length ? `${list.length} de ${lotes.length} lotes en proceso` : `${lotes.length} lote${lotes.length===1?'':'s'} en proceso`;
+    cnt.textContent = t.length ? `${list.length} de ${lotes.length} lotes${suf}` : `${lotes.length} lote${lotes.length===1?'':'s'}${suf}`;
     if(list.some(l => l.id === current)) sel.value = current;
     else if(list.length){ sel.value = list[0].id; pick(list[0].id); }
   }
@@ -2477,7 +2481,7 @@ async function _submitBigbag(e){
   if(!loteActivoId){ toast('Elegí un lote primero', 'err'); return; }
   const payload = Object.fromEntries(new FormData(e.target).entries());
   if(!payload.nro_bigbag) delete payload.nro_bigbag; else payload.nro_bigbag = Number(payload.nro_bigbag);
-  if(!payload.hora) payload.hora = null;
+  if(!payload.hora) delete payload.hora;
   ['pureza_pct','humedad_grano_pct','temperatura_ambiente_c','temperatura_grano_c'].forEach(k=>{
     payload[k] = payload[k] === '' ? null : Number(payload[k]);
   });
@@ -2557,6 +2561,7 @@ async function renderCierre(){
   <div class="card" id="cierreLoteCard" style="display:none">
     <h2>Cierre final del lote</h2>
     <div id="mezAviso2" class="mez-aviso" style="display:none"></div>
+    <div id="cfConc"></div>
     <div class="grid">
       <div><label>Kg ingresado MP (sugerido)</label><input id="cfKgMp" disabled></div>
       <div><label>Kg procesado total *</label><input id="cfKgProc" type="number" step="0.01"></div>
@@ -2575,6 +2580,7 @@ async function renderCierre(){
   const { data: lotes } = await sb.from('lotes').select('*').eq('estado','EN_PROCESO').order('creado_en',{ascending:false});
   if(!lotes || !lotes.length){ document.querySelector('.lote-sel').innerHTML = '<div class="empty">No hay lotes en proceso para cerrar.</div>'; return; }
   document.getElementById('frmTurno').addEventListener('submit', submitTurno);
+  ['cfKgProc','cfMermas'].forEach(i => document.getElementById(i).addEventListener('input', ev => { ev.target.dataset.auto = '0'; concPintar(); }));
   loteSelectorInit('cl', lotes, elegirLoteCierre, 'nh_lote_cierre');
 }
 
@@ -2584,6 +2590,8 @@ async function elegirLoteCierre(id){
   document.getElementById('frmTurno').fecha.value = hoyLocal();
 
   document.getElementById('cierreLoteCard').style.display = 'block';
+  ['cfKgProc','cfMermas'].forEach(i => { const el = document.getElementById(i); el.value = ''; el.dataset.auto = ''; });
+  CONC = null; concPintar();
   const { data: sumRow } = await sb.from('v_resumen_lotes').select('*').eq('lote_id', id).single();
   document.getElementById('cfKgMp').value = sumRow ? fmtKg(sumRow.kg_mp_asignado) : '-';
 
@@ -2610,6 +2618,7 @@ async function mezCargar(){
 function mezToggle(id, on){ if(on) MEZ.ids.add(id); else MEZ.ids.delete(id); mezRender(); if(MEZ.modo === 'bb') loadBigbagList(); }
 function mezRender(){
   const box = document.getElementById('mezBox'); if(!box) return;
+  if(MEZ.modo === 'cierre') concRefrescar();
   const otros = Object.keys(MEZ.info).filter(id => id !== loteActivoId).sort((a, b) => String(a).localeCompare(String(b), 'es', {numeric:true}));
   const g = mezGrupo(), pesos = mezPesos(g), tot = pesos.reduce((a, b) => a + b, 0);
   const cf = document.getElementById('cfKgMp'); if(cf) cf.value = fmtKg(tot || (MEZ.info[loteActivoId] ? MEZ.info[loteActivoId].kg_mp_asignado : 0));
@@ -2661,19 +2670,83 @@ async function loadTurnoList(){
   </tbody></table>`;
 }
 
+/* ================= CONCILIACIÓN DE CIERRE ================= */
+let CONC = null;
+const _r2 = n => Math.round(Number(n) * 100) / 100;
+async function concDatos(ids){
+  const [t, b] = await Promise.all([
+    sb.from('lote_turno_cierre').select('kg_reales_procesados,mermas_kg').in('lote_id', ids),
+    sb.from('produccion_bigbag').select('id,mezcla_id').in('lote_id', ids)
+  ]);
+  if(t.error || b.error) return null;
+  const ts = t.data || [];
+  return {
+    nTurnos: ts.length,
+    kgTurnos: _r2(ts.reduce((a, x) => a + (Number(x.kg_reales_procesados) || 0), 0)),
+    merTurnos: _r2(ts.reduce((a, x) => a + (Number(x.mermas_kg) || 0), 0)),
+    bigbags: new Set((b.data || []).map(x => x.mezcla_id || ('i' + x.id))).size
+  };
+}
+async function concRefrescar(){
+  const box = document.getElementById('cfConc');
+  if(!box || MEZ.modo !== 'cierre' || !loteActivoId) return;
+  const ids = mezGrupo(), tok = ids.join('|');
+  const d = await concDatos(ids);
+  if(tok !== mezGrupo().join('|') || !document.getElementById('cfConc')) return;
+  if(!d){ CONC = null; concPintar(); return; }
+  d.mp = _r2(mezPesos(ids).reduce((a, x) => a + x, 0));
+  CONC = d;
+  const p = document.getElementById('cfKgProc'), m = document.getElementById('cfMermas');
+  if(p && d.kgTurnos > 0 && (p.value === '' || p.dataset.auto === '1')){ p.value = d.kgTurnos; p.dataset.auto = '1'; }
+  if(m && d.merTurnos > 0 && (m.value === '' || m.dataset.auto === '1')){ m.value = d.merTurnos; m.dataset.auto = '1'; }
+  concPintar();
+}
+function concAvisos(d, kgProc, merTot){
+  const a = [];
+  if(!d) return a;
+  if(d.mp > 0 && kgProc > d.mp + 0.5) a.push('El procesado (' + fmtKg(kgProc) + ') supera la MP asignada (' + fmtKg(d.mp) + ').');
+  if(d.nTurnos > 0 && Math.abs(kgProc - d.kgTurnos) > 0.5) a.push('El total que cargaste (' + fmtKg(kgProc) + ') no coincide con la suma de los ajustes por turno (' + fmtKg(d.kgTurnos) + ', diferencia ' + fmtKg(_r2(kgProc - d.kgTurnos)) + ').');
+  if(d.nTurnos > 0 && d.merTurnos > 0 && merTot != null && !isNaN(merTot) && Math.abs(merTot - d.merTurnos) > 0.5) a.push('Las mermas que cargaste (' + fmtKg(merTot) + ') no coinciden con la suma por turno (' + fmtKg(d.merTurnos) + ').');
+  if(d.bigbags === 0) a.push('No hay ningún bigbag cargado en ' + (mezGrupo().length > 1 ? 'esta mezcla' : 'este lote') + '.');
+  return a;
+}
+function concPintar(){
+  const box = document.getElementById('cfConc'); if(!box) return;
+  const d = CONC;
+  if(!d){ box.innerHTML = ''; return; }
+  const kgProc = parseFloat(document.getElementById('cfKgProc').value), merTot = parseFloat(document.getElementById('cfMermas').value);
+  const av = isNaN(kgProc) ? [] : concAvisos(d, kgProc, isNaN(merTot) ? null : merTot);
+  const sin = d.nTurnos === 0 ? '<div style="font-size:13px;color:var(--text-muted);margin-top:8px">Todavía no hay ajustes por turno: el total lo cargás a mano.</div>' : '';
+  box.innerHTML = `<div class="stat-grid" style="margin:4px 0 10px">
+      <div class="stat"><div class="n">${fmtKg(d.mp)}</div><div class="l">MP asignada</div></div>
+      <div class="stat"><div class="n">${fmtKg(d.kgTurnos)}</div><div class="l">Procesado por turno (${d.nTurnos})</div></div>
+      <div class="stat"><div class="n">${fmtKg(d.merTurnos)}</div><div class="l">Mermas por turno</div></div>
+      <div class="stat"><div class="n">${d.bigbags}</div><div class="l">Bigbags</div></div>
+    </div>${sin}${av.map(x => `<div class="mez-aviso">${mpEsc(x)}</div>`).join('')}`;
+}
+
 async function cerrarLoteFinal(){ return _once('cierre', _cerrarLoteFinal); }
 async function _cerrarLoteFinal(){
   const kgProc = parseFloat(document.getElementById('cfKgProc').value);
   if(!kgProc){ toast('Cargá el kg procesado total', 'err'); return; }
   const grupo = mezGrupo(), mez = grupo.length > 1;
-  if(!confirm(mez ? '¿Cerrar definitivamente la mezcla ' + grupo.join(' + ') + '? Se cierran los ' + grupo.length + ' lotes juntos y no se puede deshacer desde acá.' : '¿Cerrar definitivamente el lote ' + loteActivoId + '? No se puede deshacer desde acá.')) return;
+  const merTot = parseFloat(document.getElementById('cfMermas').value);
 
   const mps = [];
   for(const id of grupo){
-    const { data: sumRow } = await sb.from('v_resumen_lotes').select('*').eq('lote_id', id).single();
+    const { data: sumRow, error: esr } = await sb.from('v_resumen_lotes').select('*').eq('lote_id', id).single();
+    if(esr){ toast('Error: ' + esr.message, 'err'); return; }
     mps.push(sumRow ? Number(sumRow.kg_mp_asignado || 0) : 0);
   }
-  const merTot = parseFloat(document.getElementById('cfMermas').value);
+  const dc = await concDatos(grupo);
+  if(!dc){ toast('No se pudo verificar los datos del lote. Revisá la señal e intentá de nuevo.', 'err'); return; }
+  dc.mp = _r2(mps.reduce((a, x) => a + x, 0));
+  const avisos = concAvisos(dc, kgProc, isNaN(merTot) ? null : merTot);
+  const base = mez ? '¿Cerrar definitivamente la mezcla ' + grupo.join(' + ') + '? Se cierran los ' + grupo.length + ' lotes juntos.' : '¿Cerrar definitivamente el lote ' + loteActivoId + '?';
+  const pie = ' Después solo el administrador puede reabrirlo.';
+  const msg = avisos.length ? 'ATENCIÓN, revisá antes de cerrar:\n\n- ' + avisos.join('\n- ') + '\n\n' + base + pie : base + pie;
+  if(!confirm(msg)) return;
+
   const kgs = mezReparto(kgProc, mps);
   const mers = isNaN(merTot) || !merTot ? grupo.map(() => null) : mezReparto(merTot, mps);
   const dif = document.getElementById('cfDif').value || '';
@@ -2719,6 +2792,136 @@ async function renderResumen(){
   <div class="table-wrap"><table><thead><tr><th>Lote</th><th>Cód. lab.</th><th>Producto</th><th>Estado</th><th>Cargas MP</th><th>Kg MP</th><th>Bigbags</th><th>Rendimiento</th></tr></thead><tbody>
     ${data.map(r => `<tr><td>${mpEsc(r.lote_id)}</td><td>${mpEsc(labDe[r.lote_id]||'-')}</td><td>${mpEsc(r.producto)}</td><td><span class="badge ${r.estado==='EN_PROCESO'?'warn':'ok'}">${r.estado}</span></td><td>${r.cantidad_cargas_mp}</td><td>${fmtKg(r.kg_mp_asignado)}</td><td>${r.cantidad_bigbags}</td><td>${fmtPct(r.rendimiento_pct)}</td></tr>`).join('')}
   </tbody></table></div>`;
+}
+
+/* ================= CORRECCIONES (solo administrador) ================= */
+let CORR = { id:null, bb:{}, lotes:{} };
+async function renderCorrecciones(){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="card">
+    <h2>${ICONS.correcciones} Correcciones · solo administrador</h2>
+    <div class="mez-aviso">Acá se corrige lo ya cargado: editar o borrar bigbags, borrar ajustes de turno y reabrir un lote cerrado. Cada cambio pide confirmación.</div>
+    ${loteSelectorHTML('co')}
+    <div id="coEstado"></div>
+  </div>
+  <div id="coEdit"></div>
+  <div class="card"><h2>Bigbags del lote</h2><div id="coBb" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div></div>
+  <div class="card"><h2>Ajustes de turno del lote</h2><div id="coTurnos" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div></div>`;
+  const { data: lotes, error } = await sb.from('lotes').select('*').order('creado_en', {ascending:false});
+  if(error){ document.getElementById('coEstado').innerHTML = `<div class="empty">Error: ${mpEsc(error.message)}</div>`; return; }
+  if(!lotes || !lotes.length){ document.querySelector('.lote-sel').style.display = 'none'; document.getElementById('coEstado').innerHTML = '<div class="empty">Todavía no hay lotes.</div>'; return; }
+  CORR.lotes = {}; lotes.forEach(l => { CORR.lotes[l.id] = l; });
+  loteSelectorInit('co', lotes, coElegir, 'nh_lote_corr', {sufijo:'', estado:true});
+}
+async function coElegir(id){
+  CORR.id = id;
+  document.getElementById('coEdit').innerHTML = '';
+  const l = CORR.lotes[id] || {};
+  const [cb, bb, tn] = await Promise.all([
+    sb.from('lote_cierre').select('*').eq('lote_id', id).maybeSingle(),
+    sb.from('produccion_bigbag').select('*').eq('lote_id', id).order('nro_bigbag'),
+    sb.from('lote_turno_cierre').select('*').eq('lote_id', id).order('fecha', {ascending:false})
+  ]);
+  if(CORR.id !== id) return;
+  const est = document.getElementById('coEstado');
+  const cerr = l.estado === 'CERRADO';
+  const ci = cb && cb.data;
+  est.innerHTML = `<div style="margin:10px 0;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);font-size:14px">
+    <b>Lote:</b> ${mpEsc(id)}${l.codigo_lab ? ' (' + mpEsc(l.codigo_lab) + ')' : ''} &nbsp;·&nbsp; <span class="badge ${cerr ? 'ok' : 'warn'}">${cerr ? 'CERRADO' : 'EN PROCESO'}</span>
+    ${cerr && ci ? `<div style="margin-top:6px">Cierre: procesado ${fmtKg(ci.kg_procesado_total)} · mermas ${fmtKg(ci.mermas_totales_kg)} · MP ${fmtKg(ci.kg_ingresado_mp)} · por ${mpEsc(ci.cerrado_por || '-')}</div>` : ''}
+    ${cerr ? `<button class="btn danger" type="button" style="margin-top:10px" onclick="coReabrir()">Reabrir lote</button>` : ''}
+  </div>`;
+
+  // bigbags
+  const elbb = document.getElementById('coBb');
+  if(bb.error){ elbb.innerHTML = `<div class="empty">Error: ${mpEsc(bb.error.message)}</div>`; }
+  else {
+    const rows = bb.data || [];
+    CORR.bb = {}; rows.forEach(b => { CORR.bb[b.id] = b; });
+    const mids = Array.from(new Set(rows.map(b => b.mezcla_id).filter(Boolean)));
+    let lotesMez = {};
+    if(mids.length){ const r2 = await sb.from('produccion_bigbag').select('lote_id,mezcla_id').in('mezcla_id', mids); ((r2 && r2.data) || []).forEach(x => { (lotesMez[x.mezcla_id] = lotesMez[x.mezcla_id] || []).push(x.lote_id); }); }
+    if(CORR.id !== id) return;
+    const n = v => (v === null || v === undefined || v === '') ? '-' : v;
+    elbb.innerHTML = rows.length ? `<table><thead><tr><th>Nº</th><th>Fecha</th><th>Hora</th><th>Turno</th><th>Pureza</th><th>Hum.</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th><th></th></tr></thead><tbody>
+      ${rows.map(b => `<tr><td>${mpEsc(b.nro_bigbag)}${b.mezcla_id ? ' <span class="badge off" title="' + mpEsc((lotesMez[b.mezcla_id] || []).join(' + ')) + '">mezcla</span>' : ''}</td><td>${fmtDate(b.fecha)}</td><td>${b.hora ? String(b.hora).slice(0,5) : '-'}</td><td>${mpEsc(b.turno)}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado || '-')}</td><td>${mpEsc(b.observaciones || '')}</td>
+        <td style="white-space:nowrap"><button class="btn secondary" type="button" onclick="coEditar(${Number(b.id)})">Editar</button> <button class="btn danger" type="button" onclick="coBorrarBb(${Number(b.id)})">Borrar</button></td></tr>`).join('')}
+    </tbody></table>` : '<div class="empty">Este lote no tiene bigbags.</div>';
+    CORR.mez = lotesMez;
+  }
+  // turnos
+  const elt = document.getElementById('coTurnos');
+  if(tn.error){ elt.innerHTML = `<div class="empty">Error: ${mpEsc(tn.error.message)}</div>`; }
+  else {
+    const rows = tn.data || [];
+    elt.innerHTML = rows.length ? `<table><thead><tr><th>Fecha</th><th>Turno</th><th>Kg reales</th><th>Mermas</th><th>Ajustó</th><th></th></tr></thead><tbody>
+      ${rows.map(t => `<tr><td>${fmtDate(t.fecha)}</td><td>${mpEsc(t.turno)}</td><td>${fmtKg(t.kg_reales_procesados)}</td><td>${fmtKg(t.mermas_kg)}</td><td>${mpEsc(t.ajustado_por || '-')}</td><td><button class="btn danger" type="button" onclick="coBorrarTurno(${Number(t.id)})">Borrar</button></td></tr>`).join('')}
+    </tbody></table>` : '<div class="empty">Este lote no tiene ajustes de turno.</div>';
+  }
+}
+function coMsgErr(error){ return /solo el administrador/i.test(error.message || '') ? 'Solo el administrador puede hacer esto.' : 'Error: ' + error.message; }
+function coEditar(id){
+  const b = CORR.bb[id]; if(!b) return;
+  const mez = b.mezcla_id ? (CORR.mez && CORR.mez[b.mezcla_id] || []) : [];
+  const v = x => (x === null || x === undefined) ? '' : mpEsc(x);
+  document.getElementById('coEdit').innerHTML = `<div class="card"><h2>Editar bigbag Nº ${mpEsc(b.nro_bigbag)}</h2>
+    ${mez.length > 1 ? `<div class="mez-aviso">Es un bigbag de mezcla (${mez.map(mpEsc).join(' + ')}). Los cambios se aplican en todos los lotes de la mezcla.</div>` : ''}
+    <form id="frmCoEdit" data-id="${Number(b.id)}">
+      <div class="grid">
+        <div><label>Fecha</label><input name="fecha" type="date" value="${v(b.fecha)}"></div>
+        <div><label>Hora</label><input name="hora" type="time" value="${b.hora ? mpEsc(String(b.hora).slice(0,5)) : ''}"></div>
+        <div><label>Turno</label><select name="turno"><option value="DIA"${b.turno === 'DIA' ? ' selected' : ''}>Día</option><option value="NOCHE"${b.turno === 'NOCHE' ? ' selected' : ''}>Noche</option></select></div>
+        <div><label>Pureza %</label><input name="pureza_pct" type="number" step="0.01" value="${v(b.pureza_pct)}"></div>
+        <div><label>Humedad del grano %</label><input name="humedad_grano_pct" type="number" step="0.01" value="${v(b.humedad_grano_pct)}"></div>
+        <div><label>Temp. ambiente °C</label><input name="temperatura_ambiente_c" type="number" step="0.1" value="${v(b.temperatura_ambiente_c)}"></div>
+        <div><label>Temp. del grano °C</label><input name="temperatura_grano_c" type="number" step="0.1" value="${v(b.temperatura_grano_c)}"></div>
+        <div><label>Encargado</label><input name="encargado" value="${v(b.encargado)}"></div>
+      </div>
+      <label>Observaciones</label><textarea name="observaciones">${v(b.observaciones)}</textarea>
+      <button class="btn" type="submit">${ICONS.check} Guardar corrección</button>
+      <button class="btn secondary" type="button" onclick="document.getElementById('coEdit').innerHTML=''">Cancelar</button>
+    </form></div>`;
+  document.getElementById('frmCoEdit').addEventListener('submit', e => { e.preventDefault(); return _once('coedit', _coGuardar, e); });
+  document.getElementById('coEdit').scrollIntoView({behavior:'smooth', block:'start'});
+}
+async function _coGuardar(e){
+  const f = e.target, id = Number(f.dataset.id);
+  const d = Object.fromEntries(new FormData(f).entries());
+  const { data, error } = await sb.rpc('fn_admin_editar_bigbag', { p_id:id, p_data:d });
+  if(error){ toast(coMsgErr(error), 'err'); return; }
+  toast('Bigbag corregido' + (data > 1 ? ' (' + data + ' lotes de la mezcla)' : ''), 'ok');
+  coElegir(CORR.id);
+}
+async function coBorrarBb(id){
+  return _once('cobb' + id, async () => {
+    const b = CORR.bb[id]; if(!b) return;
+    const mez = b.mezcla_id ? (CORR.mez && CORR.mez[b.mezcla_id] || []) : [];
+    if(!confirm('¿Borrar el bigbag Nº ' + b.nro_bigbag + (mez.length > 1 ? ' de TODA la mezcla (' + mez.join(' + ') + ')' : ' del lote ' + b.lote_id) + '? No se puede deshacer.')) return;
+    const { data, error } = await sb.rpc('fn_admin_eliminar_bigbag', { p_id:id });
+    if(error){ toast(coMsgErr(error), 'err'); return; }
+    toast('Bigbag borrado' + (data > 1 ? ' (' + data + ' lotes)' : ''), 'ok');
+    coElegir(CORR.id);
+  });
+}
+async function coBorrarTurno(id){
+  return _once('cotn' + id, async () => {
+    if(!confirm('¿Borrar este ajuste de turno? No se puede deshacer. Si fue una mezcla, el ajuste de los otros lotes se borra por separado.')) return;
+    const { error } = await sb.rpc('fn_admin_eliminar_turno', { p_id:id });
+    if(error){ toast(coMsgErr(error), 'err'); return; }
+    toast('Ajuste borrado', 'ok');
+    coElegir(CORR.id);
+  });
+}
+async function coReabrir(){
+  return _once('coreab', async () => {
+    const id = CORR.id; if(!id) return;
+    if(!confirm('¿Reabrir el lote ' + id + '?\n\nVuelve a EN PROCESO y se borra su cierre final (kg procesado, mermas y resúmenes). Los bigbags y ajustes de turno se mantienen. Si estaba cerrado en mezcla, reabrí cada lote por separado.')) return;
+    const { error } = await sb.rpc('fn_admin_reabrir_lote', { p_lote:id });
+    if(error){ toast(coMsgErr(error), 'err'); return; }
+    toast('Lote ' + id + ' reabierto', 'ok');
+    if(CORR.lotes[id]) CORR.lotes[id].estado = 'EN_PROCESO';
+    renderCorrecciones();
+  });
 }
 
 async function renderUsuarios(){
@@ -2976,7 +3179,7 @@ document.addEventListener('visibilitychange', () => { if(!document.hidden) setTi
 window.addEventListener('focus', () => { if(_verPend) aplicarVersion(); else verNuevaVersion(); });
 window.addEventListener('online', verNuevaVersion);
 
-const RENDERERS = { mp: renderMP, silo: renderSilo, lote: renderLote, bigbag: renderBigbag, cierre: renderCierre, resumen: renderResumen, usuarios: renderUsuarios };
+const RENDERERS = { mp: renderMP, silo: renderSilo, lote: renderLote, bigbag: renderBigbag, cierre: renderCierre, resumen: renderResumen, correcciones: renderCorrecciones, usuarios: renderUsuarios };
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
