@@ -715,7 +715,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v45';
+const APP_VERSION = 'v46';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -2806,7 +2806,9 @@ async function renderCorrecciones(){
   </div>
   <div id="coEdit"></div>
   <div class="card"><h2>Bigbags del lote</h2><div id="coBb" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div></div>
-  <div class="card"><h2>Ajustes de turno del lote</h2><div id="coTurnos" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div></div>`;
+  <div class="card"><h2>Ajustes de turno del lote</h2><div id="coTurnos" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div></div>
+  <div class="card"><h2>Cargas de MP del lote</h2><div id="coCargas" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div></div>
+  <div class="card"><h2>Historial de correcciones</h2><div id="coHist" class="table-wrap"><div class="empty">Cargando...</div></div></div>`;
   const { data: lotes, error } = await sb.from('lotes').select('*').order('creado_en', {ascending:false});
   if(error){ document.getElementById('coEstado').innerHTML = `<div class="empty">Error: ${mpEsc(error.message)}</div>`; return; }
   if(!lotes || !lotes.length){ document.querySelector('.lote-sel').style.display = 'none'; document.getElementById('coEstado').innerHTML = '<div class="empty">Todavía no hay lotes.</div>'; return; }
@@ -2817,10 +2819,11 @@ async function coElegir(id){
   CORR.id = id;
   document.getElementById('coEdit').innerHTML = '';
   const l = CORR.lotes[id] || {};
-  const [cb, bb, tn] = await Promise.all([
+  const [cb, bb, tn, cg] = await Promise.all([
     sb.from('lote_cierre').select('*').eq('lote_id', id).maybeSingle(),
     sb.from('produccion_bigbag').select('*').eq('lote_id', id).order('nro_bigbag'),
-    sb.from('lote_turno_cierre').select('*').eq('lote_id', id).order('fecha', {ascending:false})
+    sb.from('lote_turno_cierre').select('*').eq('lote_id', id).order('fecha', {ascending:false}),
+    sb.from('lote_recepcion').select('*').eq('lote_id', id).order('asignado_en')
   ]);
   if(CORR.id !== id) return;
   const est = document.getElementById('coEstado');
@@ -2829,7 +2832,7 @@ async function coElegir(id){
   est.innerHTML = `<div style="margin:10px 0;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);font-size:14px">
     <b>Lote:</b> ${mpEsc(id)}${l.codigo_lab ? ' (' + mpEsc(l.codigo_lab) + ')' : ''} &nbsp;·&nbsp; <span class="badge ${cerr ? 'ok' : 'warn'}">${cerr ? 'CERRADO' : 'EN PROCESO'}</span>
     ${cerr && ci ? `<div style="margin-top:6px">Cierre: procesado ${fmtKg(ci.kg_procesado_total)} · mermas ${fmtKg(ci.mermas_totales_kg)} · MP ${fmtKg(ci.kg_ingresado_mp)} · por ${mpEsc(ci.cerrado_por || '-')}</div>` : ''}
-    ${cerr ? `<button class="btn danger" type="button" style="margin-top:10px" onclick="coReabrir()">Reabrir lote</button>` : ''}
+    ${cerr ? `<button class="btn danger" type="button" style="margin-top:10px" onclick="coReabrir(false)">Reabrir lote</button>${coMezCerrada(ci).length > 1 ? ` <button class="btn danger" type="button" style="margin-top:10px" onclick="coReabrir(true)">Reabrir toda la mezcla (${coMezCerrada(ci).map(mpEsc).join(' + ')})</button>` : ''}` : ''}
   </div>`;
 
   // bigbags
@@ -2858,6 +2861,33 @@ async function coElegir(id){
       ${rows.map(t => `<tr><td>${fmtDate(t.fecha)}</td><td>${mpEsc(t.turno)}</td><td>${fmtKg(t.kg_reales_procesados)}</td><td>${fmtKg(t.mermas_kg)}</td><td>${mpEsc(t.ajustado_por || '-')}</td><td><button class="btn danger" type="button" onclick="coBorrarTurno(${Number(t.id)})">Borrar</button></td></tr>`).join('')}
     </tbody></table>` : '<div class="empty">Este lote no tiene ajustes de turno.</div>';
   }
+  coPintarCargas(cg, l);
+  coHistorial();
+}
+function coMezCerrada(ci){
+  const m = ci && /^Mezcla ([^()]+?) \(/.exec(String(ci.diferencia_analisis || ''));
+  if(!m) return [];
+  const ids = m[1].split(' + ').map(x => x.trim()).filter(Boolean);
+  return ids.filter(x => x === CORR.id || (CORR.lotes[x] && CORR.lotes[x].estado === 'CERRADO'));
+}
+function coPintarCargas(cg, l){
+  const el = document.getElementById('coCargas'); if(!el) return;
+  if(cg.error){ el.innerHTML = `<div class="empty">Error: ${mpEsc(cg.error.message)}</div>`; return; }
+  const rows = cg.data || [];
+  if(!rows.length){ el.innerHTML = '<div class="empty">Este lote no tiene cargas.</div>'; return; }
+  const puede = l.estado === 'EN_PROCESO' && rows.length > 1;
+  el.innerHTML = `<table><thead><tr><th>Carga MP</th><th>Kg líquidos usados</th><th>Asignada</th><th></th></tr></thead><tbody>
+    ${rows.map(c => `<tr><td>${mpEsc(c.recepcion_mp_id)}</td><td>${fmtKg(c.kg_liquido_usado)}</td><td>${fmtDate(c.asignado_en)}</td><td>${puede ? `<button class="btn danger" type="button" data-rec="${mpEsc(c.recepcion_mp_id)}" onclick="coQuitarCarga(this.dataset.rec)">Quitar del lote</button>` : ''}</td></tr>`).join('')}
+  </tbody></table>${l.estado !== 'EN_PROCESO' ? '<div class="empty">Para quitar una carga, primero reabrí el lote.</div>' : (rows.length <= 1 ? '<div class="empty">El lote tiene que quedar con al menos una carga.</div>' : '')}`;
+}
+async function coHistorial(){
+  const el = document.getElementById('coHist'); if(!el) return;
+  const { data, error } = await sb.from('auditoria_cambios').select('*').order('creado_en', {ascending:false}).limit(40);
+  if(error){ el.innerHTML = `<div class="empty">Error: ${mpEsc(error.message)}</div>`; return; }
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay correcciones registradas.</div>'; return; }
+  el.innerHTML = `<table><thead><tr><th>Cuándo</th><th>Quién</th><th>Qué</th><th>Lote</th></tr></thead><tbody>
+    ${data.map(a => `<tr><td>${mpEsc(new Date(a.creado_en).toLocaleString('es-PY', {day:'numeric', month:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'}))}</td><td>${mpEsc(a.usuario_nombre || '-')}</td><td>${mpEsc(a.accion)}</td><td>${mpEsc(a.lote_id || '-')}</td></tr>`).join('')}
+  </tbody></table>`;
 }
 function coMsgErr(error){ return /solo el administrador/i.test(error.message || '') ? 'Solo el administrador puede hacer esto.' : 'Error: ' + error.message; }
 function coEditar(id){
@@ -2912,15 +2942,27 @@ async function coBorrarTurno(id){
     coElegir(CORR.id);
   });
 }
-async function coReabrir(){
+async function coReabrir(mezcla){
   return _once('coreab', async () => {
     const id = CORR.id; if(!id) return;
-    if(!confirm('¿Reabrir el lote ' + id + '?\n\nVuelve a EN PROCESO y se borra su cierre final (kg procesado, mermas y resúmenes). Los bigbags y ajustes de turno se mantienen. Si estaba cerrado en mezcla, reabrí cada lote por separado.')) return;
-    const { error } = await sb.rpc('fn_admin_reabrir_lote', { p_lote:id });
+    const { data: ci } = await sb.from('lote_cierre').select('diferencia_analisis').eq('lote_id', id).maybeSingle();
+    const ids = mezcla ? coMezCerrada(ci) : [id];
+    if(!ids.length) return;
+    if(!confirm('¿Reabrir ' + (ids.length > 1 ? 'la mezcla ' + ids.join(' + ') : 'el lote ' + id) + '?\n\nVuelve a EN PROCESO y se borra su cierre final (kg procesado, mermas y resúmenes). Los bigbags y ajustes de turno se mantienen.')) return;
+    const { error } = await sb.rpc('fn_admin_reabrir_lotes', { p_lotes:ids });
     if(error){ toast(coMsgErr(error), 'err'); return; }
-    toast('Lote ' + id + ' reabierto', 'ok');
-    if(CORR.lotes[id]) CORR.lotes[id].estado = 'EN_PROCESO';
+    toast(ids.length > 1 ? 'Mezcla reabierta: ' + ids.join(' + ') : 'Lote ' + id + ' reabierto', 'ok');
     renderCorrecciones();
+  });
+}
+async function coQuitarCarga(rec){
+  return _once('coqc' + rec, async () => {
+    const id = CORR.id; if(!id || !rec) return;
+    if(!confirm('¿Quitar la carga ' + rec + ' del lote ' + id + '? La carga vuelve a quedar disponible para otro lote.')) return;
+    const { error } = await sb.rpc('fn_admin_quitar_carga', { p_lote:id, p_recepcion:rec });
+    if(error){ toast(coMsgErr(error), 'err'); return; }
+    toast('Carga ' + rec + ' quitada del lote', 'ok');
+    coElegir(id);
   });
 }
 
