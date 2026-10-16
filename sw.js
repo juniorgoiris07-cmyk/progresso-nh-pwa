@@ -5,7 +5,7 @@
  * Supabase (oulrdijjdrfsmbeezolt.supabase.co) NO pasan por este SW (ni se
  * cachean ni se interceptan): si fallan, la app recibe un error real.
  */
-var CACHE_NAME = 'progresso-pwa-v6';
+var CACHE_NAME = 'progresso-pwa-v7';
 var APP_SHELL = [
   './',
   './index.html',
@@ -45,6 +45,10 @@ self.addEventListener('fetch', function (event) {
   // Llamadas a Supabase: el SW no se mete. Van directo a la red y, si falla,
   // el navegador devuelve error real (asi la app nunca muestra "guardado" en falso).
   if (url.indexOf('supabase.co') !== -1) return;
+
+  // Pedidos con ?query (ej. el chequeo de version del index.html): directo a red,
+  // sin pasar por la cache (antes se guardaba una copia nueva cada 90 s).
+  if (url.indexOf('?') !== -1) return;
 
   // App shell: red primero (siempre la version nueva si hay internet), con
   // respaldo en cache si no hay red o tarda mas de 2.5 s (campo / señal mala).
