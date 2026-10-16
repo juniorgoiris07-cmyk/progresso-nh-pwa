@@ -715,7 +715,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v43';
+const APP_VERSION = 'v44';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -1598,6 +1598,13 @@ const mpFk = (v,d) => Number(v||0).toLocaleString('es-PY',{minimumFractionDigits
 const mpFd = s => { if(!s) return '-'; const p = String(s).slice(0,10).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; };
 const hoyLocal = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
 const mpEsc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mpDescHumFila = h => {
+  if(mpEditId !== null){
+    const r = MP_ROWS.find(x => x.id === mpEditId);
+    if(r && h !== '' && Number(h) === Number(r.pct_humedad)) return Number(r.pct_descuento_humedad || 0);
+  }
+  return mpDescHum(h);
+};
 const mpDescHum = h => (h === '' || h === null || h === undefined) ? 0 : Math.max(0, mpN(h) - mpHumMax);
 let mpParcelaCount = 0;
 
@@ -1608,7 +1615,7 @@ async function renderMP(){
   main.innerHTML = `<div class="card">
     <div class="row-flex" style="align-items:flex-start;">
       <div><h2 id="mpTitle">${ICONS.mp} Recepción de materia prima</h2></div>
-      <div style="flex:0 0 150px;"><label>Humedad máx. admitida (%)</label><input id="mpHumMax" type="number" step="0.1" value="${mpHumMax}" oninput="mpSetHumMax()"></div>
+      <div style="flex:0 0 150px;"><label>Humedad máx. admitida (%)</label><input id="mpHumMax" type="number" step="0.1" value="${mpHumMax}" oninput="mpSetHumMax()" title="Valor compartido: si lo cambiás, cambia para todos. No modifica recepciones ya guardadas."></div>
     </div>
     <form id="frmMP">
       <div class="section-title">Datos del camión</div>
@@ -1701,10 +1708,37 @@ function mpFillSilos(silos, extra){
   if(cur && list.some(s => s.id === cur)) sel.value = cur;
 }
 
+let _humTimer = null, _humPend = false;
 function mpSetHumMax(){
-  mpHumMax = mpN(document.getElementById('mpHumMax').value);
+  const inp = document.getElementById('mpHumMax');
+  mpHumMax = mpN(inp.value);
   try { localStorage.setItem('mp_hum_max', String(mpHumMax)); } catch(e){}
   mpCalc();
+  clearTimeout(_humTimer); _humPend = false;
+  const raw = String(inp.value).trim(), v = Number(raw);
+  if(raw === '' || isNaN(v) || v < 0 || v > 100) return;
+  _humPend = true;
+  _humTimer = setTimeout(async () => {
+    const { error } = await sb.from('configuracion').upsert({ clave:'hum_max', valor:v, actualizado_por:usuario || null, actualizado_en:new Date().toISOString() }, { onConflict:'clave' });
+    _humPend = false;
+    if(error){ toast('No se pudo guardar la humedad máx. para todos: ' + error.message, 'err'); return; }
+    toast('Humedad máx. actualizada para todos: ' + mpFk(v,1) + ' %', 'ok');
+  }, 900);
+}
+async function mpCargarHumMax(force){
+  if(_humPend) return null;
+  try{
+    const { data, error } = await sb.from('configuracion').select('valor').eq('clave','hum_max').maybeSingle();
+    if(error || !data) return null;
+    const v = Number(data.valor);
+    if(isNaN(v)) return null;
+    mpHumMax = v;
+    try { localStorage.setItem('mp_hum_max', String(v)); } catch(e){}
+    const inp = document.getElementById('mpHumMax');
+    if(inp && (force || document.activeElement !== inp)) inp.value = v;
+    mpCalc();
+    return v;
+  }catch(e){ return null; }
 }
 
 function mpAddParcela(nro, pct){
@@ -1729,7 +1763,7 @@ function mpCalc(){
   const f = document.getElementById('frmMP');
   if(!f) return;
   const neto = mpN(f.peso_bruto_kg.value) - mpN(f.peso_tara_kg.value);
-  const dh = mpDescHum(f.pct_humedad.value);
+  const dh = mpDescHumFila(f.pct_humedad.value);
   const tot = mpN(f.pct_impureza_gruesa.value) + mpN(f.pct_impureza_fina.value) + mpN(f.pct_descuento_calidad.value) + dh;
   document.getElementById('mpNeto').value = mpFk(neto,2) + ' kg';
   document.getElementById('mpDescHum').value = mpFk(dh,2) + ' %';
@@ -1803,29 +1837,19 @@ async function mpSubmit(e){
     pct_impureza_gruesa: num(f.pct_impureza_gruesa.value),
     pct_impureza_fina: num(f.pct_impureza_fina.value),
     pct_descuento_calidad: num(f.pct_descuento_calidad.value) === null ? 0 : num(f.pct_descuento_calidad.value),
-    pct_descuento_humedad: mpDescHum(f.pct_humedad.value),
+    pct_descuento_humedad: mpDescHumFila(f.pct_humedad.value),
     laboratorio: f.laboratorio.value,
     silo_bolsa_id: f.silo_bolsa_id.value,
     patio_destino: f.patio_destino.value,
     observaciones: f.observaciones.value.trim()
   };
+  const humAntes = mpHumMax;
+  const humAhora = await mpCargarHumMax(true);
+  if(humAhora !== null && humAhora !== humAntes){ toast('La humedad máx. cambió a ' + mpFk(humAhora,1) + ' %. Revisá el descuento y guardá de nuevo', 'err'); return; }
   const btn = f.querySelector('button[type=submit]'); btn.disabled = true;
-  let recId = mpEditId;
-  if(mpEditId !== null){
-    const { error } = await sb.from('recepcion_mp').update(payload).eq('id', mpEditId);
-    if(error){ btn.disabled = false; toast(mpDup(error) ? 'Ya existe una recepción con esa remisión' : 'Error: ' + error.message, 'err'); return; }
-    const { error: eDel } = await sb.from('recepcion_parcela').delete().eq('recepcion_mp_id', mpEditId);
-    if(eDel){ btn.disabled = false; toast('Error al actualizar parcelas: ' + eDel.message, 'err'); return; }
-  } else {
-    payload.creado_por = usuario || null;
-    const { data, error } = await sb.from('recepcion_mp').insert(payload).select().single();
-    if(error){ btn.disabled = false; toast(mpDup(error) ? 'Ya existe una recepción con esa remisión' : 'Error: ' + error.message, 'err'); return; }
-    recId = data.id;
-  }
-  if(ps.length){
-    const { error: errP } = await sb.from('recepcion_parcela').insert(ps.map(p => ({ recepcion_mp_id: recId, nro_parcela: p.nro || null, pct_parcela: p.pct })));
-    if(errP){ btn.disabled = false; toast('Recepción guardada, pero error al guardar parcelas: ' + errP.message, 'err'); await mpLoad(); return; }
-  }
+  if(mpEditId === null) payload.creado_por = usuario || null;
+  const { error } = await sb.rpc('fn_guardar_recepcion', { p_id: mpEditId, p_data: payload, p_parcelas: ps.map(p => ({ nro_parcela: p.nro || null, pct_parcela: p.pct })) });
+  if(error){ btn.disabled = false; toast(mpDup(error) ? 'Ya existe una recepción con esa remisión' : 'Error: ' + error.message, 'err'); return; }
   btn.disabled = false;
   const wasEdit = mpEditId !== null;
   toast('Recepción ' + payload.nro_boleta + (wasEdit ? ' actualizada' : ' guardada'), 'ok');
@@ -1855,9 +1879,7 @@ async function mpDelete(){
   const r = MP_ROWS.find(x => x.id === mpEditId);
   if(!r || r.estado === 'ASIGNADA'){ toast('Esta carga ya está en un lote y no se puede eliminar','err'); return; }
   if(!confirm('¿Eliminar la remisión ' + r.nro_boleta + '? Esta acción no se puede deshacer.')) return;
-  const { error: e1 } = await sb.from('recepcion_parcela').delete().eq('recepcion_mp_id', r.id);
-  if(e1){ toast('Error: ' + e1.message, 'err'); return; }
-  const { error: e2 } = await sb.from('recepcion_mp').delete().eq('id', r.id);
+  const { error: e2 } = await sb.rpc('fn_eliminar_recepcion', { p_id: r.id });
   if(e2){ toast('Error: ' + e2.message, 'err'); return; }
   toast('Recepción eliminada', 'ok');
   mpResetForm(false);
@@ -1865,6 +1887,7 @@ async function mpDelete(){
 }
 
 async function mpLoad(){
+  mpCargarHumMax();
   let data = [], error = null;
   for(let desde = 0; ; desde += 1000){
     const r = await sb.from('recepcion_mp')
@@ -2117,7 +2140,7 @@ async function _submitSilo(e){
   const igual = ((ex && ex.data) || []).find(x => _normTxt(x.numero) === _normTxt(payload.numero));
   if(igual){ toast('Ya existe el silo ' + igual.numero + ' (' + igual.id + ')', 'err'); return; }
   const { data, error } = await sb.from('silos_bolsa').insert(payload).select().single();
-  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  if(error){ toast(_esDup(error) ? 'Ya existe un silo con ese número' : 'Error: ' + error.message, 'err'); return; }
   toast('Silo ' + data.id + ' creado', 'ok');
   renderSilo();
 }
@@ -2317,19 +2340,19 @@ async function _crearLote(){
   const parciales = uso.filter(u => u.kg < ltSaldo(u.r) - 0.5).length;
   if(!confirm('¿Crear un lote de ' + producto + (categoria ? ' (' + categoria + ')' : '') + (codigo_lab ? ' · ' + codigo_lab : '') + ' con ' + seleccionadas.length + ' carga(s) y ' + ltN(kg) + ' kg líquidos' + (parciales ? ' (' + parciales + ' con uso parcial)' : '') + '?')) return;
 
-  const nuevo = {producto, categoria, responsable, creado_por: usuario||null};
-  if(codigo_lab) nuevo.codigo_lab = codigo_lab;
-  const { data: lote, error } = await sb.from('lotes').insert(nuevo).select().single();
-  if(error){ toast('Error: ' + error.message, 'err'); return; }
-
   const rows = uso.map(u => {
-    const fila = {lote_id: lote.id, recepcion_mp_id: u.r.id};
+    const fila = {recepcion_mp_id: u.r.id};
     const yaUsado = Number(u.r.kg_liquido_usado||0);
     if(yaUsado > 0 || u.kg < ltLiq(u.r) - 0.5) fila.kg_liquido_usado = u.kg;
     return fila;
   });
-  const { error: e2 } = await sb.from('lote_recepcion').insert(rows);
-  if(e2){ toast('Lote creado pero error asignando cargas: ' + (_esDup(e2) ? 'alguna carga ya está en este lote' : e2.message), 'err'); return; }
+  const { data: loteId, error } = await sb.rpc('fn_crear_lote', { p_lote: {producto, categoria, responsable, creado_por: usuario||null, codigo_lab}, p_cargas: rows });
+  if(error){
+    const m = String(error.message || '');
+    toast(/uq_lotes_codigo_lab/.test(m) ? 'Ya existe un lote con ese código' : (_esDup(error) ? 'Alguna carga ya está en un lote' : 'Error: ' + m), 'err');
+    return;
+  }
+  const lote = { id: loteId };
 
   toast('Lote ' + lote.id + ' creado con ' + seleccionadas.length + ' carga(s)', 'ok');
   renderLote();
