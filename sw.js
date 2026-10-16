@@ -2,13 +2,14 @@
  * sw.js - Service worker de la PWA Progresso NH.
  * Cachea el app shell (HTML/CSS/JS son un solo index.html + manifest + iconos)
  * para que la app abra y sea instalable incluso offline. Las llamadas a
- * Supabase (oulrdijjdrfsmbeezolt.supabase.co) NUNCA se cachean: siempre van a
- * red, para no mostrar datos de stock/produccion desactualizados.
+ * Supabase (oulrdijjdrfsmbeezolt.supabase.co) NO pasan por este SW (ni se
+ * cachean ni se interceptan): si fallan, la app recibe un error real.
  */
-var CACHE_NAME = 'progresso-pwa-v5';
+var CACHE_NAME = 'progresso-pwa-v6';
 var APP_SHELL = [
   './',
   './index.html',
+  './supabase-2.117.2.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -41,18 +42,9 @@ self.addEventListener('fetch', function (event) {
   var req = event.request;
   var url = req.url;
 
-  // Llamadas a Supabase: siempre red, nunca cache.
-  if (url.indexOf('supabase.co') !== -1) {
-    event.respondWith(
-      fetch(req).catch(function () {
-        return new Response(
-          JSON.stringify({ error: 'Sin conexion a internet. Intenta de nuevo.' }),
-          { headers: { 'Content-Type': 'application/json' } }
-        );
-      })
-    );
-    return;
-  }
+  // Llamadas a Supabase: el SW no se mete. Van directo a la red y, si falla,
+  // el navegador devuelve error real (asi la app nunca muestra "guardado" en falso).
+  if (url.indexOf('supabase.co') !== -1) return;
 
   // App shell: red primero (siempre la version nueva si hay internet), con
   // respaldo en cache si no hay red o tarda mas de 2.5 s (campo / señal mala).

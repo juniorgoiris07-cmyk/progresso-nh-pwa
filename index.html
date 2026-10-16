@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fcfcfb">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-2.117.2.js"></script>
 <style>
   :root{
     --surface-1:#fcfcfb; --surface-2:#f5f4ee; --card:#ffffff;
@@ -715,7 +715,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v40';
+const APP_VERSION = 'v41';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -840,6 +840,7 @@ const _normTxt = x => String(x==null?'':x).trim().replace(/\s+/g,' ').toLowerCas
 const _esDup = err => !!err && (err.code === '23505' || /duplicate key|unique constraint/i.test(err.message||''));
 
 function toast(msg, type){
+  if(type === 'err' && /failed to fetch|networkerror|load failed|network request failed/i.test(String(msg))) msg = 'Sin conexión: no se guardó nada. Revisá la señal e intentá de nuevo.';
   let box = document.getElementById('toasts');
   if(!box){
     box = document.createElement('div');
@@ -2463,7 +2464,7 @@ async function _submitBigbag(e){
   const filas = grupo.map(id => Object.assign({}, payload, { lote_id:id, observaciones:obs }, mez ? { mezcla_id:mezId } : {}));
 
   const { data, error } = await sb.from('produccion_bigbag').insert(filas).select();
-  if(error){ toast(_esDup(error) ? 'Ya existe el bigbag Nº ' + payload.nro_bigbag + (mez ? ' en alguno de los lotes de la mezcla' : ' en este lote') : 'Error: ' + error.message, 'err'); return; }
+  if(error){ toast(_esDup(error) ? (payload.nro_bigbag ? 'Ya existe el bigbag Nº ' + payload.nro_bigbag + (mez ? ' en alguno de los lotes de la mezcla' : ' en este lote') : 'Otro usuario cargó un bigbag justo ahora. Tocá Registrar de nuevo.') : 'Error: ' + error.message, 'err'); return; }
   const rows = data || [];
   toast(mez ? 'Bigbag Nº' + (rows[0] ? rows[0].nro_bigbag : '') + ' de la mezcla registrado (' + grupo.join(' + ') + ')' : 'Bigbag Nº' + (rows[0] ? rows[0].nro_bigbag : '') + ' registrado', 'ok');
   e.target.reset();
