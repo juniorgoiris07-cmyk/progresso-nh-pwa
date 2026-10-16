@@ -715,7 +715,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v47';
+const APP_VERSION = 'v48';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -2800,7 +2800,7 @@ async function renderCorrecciones(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
     <h2>${ICONS.correcciones} Correcciones · solo administrador</h2>
-    <div class="mez-aviso">Acá se corrige lo ya cargado: editar o borrar bigbags, borrar ajustes de turno y reabrir un lote cerrado. Cada cambio pide confirmación.</div>
+    <div class="mez-aviso">Acá se corrige lo ya cargado: bigbags, ajustes de turno, cargas de MP y lotes cerrados. Cada cambio pide confirmación y queda en el historial.</div>
     ${loteSelectorHTML('co')}
     <div id="coEstado"></div>
   </div>
