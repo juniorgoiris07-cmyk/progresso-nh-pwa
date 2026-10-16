@@ -715,7 +715,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v46';
+const APP_VERSION = 'v47';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -2877,7 +2877,7 @@ function coPintarCargas(cg, l){
   if(!rows.length){ el.innerHTML = '<div class="empty">Este lote no tiene cargas.</div>'; return; }
   const puede = l.estado === 'EN_PROCESO' && rows.length > 1;
   el.innerHTML = `<table><thead><tr><th>Carga MP</th><th>Kg líquidos usados</th><th>Asignada</th><th></th></tr></thead><tbody>
-    ${rows.map(c => `<tr><td>${mpEsc(c.recepcion_mp_id)}</td><td>${fmtKg(c.kg_liquido_usado)}</td><td>${fmtDate(c.asignado_en)}</td><td>${puede ? `<button class="btn danger" type="button" data-rec="${mpEsc(c.recepcion_mp_id)}" onclick="coQuitarCarga(this.dataset.rec)">Quitar del lote</button>` : ''}</td></tr>`).join('')}
+    ${rows.map(c => `<tr><td>${mpEsc(c.recepcion_mp_id)}</td><td>${c.kg_liquido_usado === null || c.kg_liquido_usado === undefined ? 'carga completa' : fmtKg(c.kg_liquido_usado)}</td><td>${fmtDate(c.asignado_en)}</td><td>${puede ? `<button class="btn danger" type="button" data-rec="${mpEsc(c.recepcion_mp_id)}" onclick="coQuitarCarga(this.dataset.rec)">Quitar del lote</button>` : ''}</td></tr>`).join('')}
   </tbody></table>${l.estado !== 'EN_PROCESO' ? '<div class="empty">Para quitar una carga, primero reabrí el lote.</div>' : (rows.length <= 1 ? '<div class="empty">El lote tiene que quedar con al menos una carga.</div>' : '')}`;
 }
 async function coHistorial(){
