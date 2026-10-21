@@ -43,6 +43,43 @@
 
   main{padding:18px 16px 50px;max-width:920px;margin:0 auto;}
   .hidden{display:none !important;}
+  .prod-chip{appearance:none;display:inline-flex;align-items:center;gap:9px;background:var(--text-primary);border:1px solid var(--text-primary);border-radius:22px;padding:8px 14px 8px 12px;font:inherit;font-size:13px;font-weight:800;letter-spacing:.01em;color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .18s ease,transform .18s ease;}
+  .prod-chip i{display:none;}
+  .prod-chip svg{width:14px;height:14px;opacity:.75;transition:transform .25s ease,opacity .18s ease;}
+  .prod-chip:hover{background:var(--accent-dark);border-color:var(--accent-dark);}
+  .prod-chip:hover svg{transform:rotate(180deg);opacity:1;}
+  .prod-chip:active{transform:scale(.96);}
+  #prodScreen{transition:opacity .22s ease;}
+  #prodScreen.saliendo{opacity:0;}
+  #authScreen,#prodScreen{position:relative;background:#2d3b2a url("fondo.jpg") center/cover no-repeat;}
+  #authScreen::before,#prodScreen::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(23,21,15,.14);pointer-events:none;}
+  #authScreen .auth-card{position:relative;z-index:1;border:none;border-radius:22px;box-shadow:0 24px 60px rgba(0,0,0,.30);}
+  #authScreen:not(.hidden) .auth-card{animation:prodIn .38s cubic-bezier(.2,.7,.2,1) both;}
+  #prodScreen .auth-card{max-width:430px;padding:34px 28px 14px;position:relative;z-index:1;border:none;border-radius:22px;box-shadow:0 24px 60px rgba(0,0,0,.30);}
+  #prodScreen .auth-logo-img{margin-bottom:20px;}
+  #prodScreen h1{font-size:23px;font-weight:800;letter-spacing:-.01em;}
+  .prod-hello{margin:4px 0 22px;font-size:13.5px;color:var(--text-muted);}
+  .prod-list{display:grid;gap:12px;margin:0 0 14px;text-align:left;}
+  .prod-opt{appearance:none;width:100%;display:flex;align-items:center;gap:16px;background:var(--card);border:2px solid var(--gridline);border-radius:16px;padding:16px 18px 16px 16px;font:inherit;color:var(--text-primary);cursor:pointer;text-align:left;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease,background .2s ease;}
+  .prod-opt:hover,.prod-opt:focus-visible{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 10px 24px rgba(23,21,15,.10);outline:none;}
+  .prod-opt:active{transform:scale(.985);}
+  .prod-ic{flex:none;width:56px;height:56px;border-radius:14px;display:grid;place-items:center;font-style:normal;font-size:26px;font-weight:800;color:#fff;background:var(--accent);transition:background .2s ease;}
+  .prod-opt:hover .prod-ic,.prod-opt:focus-visible .prod-ic{background:var(--accent-dark);}
+  .prod-txt{flex:1;min-width:0;}
+  .prod-txt b{display:block;font-size:21px;font-weight:800;letter-spacing:-.01em;line-height:1.15;}
+  .prod-txt small{display:block;margin-top:3px;font-size:12.5px;font-weight:600;color:var(--text-muted);}
+  .prod-opt>svg{width:20px;height:20px;flex:none;opacity:.4;transition:transform .2s ease,opacity .2s ease;}
+  .prod-opt:hover>svg{transform:translateX(3px);opacity:.9;}
+  .prod-salir{appearance:none;background:none;border:none;font:inherit;font-size:12.5px;font-weight:700;color:var(--text-muted);cursor:pointer;padding:8px 10px;margin-bottom:8px;transition:color .18s ease;}
+  .prod-salir:hover{color:var(--text-primary);}
+  @keyframes prodIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  #prodScreen:not(.hidden) .auth-card{animation:prodIn .38s cubic-bezier(.2,.7,.2,1) both;}
+  #prodScreen:not(.hidden) .prod-opt{animation:prodIn .42s cubic-bezier(.2,.7,.2,1) both;}
+  #prodScreen:not(.hidden) .prod-opt:nth-child(1){animation-delay:.08s;}
+  #prodScreen:not(.hidden) .prod-opt:nth-child(2){animation-delay:.15s;}
+  #appShell.entra{animation:prodFade .35s ease both;}
+  @keyframes prodFade{from{opacity:0;}to{opacity:1;}}
+  @media (prefers-reduced-motion:reduce){#prodScreen *,#appShell.entra,.prod-chip,.prod-chip svg{animation:none !important;transition:none !important;}}
 
   .volver-btn{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--gridline);color:var(--text-secondary);font-size:13px;font-weight:700;padding:9px 15px;border-radius:20px;cursor:pointer;margin-bottom:16px;box-shadow:var(--shadow-sm);}
   .volver-btn:hover{border-color:var(--accent);color:var(--accent-dark);}
@@ -660,6 +697,16 @@
   </div>
 </div>
 
+<div id="prodScreen" class="auth-wrap hidden">
+  <div class="auth-card">
+    <img class="auth-logo-img" alt="Progresso NH S.A." width="480" height="236">
+    <h1>Elegí el producto</h1>
+    <p class="prod-hello" id="prodHello"></p>
+    <div class="prod-list" id="prodList"></div>
+    <button type="button" class="prod-salir" onclick="cerrarSesion()">Cerrar sesión</button>
+  </div>
+</div>
+
 <div class="app-shell hidden" id="appShell">
   <header class="appbar" id="appbar">
     <div class="appbar-top">
@@ -674,6 +721,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         <span id="usuarioChipText">Cargando...</span>
       </button>
+      <button type="button" class="prod-chip" id="prodChip" onclick="cambiarProducto()" title="Cambiar de producto" aria-label="Cambiar de producto"><i></i><span id="prodChipTxt"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg></button>
       <div class="gsearch" id="gsearch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
         <input id="gsInput" type="text" placeholder="Buscar módulo" autocomplete="off" spellcheck="false" aria-label="Buscar módulo">
@@ -715,13 +763,43 @@
 </div>
 
 <script>
-const APP_VERSION = 'v48';
+const APP_VERSION = 'v49';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
-const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+/* Un producto = un esquema de la base (datos 100% separados). Chía vive en "public", Sésamo en "sesamo".
+   Usuarios y roles (perfiles) son compartidos: siempre en "public". */
+const PROD_INFO = {
+  chia:   { nombre:'Chía',   producto:'Chia',   schema:'public', lab:'PROCHCE' },
+  sesamo: { nombre:'Sésamo', producto:'Sesamo', schema:'sesamo', lab:'PROSES' }
+};
+let PROD = null;
+const _dbProd = () => { const sc = PROD && PROD_INFO[PROD].schema; return (sc && sc !== 'public') ? _sbRaw.schema(sc) : _sbRaw; };
+const sb = { auth:_sbRaw.auth, from:t => _dbProd().from(t), rpc:(n, a, o) => _dbProd().rpc(n, a, o) };
+const sbPub = _sbRaw;
+function prodGuardado(){ try{ const p = sessionStorage.getItem('nh_prod'); return PROD_INFO[p] ? p : null; }catch(e){ return null; } }
+function prodOpts(){ return `<option value="${PROD_INFO[PROD].producto}">${PROD_INFO[PROD].producto}</option>`; }
 
 const CATEGORIAS = ['Organico','Organico BNN','Convencional UE','Convencional ROW'];
-const PRODUCTOS = ['Chia','Sesamo','Girasol confiteria','Otro'];
+/* Qué lleva cada producto (formulario, descuentos, calidades). Chía queda exactamente como estaba. */
+const PROD_CFG = {
+  chia: {
+    tipos:['Corte hilerado','Desecado','Convencional'], destinos:['Warrants','Interno'],
+    cats:['Organico','Organico BNN','Convencional UE','Convencional ROW'],
+    desc:[{k:'pct_impureza_gruesa',l:'% Impureza gruesa'},{k:'pct_impureza_fina',l:'% Impureza fina'},{k:'pct_descuento_calidad',l:'% Descuento calidad',cero:true}],
+    imp:['pct_impureza_gruesa','pct_impureza_fina'], hum:true, lab:true, variedad:false, marcado:false
+  },
+  sesamo: {
+    tipos:['Organico','Posible Traza','Convencional','Trazas'], destinos:['Warrants','Sin Warrants','Semillero'],
+    cats:['Organico','Posible Traza','Convencional','Trazas'],
+    desc:[{k:'pct_impureza',l:'% Impureza',cero:true},{k:'pct_contraste',l:'% Contraste',cero:true},{k:'pct_danos_mecanicos',l:'% Daños mecánicos',cero:true}],
+    imp:['pct_impureza'], hum:false, lab:false, variedad:true, marcado:true
+  }
+};
+const PC = () => PROD_CFG[PROD || 'chia'];
+const impDe = r => PC().imp.reduce((a, k) => a + Number(r[k] || 0), 0);
+const VARIEDADES = ['K3','Equinom','Criollo','Jazmin'];
+
 
 const ICONS = {
   mp: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M5 7l1 13h12l1-13M9 11v6M15 11v6M9 7V4h6v3"/></svg>',
@@ -752,6 +830,9 @@ function showAuthScreen(){
   usuario = null;
   currentUser = null;
   miRol = null;
+  PROD = null;
+  try{ sessionStorage.removeItem('nh_prod'); }catch(e){}
+  document.getElementById('prodScreen').classList.add('hidden');
 }
 
 async function onLogin(session){
@@ -759,7 +840,7 @@ async function onLogin(session){
   let nombre = null;
   let perfil = null;
   try{
-    const { data } = await sb.from('perfiles').select('*').eq('id', session.user.id).single();
+    const { data } = await sbPub.from('perfiles').select('*').eq('id', session.user.id).single();
     perfil = data;
     nombre = perfil ? perfil.nombre : null;
   }catch(e){}
@@ -776,6 +857,44 @@ async function onLogin(session){
   document.getElementById('upName').textContent = usuario;
   document.getElementById('upRol').textContent = rolLabel(miRol);
   document.getElementById('authScreen').classList.add('hidden');
+  PROD = PROD || prodGuardado();
+  if(!PROD){ mostrarProductos(); return; }
+  entrarApp();
+}
+
+function mostrarProductos(){
+  document.getElementById('appShell').classList.add('hidden');
+  document.getElementById('navbar').classList.add('hidden');
+  document.getElementById('prodScreen').classList.remove('hidden');
+  document.getElementById('prodHello').textContent = 'Hola, ' + usuario + '. ¿Con qué producto vas a trabajar?';
+  let ult = null; try{ ult = localStorage.getItem('nh_prod_ult'); }catch(e){}
+  const flecha = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+  document.getElementById('prodList').innerHTML = Object.keys(PROD_INFO).map(k => `<button type="button" class="prod-opt" onclick="elegirProducto('${k}')"><i class="prod-ic">${PROD_INFO[k].nombre.charAt(0)}</i><span class="prod-txt"><b>${PROD_INFO[k].nombre}</b><small>${k === ult ? 'Último que usaste' : 'Lotes, recepciones y producción'}</small></span>${flecha}</button>`).join('');
+}
+
+function elegirProducto(k){
+  if(!PROD_INFO[k]) return;
+  let ult = null; try{ ult = localStorage.getItem('nh_prod_ult'); }catch(e){}
+  if(ult && ult !== k){ ['nh_lote_carga','nh_lote_cierre','nh_lote_corr'].forEach(x => { try{ localStorage.removeItem(x); }catch(e){} }); }
+  PROD = k;
+  try{ sessionStorage.setItem('nh_prod', k); localStorage.setItem('nh_prod_ult', k); }catch(e){}
+  const ps = document.getElementById('prodScreen');
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches){ entrarApp(); return; }
+  ps.classList.add('saliendo');
+  setTimeout(() => { ps.classList.remove('saliendo'); entrarApp(); const sh = document.getElementById('appShell'); sh.classList.remove('entra'); void sh.offsetWidth; sh.classList.add('entra'); }, 200);
+}
+
+function cambiarProducto(){
+  if(_dirty && !confirm('Hay datos sin guardar. ¿Cambiar de producto igual?')) return;
+  try{ sessionStorage.removeItem('nh_prod'); }catch(e){}
+  const sh = document.getElementById('appShell'); sh.style.transition = 'opacity .18s ease'; sh.style.opacity = '0';
+  setTimeout(() => location.reload(), 180);
+}
+
+function entrarApp(){
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('prodScreen').classList.add('hidden');
+  document.getElementById('prodChipTxt').textContent = PROD_INFO[PROD].nombre;
   document.getElementById('appShell').classList.remove('hidden');
   renderHomeMenu();
   document.getElementById('navbar').classList.remove('hidden');
@@ -961,7 +1080,7 @@ async function renderDash(forzar){
   if(!DASH.ok) host.innerHTML = `<div class="dash"><div class="dash-kpis">${'<div class="dkpi dskel"><i></i><i></i><i></i></div>'.repeat(4)}</div><div class="dash-grid">${'<div class="dcard dskel"><i></i><i></i><i></i><i></i></div>'.repeat(4)}</div></div>`;
   try{
     const [rec, silos, lotes, bbs, lb, tcs] = await Promise.all([
-      dashAll('recepcion_mp', 'id,nro_boleta,fecha,proveedor,silo_bolsa_id,peso_neto_kg,kg_liquido_carga,kg_liquido_usado,pct_humedad,pct_impureza_gruesa,pct_impureza_fina,estado,laboratorio', 'fecha'),
+      dashAll('recepcion_mp', 'id,nro_boleta,fecha,proveedor,silo_bolsa_id,peso_neto_kg,kg_liquido_carga,kg_liquido_usado,pct_humedad,' + PC().imp.join(',') + ',estado' + (PC().lab ? ',laboratorio' : ''), 'fecha'),
       dashAll('silos_bolsa', '*', 'creado_en'),
       dashAll('v_resumen_lotes', '*', 'fecha_creacion', 'lote_id'),
       dashAll('produccion_bigbag', 'lote_id,fecha,turno,mezcla_id', 'fecha'),
@@ -1008,7 +1127,7 @@ function dMensual(a){
     if(!r.fecha || Number(String(r.fecha).slice(0,4)) !== a) return;
     const m = Number(String(r.fecha).slice(5,7)) - 1, n = Number(r.peso_neto_kg||0);
     rec[m] += Number(r.kg_liquido_carga||0); car[m]++; neto[m] += n; provs[m].add(r.proveedor || 'Sin proveedor');
-    if(n > 0){ hn[m] += n * Number(r.pct_humedad||0); im[m] += n * (Number(r.pct_impureza_gruesa||0) + Number(r.pct_impureza_fina||0)); }
+    if(n > 0){ hn[m] += n * Number(r.pct_humedad||0); im[m] += n * impDe(r); }
   });
   DASH.lotes.forEach(l => {
     if(l.estado !== 'CERRADO' || !l.fecha_cierre || Number(String(l.fecha_cierre).slice(0,4)) !== a) return;
@@ -1494,7 +1613,7 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarUserMen
 window.addEventListener('scroll', () => { const h = document.getElementById('appbar'); if(h) h.classList.toggle('scrolled', window.scrollY > 4); }, {passive:true});
 const mqDesk = window.matchMedia('(min-width:960px)');
 const LOGO_SRC = document.querySelector('#appbar img.brandmark').src;
-{ const li = document.querySelector('.auth-logo-img'); if(li) li.src = LOGO_SRC; }
+document.querySelectorAll('.auth-logo-img').forEach(li => { li.src = LOGO_SRC; });
 function setAppbarTitle(id){
   const h1 = document.getElementById('abTitle'); if(!h1) return;
   const all = tabsMenu();
@@ -1618,7 +1737,7 @@ async function renderMP(){
   main.innerHTML = `<div class="card">
     <div class="row-flex" style="align-items:flex-start;">
       <div><h2 id="mpTitle">${ICONS.mp} Recepción de materia prima</h2></div>
-      <div style="flex:0 0 150px;"><label>Humedad máx. admitida (%)</label><input id="mpHumMax" type="number" step="0.1" value="${mpHumMax}" oninput="mpSetHumMax()" title="Valor compartido: si lo cambiás, cambia para todos. No modifica recepciones ya guardadas."></div>
+      ${PC().hum ? `<div style="flex:0 0 150px;"><label>Humedad máx. admitida (%)</label><input id="mpHumMax" type="number" step="0.1" value="${mpHumMax}" oninput="mpSetHumMax()" title="Valor compartido: si lo cambiás, cambia para todos. No modifica recepciones ya guardadas."></div>` : ''}
     </div>
     <form id="frmMP">
       <div class="section-title">Datos del camión</div>
@@ -1628,10 +1747,13 @@ async function renderMP(){
         <div><label>Chapa camión</label><input name="chapa_camion"></div>
         <div><label>Chofer</label><input name="chofer"></div>
         <div><label>Proveedor / Productor</label><input name="proveedor" list="mpProvList"></div>
-        <div><label>Tipo</label><select name="tipo_cosecha"><option>Corte hilerado</option><option>Desecado</option><option>Convencional</option></select></div>
-        <div><label>Para</label><select name="destino"><option>Warrants</option><option>Interno</option></select></div>
+        ${PC().variedad ? `<div><label>Variedad</label><input name="variedad" list="mpVarList" autocomplete="off"></div>` : ''}
+        <div><label>Tipo</label><select name="tipo_cosecha">${PC().tipos.map(t => `<option>${t}</option>`).join('')}</select></div>
+        <div><label>Para</label><select name="destino">${PC().destinos.map(t => `<option>${t}</option>`).join('')}</select></div>
+        ${PC().marcado ? `<div><label>Marcado</label><label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:14px;font-weight:600;margin-top:10px;"><input type="checkbox" name="marcado" style="width:auto;margin:0;"> Sí</label></div>` : ''}
       </div>
       <datalist id="mpProvList"></datalist>
+      ${PC().variedad ? `<datalist id="mpVarList">${VARIEDADES.map(v => `<option value="${v}">`).join('')}</datalist>` : ''}
 
       <div class="section-title">Pesaje</div>
       <div class="grid">
@@ -1644,12 +1766,10 @@ async function renderMP(){
       <div class="grid">
         <div><label>% Humedad</label><input name="pct_humedad" type="number" step="0.01" oninput="mpCalc()"></div>
         <div><label>Temperatura (°C)</label><input name="temperatura_c" type="number" step="0.1"></div>
-        <div><label>% Impureza gruesa</label><input name="pct_impureza_gruesa" type="number" step="0.01" oninput="mpCalc()"></div>
-        <div><label>% Impureza fina</label><input name="pct_impureza_fina" type="number" step="0.01" oninput="mpCalc()"></div>
-        <div><label>% Descuento calidad</label><input name="pct_descuento_calidad" type="number" step="0.01" oninput="mpCalc()"></div>
-        <div class="field-computed"><label>% Descuento humedad</label><input id="mpDescHum" disabled></div>
+        ${PC().desc.map(d => `<div><label>${d.l}</label><input name="${d.k}" type="number" step="0.01" oninput="mpCalc()"></div>`).join('')}
+        ${PC().hum ? `<div class="field-computed"><label>% Descuento humedad</label><input id="mpDescHum" disabled></div>` : ''}
         <div class="field-computed"><label>% Total descuento</label><input id="mpTotal" disabled></div>
-        <div><label>Laboratorio</label><select name="laboratorio"><option>Calado</option><option>Sin calar</option></select></div>
+        ${PC().lab ? `<div><label>Laboratorio</label><select name="laboratorio"><option>Calado</option><option>Sin calar</option></select></div>` : ''}
       </div>
 
       <div class="section-title">Parcelas</div>
@@ -1729,7 +1849,7 @@ function mpSetHumMax(){
   }, 900);
 }
 async function mpCargarHumMax(force){
-  if(_humPend) return null;
+  if(!PC().hum || _humPend) return null;
   try{
     const { data, error } = await sb.from('configuracion').select('valor').eq('clave','hum_max').maybeSingle();
     if(error || !data) return null;
@@ -1766,10 +1886,10 @@ function mpCalc(){
   const f = document.getElementById('frmMP');
   if(!f) return;
   const neto = mpN(f.peso_bruto_kg.value) - mpN(f.peso_tara_kg.value);
-  const dh = mpDescHumFila(f.pct_humedad.value);
-  const tot = mpN(f.pct_impureza_gruesa.value) + mpN(f.pct_impureza_fina.value) + mpN(f.pct_descuento_calidad.value) + dh;
+  const dh = PC().hum ? mpDescHumFila(f.pct_humedad.value) : 0;
+  const tot = PC().desc.reduce((a, d) => a + mpN(f[d.k].value), 0) + dh;
   document.getElementById('mpNeto').value = mpFk(neto,2) + ' kg';
-  document.getElementById('mpDescHum').value = mpFk(dh,2) + ' %';
+  const eh = document.getElementById('mpDescHum'); if(eh) eh.value = mpFk(dh,2) + ' %';
   document.getElementById('mpTotal').value = mpFk(tot,2) + ' %';
   const ps = mpLeerParcelas();
   const sum = ps.reduce((a,p) => a + (p.pct||0), 0);
@@ -1796,7 +1916,9 @@ function mpSetMode(){
 
 function mpResetForm(keep){
   const f = document.getElementById('frmMP');
-  const k = keep ? {fecha:f.fecha.value, proveedor:f.proveedor.value, tipo_cosecha:f.tipo_cosecha.value, destino:f.destino.value, silo_bolsa_id:f.silo_bolsa_id.value, patio_destino:f.patio_destino.value, laboratorio:f.laboratorio.value} : null;
+  const k = keep ? {fecha:f.fecha.value, proveedor:f.proveedor.value, tipo_cosecha:f.tipo_cosecha.value, destino:f.destino.value, silo_bolsa_id:f.silo_bolsa_id.value, patio_destino:f.patio_destino.value} : null;
+  if(k && PC().lab) k.laboratorio = f.laboratorio.value;
+  if(k && PC().variedad) k.variedad = f.variedad.value;
   f.reset();
   f.fecha.value = hoyLocal();
   mpFillSilos(window.mpSilosAbiertos || [], null);
@@ -1837,15 +1959,15 @@ async function mpSubmit(e){
     peso_tara_kg: Number(f.peso_tara_kg.value),
     pct_humedad: num(f.pct_humedad.value),
     temperatura_c: num(f.temperatura_c.value),
-    pct_impureza_gruesa: num(f.pct_impureza_gruesa.value),
-    pct_impureza_fina: num(f.pct_impureza_fina.value),
-    pct_descuento_calidad: num(f.pct_descuento_calidad.value) === null ? 0 : num(f.pct_descuento_calidad.value),
-    pct_descuento_humedad: mpDescHumFila(f.pct_humedad.value),
-    laboratorio: f.laboratorio.value,
     silo_bolsa_id: f.silo_bolsa_id.value,
     patio_destino: f.patio_destino.value,
     observaciones: f.observaciones.value.trim()
   };
+  PC().desc.forEach(d => { const v = num(f[d.k].value); payload[d.k] = (v === null && d.cero) ? 0 : v; });
+  if(PC().hum) payload.pct_descuento_humedad = mpDescHumFila(f.pct_humedad.value);
+  if(PC().lab) payload.laboratorio = f.laboratorio.value;
+  if(PC().variedad) payload.variedad = nul(f.variedad.value);
+  if(PC().marcado) payload.marcado = !!f.marcado.checked;
   const humAntes = mpHumMax;
   const humAhora = await mpCargarHumMax(true);
   if(humAhora !== null && humAhora !== humAntes){ toast('La humedad máx. cambió a ' + mpFk(humAhora,1) + ' %. Revisá el descuento y guardá de nuevo', 'err'); return; }
@@ -1866,7 +1988,8 @@ function mpEdit(id){
   if(r.estado === 'ASIGNADA'){ toast('Esta carga ya está en un lote y no se puede editar','err'); return; }
   const f = document.getElementById('frmMP');
   mpEditId = id;
-  ['nro_boleta','fecha','chapa_camion','chofer','proveedor','tipo_cosecha','destino','peso_bruto_kg','peso_tara_kg','pct_humedad','temperatura_c','pct_impureza_gruesa','pct_impureza_fina','pct_descuento_calidad','laboratorio','patio_destino','observaciones'].forEach(k => { f[k].value = r[k] == null ? '' : r[k]; });
+  ['nro_boleta','fecha','chapa_camion','chofer','proveedor','tipo_cosecha','destino','peso_bruto_kg','peso_tara_kg','pct_humedad','temperatura_c'].concat(PC().desc.map(d => d.k), PC().lab ? ['laboratorio'] : [], PC().variedad ? ['variedad'] : [], ['patio_destino','observaciones']).forEach(k => { f[k].value = r[k] == null ? '' : r[k]; });
+  if(PC().marcado) f.marcado.checked = !!r.marcado;
   mpFillSilos(window.mpSilosAbiertos || [], r.silos_bolsa ? {id:r.silo_bolsa_id, numero:r.silos_bolsa.numero, producto:r.silos_bolsa.producto, categoria:r.silos_bolsa.categoria} : {id:r.silo_bolsa_id, numero:r.silo_bolsa_id, producto:'', categoria:''});
   f.silo_bolsa_id.value = r.silo_bolsa_id;
   document.getElementById('parcelaRows').innerHTML = '';
@@ -1962,10 +2085,10 @@ function mpRenderList(){
   fs.forEach(x => { if(!seen[x.r.id] && x.r.pct_humedad != null){ seen[x.r.id] = 1; hs.push(Number(x.r.pct_humedad)); } });
   const hp = hs.length ? hs.reduce((a,b) => a + b, 0)/hs.length : 0;
   const pp = fs.reduce((a,x) => a + x.tot*x.neto, 0) / (tn || 1);
-  el.innerHTML = `<table><thead><tr><th>Remisión</th><th>Fecha</th><th>Placa</th><th>Chofer</th><th>Proveedor / Productor</th><th>Parcela</th><th class="num">% parcela</th><th>Tipo</th><th class="num sep">Peso bruto</th><th class="num">Peso tara</th><th class="num">Peso neto</th><th class="num sep">Humedad %</th><th class="num">Temp °C</th><th class="num">Impurezas %</th><th class="num">Desc. calidad %</th><th class="num">Desc. humedad %</th><th class="num">Total desc. %</th><th class="num sep">Descuento kg</th><th class="num">Peso final kg</th><th class="sep">Observaciones</th><th>Ubicación</th><th>Silo bolsa</th><th>Lote</th><th>Para</th><th>Estado</th><th>Laboratorio</th><th></th></tr></thead><tbody>${
+  el.innerHTML = `<table><thead><tr><th>Remisión</th><th>Fecha</th><th>Placa</th><th>Chofer</th><th>Proveedor / Productor</th><th>Parcela</th><th class="num">% parcela</th>${PC().variedad ? '<th>Variedad</th>' : ''}<th>Tipo</th><th class="num sep">Peso bruto</th><th class="num">Peso tara</th><th class="num">Peso neto</th><th class="num sep">Humedad %</th><th class="num">Temp °C</th>${PC().hum ? '<th class="num">Impurezas %</th><th class="num">Desc. calidad %</th><th class="num">Desc. humedad %</th>' : '<th class="num">Impureza %</th><th class="num">Contraste %</th><th class="num">Daños mec. %</th>'}<th class="num">Total desc. %</th><th class="num sep">Descuento kg</th><th class="num">Peso final kg</th><th class="sep">Observaciones</th><th>Ubicación</th><th>Silo bolsa</th><th>Lote</th><th>Para</th><th>Estado</th>${PC().lab ? '<th>Laboratorio</th>' : '<th>Marcado</th>'}<th></th></tr></thead><tbody>${
     fs.slice(0, mpLimit).map(x => { const r = x.r, lote = mpLoteDe(r), asig = r.estado === 'ASIGNADA';
-      return `<tr><td>${mpEsc(r.nro_boleta)}</td><td>${mpFd(r.fecha)}</td><td>${mpEsc(r.chapa_camion||'')}</td><td>${mpEsc(r.chofer||'')}</td><td>${mpEsc(r.proveedor||'')}</td><td>${mpEsc(x.nro)}</td><td class="num">${mpFk(x.pct,2)}</td><td>${mpEsc(r.tipo_cosecha||'')}</td><td class="num sep">${mpFk(x.bruto)}</td><td class="num">${mpFk(r.peso_tara_kg)}</td><td class="num">${mpFk(x.neto)}</td><td class="num sep">${r.pct_humedad==null?'':mpFk(r.pct_humedad,1)}</td><td class="num">${r.temperatura_c==null?'':mpFk(r.temperatura_c)}</td><td class="num">${mpFk(Number(r.pct_impureza_gruesa||0)+Number(r.pct_impureza_fina||0),2)}</td><td class="num">${mpFk(r.pct_descuento_calidad,2)}</td><td class="num${x.dh>0?' hum':''}">${mpFk(x.dh,2)}</td><td class="num">${mpFk(x.tot,2)}</td><td class="num sep">${mpFk(x.desc)}</td><td class="num"><b>${mpFk(x.fin)}</b></td><td class="sep">${mpEsc(r.observaciones||'')}</td><td>${mpEsc(r.patio_destino||'')}</td><td>${mpEsc(r.silos_bolsa ? r.silos_bolsa.numero : '')}</td><td>${lote ? mpEsc(lote) : '<span style="color:var(--text-muted)">—</span>'}</td><td>${mpEsc(r.destino||'')}</td><td><span class="badge ${asig?'ok':'warn'}">${asig?'Procesado':'Sin procesar'}</span></td><td>${mpEsc(r.laboratorio||'')}</td><td>${asig ? '' : `<button class="edit-btn" onclick="mpEdit('${mpEsc(r.id)}')">Editar</button>`}</td></tr>`; }).join('')
-  }${fs.length > mpLimit ? `<tr><td colspan="26" style="text-align:center;padding:12px"><button type="button" class="btn secondary small" onclick="mpLimit+=80;mpRenderList()">Mostrar más (${fs.length - mpLimit} restantes)</button></td></tr>` : ''}</tbody><tfoot><tr><td colspan="8">Totales · ${fs.length} filas</td><td class="num sep">${mpFk(tb)}</td><td></td><td class="num">${mpFk(tn)}</td><td class="num sep">${mpFk(hp,1)} prom.</td><td colspan="4" class="num">${mpFk(pp,2)} prom.</td><td class="num sep">${mpFk(td)}</td><td class="num">${mpFk(tf)}</td><td colspan="8" class="sep"></td></tr></tfoot></table>`;
+      return `<tr><td>${mpEsc(r.nro_boleta)}</td><td>${mpFd(r.fecha)}</td><td>${mpEsc(r.chapa_camion||'')}</td><td>${mpEsc(r.chofer||'')}</td><td>${mpEsc(r.proveedor||'')}</td><td>${mpEsc(x.nro)}</td><td class="num">${mpFk(x.pct,2)}</td>${PC().variedad ? `<td>${mpEsc(r.variedad||'')}</td>` : ''}<td>${mpEsc(r.tipo_cosecha||'')}</td><td class="num sep">${mpFk(x.bruto)}</td><td class="num">${mpFk(r.peso_tara_kg)}</td><td class="num">${mpFk(x.neto)}</td><td class="num sep">${r.pct_humedad==null?'':mpFk(r.pct_humedad,1)}</td><td class="num">${r.temperatura_c==null?'':mpFk(r.temperatura_c)}</td>${PC().hum ? `<td class="num">${mpFk(impDe(r),2)}</td><td class="num">${mpFk(r.pct_descuento_calidad,2)}</td><td class="num${x.dh>0?' hum':''}">${mpFk(x.dh,2)}</td>` : `<td class="num">${mpFk(r.pct_impureza,2)}</td><td class="num">${mpFk(r.pct_contraste,2)}</td><td class="num">${mpFk(r.pct_danos_mecanicos,2)}</td>`}<td class="num">${mpFk(x.tot,2)}</td><td class="num sep">${mpFk(x.desc)}</td><td class="num"><b>${mpFk(x.fin)}</b></td><td class="sep">${mpEsc(r.observaciones||'')}</td><td>${mpEsc(r.patio_destino||'')}</td><td>${mpEsc(r.silos_bolsa ? r.silos_bolsa.numero : '')}</td><td>${lote ? mpEsc(lote) : '<span style="color:var(--text-muted)">—</span>'}</td><td>${mpEsc(r.destino||'')}</td><td><span class="badge ${asig?'ok':'warn'}">${asig?'Procesado':'Sin procesar'}</span></td><td>${PC().lab ? mpEsc(r.laboratorio||'') : (r.marcado ? 'Sí' : '')}</td><td>${asig ? '' : `<button class="edit-btn" onclick="mpEdit('${mpEsc(r.id)}')">Editar</button>`}</td></tr>`; }).join('')
+  }${fs.length > mpLimit ? `<tr><td colspan="40" style="text-align:center;padding:12px"><button type="button" class="btn secondary small" onclick="mpLimit+=80;mpRenderList()">Mostrar más (${fs.length - mpLimit} restantes)</button></td></tr>` : ''}</tbody><tfoot><tr><td colspan="${PC().variedad ? 9 : 8}">Totales · ${fs.length} filas</td><td class="num sep">${mpFk(tb)}</td><td></td><td class="num">${mpFk(tn)}</td><td class="num sep">${mpFk(hp,1)} prom.</td><td colspan="5" class="num">${mpFk(pp,2)} prom.</td><td class="num sep">${mpFk(td)}</td><td class="num">${mpFk(tf)}</td><td colspan="8" class="sep"></td></tr></tfoot></table>`;
 }
 
 /* ================= EXPORTAR A EXCEL (.xlsx real, sin librerías) ================= */
@@ -2067,20 +2190,24 @@ function mpExport(){
   if(!fs.length){ toast('No hay filas para exportar', 'err'); return; }
   const sel = document.getElementById('mpFSilo'), q = (document.getElementById('mpQ').value || '').trim();
   const filtros = [sel && sel.value ? 'Silo ' + sel.options[sel.selectedIndex].text : '', q ? 'Búsqueda: ' + q : ''].filter(Boolean).join(' · ');
+  const sz = !PC().hum, o = PC().variedad ? 1 : 0;
   const cols = [
-    {t:'Remisión',w:13},{t:'Fecha',k:'f',w:12},{t:'Placa',w:11},{t:'Chofer',w:20},{t:'Proveedor / Productor',w:28},{t:'Parcela',w:11},{t:'% parcela',k:'n2',w:10},{t:'Tipo',w:14},
-    {t:'Peso bruto (kg)',k:'n0',w:14},{t:'Peso tara (kg)',k:'n0',w:14},{t:'Peso neto (kg)',k:'n0',w:14},{t:'Humedad %',k:'n1',w:11},{t:'Temp °C',k:'n0',w:9},{t:'Impurezas %',k:'n2',w:12},
-    {t:'Desc. calidad %',k:'n2',w:12},{t:'Desc. humedad %',k:'n2',w:12},{t:'Total desc. %',k:'n2',w:12},{t:'Descuento (kg)',k:'n0',w:14},{t:'Peso final (kg)',k:'n0',w:14},
-    {t:'Observaciones',w:32},{t:'Ubicación',w:14},{t:'Silo bolsa',w:11},{t:'Lote',w:12},{t:'Para',w:14},{t:'Estado',w:13},{t:'Laboratorio',w:13}
-  ];
-  const filas = fs.map(x => { const r = x.r; return [r.nro_boleta, r.fecha, r.chapa_camion, r.chofer, r.proveedor, x.nro, x.pct, r.tipo_cosecha,
-    x.bruto, Number(r.peso_tara_kg||0), x.neto, r.pct_humedad == null ? null : Number(r.pct_humedad), r.temperatura_c == null ? null : Number(r.temperatura_c), Number(r.pct_impureza_gruesa||0) + Number(r.pct_impureza_fina||0),
-    Number(r.pct_descuento_calidad||0), x.dh, x.tot, x.desc, x.fin, r.observaciones, r.patio_destino, r.silos_bolsa ? r.silos_bolsa.numero : '', mpLoteDe(r), r.destino, r.estado === 'ASIGNADA' ? 'Procesado' : 'Sin procesar', r.laboratorio]; });
+    {t:'Remisión',w:13},{t:'Fecha',k:'f',w:12},{t:'Placa',w:11},{t:'Chofer',w:20},{t:'Proveedor / Productor',w:28},{t:'Parcela',w:11},{t:'% parcela',k:'n2',w:10}]
+    .concat(PC().variedad ? [{t:'Variedad',w:14}] : [], [{t:'Tipo',w:14},
+    {t:'Peso bruto (kg)',k:'n0',w:14},{t:'Peso tara (kg)',k:'n0',w:14},{t:'Peso neto (kg)',k:'n0',w:14},{t:'Humedad %',k:'n1',w:11},{t:'Temp °C',k:'n0',w:9}],
+    sz ? [{t:'Impureza %',k:'n2',w:12},{t:'Contraste %',k:'n2',w:12},{t:'Daños mecánicos %',k:'n2',w:14}] : [{t:'Impurezas %',k:'n2',w:12},{t:'Desc. calidad %',k:'n2',w:12},{t:'Desc. humedad %',k:'n2',w:12}],
+    [{t:'Total desc. %',k:'n2',w:12},{t:'Descuento (kg)',k:'n0',w:14},{t:'Peso final (kg)',k:'n0',w:14},
+    {t:'Observaciones',w:32},{t:'Ubicación',w:14},{t:'Silo bolsa',w:11},{t:'Lote',w:12},{t:'Para',w:14},{t:'Estado',w:13},{t:PC().lab ? 'Laboratorio' : 'Marcado',w:13}]);
+  const filas = fs.map(x => { const r = x.r;
+    return [r.nro_boleta, r.fecha, r.chapa_camion, r.chofer, r.proveedor, x.nro, x.pct].concat(PC().variedad ? [r.variedad] : [], [r.tipo_cosecha,
+    x.bruto, Number(r.peso_tara_kg||0), x.neto, r.pct_humedad == null ? null : Number(r.pct_humedad), r.temperatura_c == null ? null : Number(r.temperatura_c)],
+    sz ? [Number(r.pct_impureza||0), Number(r.pct_contraste||0), Number(r.pct_danos_mecanicos||0)] : [impDe(r), Number(r.pct_descuento_calidad||0), x.dh],
+    [x.tot, x.desc, x.fin, r.observaciones, r.patio_destino, r.silos_bolsa ? r.silos_bolsa.numero : '', mpLoteDe(r), r.destino, r.estado === 'ASIGNADA' ? 'Procesado' : 'Sin procesar', PC().lab ? r.laboratorio : (r.marcado ? 'Sí' : '')]); });
   const sum = i => filas.reduce((a, f) => a + (Number(f[i]) || 0), 0);
   const hs = [], vistos = {}; fs.forEach(x => { if(!vistos[x.r.id] && x.r.pct_humedad != null){ vistos[x.r.id] = 1; hs.push(Number(x.r.pct_humedad)); } });
-  const tn = sum(10), pp = fs.reduce((a, x) => a + x.tot * x.neto, 0) / (tn || 1);
+  const tn = sum(10 + o), pp = fs.reduce((a, x) => a + x.tot * x.neto, 0) / (tn || 1);
   const tot = cols.map(() => null);
-  tot[0] = 'Totales · ' + fs.length + ' filas'; tot[8] = sum(8); tot[10] = tn; tot[11] = hs.length ? hs.reduce((a, b) => a + b, 0) / hs.length : null; tot[16] = pp; tot[17] = sum(17); tot[18] = sum(18);
+  tot[0] = 'Totales · ' + fs.length + ' filas'; tot[8 + o] = sum(8 + o); tot[10 + o] = tn; tot[11 + o] = hs.length ? hs.reduce((a, b) => a + b, 0) / hs.length : null; tot[16 + o] = pp; tot[17 + o] = sum(17 + o); tot[18 + o] = sum(18 + o);
   xlsxDescargar('recepcion_materia_prima_' + hoyLocal() + '.xlsx', [{ nombre:'Recepciones', titulo:'Planilla de recepciones · Progresso NH S.A.', sub:'Exportado el ' + xlTs() + ' · ' + fs.length + ' filas' + (filtros ? ' · ' + filtros : '') + ' · Humedad y descuento total en la fila de totales = promedio', cols, filas, tot, fijas:1 }]);
 }
 
@@ -2118,8 +2245,8 @@ async function renderSilo(){
     <form id="frmSilo">
       <div class="grid">
         <div><label>Número *</label><input name="numero" required></div>
-        <div><label>Producto *</label><select name="producto" required>${opt(PRODUCTOS)}</select></div>
-        <div><label>Categoría *</label><select name="categoria" required>${opt(CATEGORIAS)}</select></div>
+        <div><label>Producto *</label><select name="producto" required>${prodOpts()}</select></div>
+        <div><label>Categoría *</label><select name="categoria" required>${opt(PC().cats)}</select></div>
         <div><label>Patio</label><input name="patio"></div>
       </div>
       <label>Observaciones</label><textarea name="observaciones"></textarea>
@@ -2154,7 +2281,7 @@ async function loadSiloList(){
   if(error){ el.innerHTML = `<div class="empty">Error: ${mpEsc(error.message)}</div>`; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay silos bolsa.</div>'; return; }
   el.innerHTML = `<table><thead><tr><th>ID</th><th>Nº</th><th>Producto</th><th>Categoría</th><th>Patio</th><th>Estado</th><th></th></tr></thead><tbody>
-    ${data.map(s => `<tr><td>${mpEsc(s.id)}</td><td>${mpEsc(s.numero)}</td><td>${mpEsc(s.producto)}</td><td><select onchange="setSiloCategoria('${s.id}', this.value)" style="min-width:150px"><option value=""${s.categoria?'':' selected'}>Pendiente (lab)</option>${CATEGORIAS.map(c => `<option${s.categoria===c?' selected':''}>${c}</option>`).join('')}</select></td><td>${mpEsc(s.patio||'-')}</td><td><span class="badge ${s.estado==='ABIERTO'?'ok':'off'}">${mpEsc(s.estado)}</span></td>
+    ${data.map(s => `<tr><td>${mpEsc(s.id)}</td><td>${mpEsc(s.numero)}</td><td>${mpEsc(s.producto)}</td><td><select onchange="setSiloCategoria('${s.id}', this.value)" style="min-width:150px"><option value=""${s.categoria?'':' selected'}>Pendiente (lab)</option>${PC().cats.map(c => `<option${s.categoria===c?' selected':''}>${c}</option>`).join('')}</select></td><td>${mpEsc(s.patio||'-')}</td><td><span class="badge ${s.estado==='ABIERTO'?'ok':'off'}">${mpEsc(s.estado)}</span></td>
     <td>${s.estado==='ABIERTO' ? `<button class="btn secondary small" onclick="cerrarSilo('${s.id}')">Cerrar</button>` : ''}</td></tr>`).join('')}
   </tbody></table>`;
 }
@@ -2185,10 +2312,10 @@ async function renderLote(){
   main.innerHTML = `<div class="card">
     <h2>${ICONS.lote} Crear lote</h2>
     <div class="grid">
-      <div><label>Producto *</label><select id="loteProducto">${opt(PRODUCTOS)}</select></div>
-      <div><label>Calidad</label><select id="loteCategoria"><option value="">-</option>${opt(CATEGORIAS)}</select></div>
+      <div><label>Producto *</label><select id="loteProducto">${prodOpts()}</select></div>
+      <div><label>Calidad</label><select id="loteCategoria"><option value="">-</option>${opt(PC().cats)}</select></div>
       <div><label>Responsable</label><input id="loteResponsable"></div>
-      <div><label>Código de laboratorio</label><input id="loteCodigoLab" placeholder="Ej: PROCHCE 030-26"></div>
+      <div><label>Código de laboratorio</label><input id="loteCodigoLab" placeholder="Ej: ${PROD_INFO[PROD].lab} 030-26"></div>
     </div>
   </div>
   <div class="card">
@@ -2262,7 +2389,7 @@ function ltRender(){
       <th>Remisión</th><th>Fecha</th><th>Proveedor</th><th>Silo</th><th class="num">Neto kg</th><th class="num">Hum %</th><th class="num">Imp %</th><th class="num">Líquido disp. kg</th><th class="num">Usar kg</th></tr></thead><tbody>
       ${fs.map(r => `<tr class="${loteSel.has(r.id)?'lt-sel':''}" onclick="ltFila(event,'${r.id}')"><td><input type="checkbox" ${loteSel.has(r.id)?'checked':''} tabindex="-1"></td>
         <td><b>${mpEsc(r.nro_boleta)}</b></td><td>${mpFd(r.fecha)}</td><td>${mpEsc(r.proveedor||'')}<span class="lt-parcial">${mpEsc(r.tipo_cosecha||'')}</span></td><td>${mpEsc(ltSiloNum(r))}</td>
-        <td class="num">${ltN(r.peso_neto_kg)}</td><td class="num">${ltP(r.pct_humedad)}</td><td class="num">${ltP(Number(r.pct_impureza_gruesa||0)+Number(r.pct_impureza_fina||0))}</td><td class="num"><b>${ltN(ltSaldo(r))}</b>${Number(r.kg_liquido_usado||0)>0?`<span class="lt-parcial">de ${ltN(ltLiq(r))} (ya usados ${ltN(r.kg_liquido_usado)})</span>`:''}</td>
+        <td class="num">${ltN(r.peso_neto_kg)}</td><td class="num">${ltP(r.pct_humedad)}</td><td class="num">${ltP(impDe(r))}</td><td class="num"><b>${ltN(ltSaldo(r))}</b>${Number(r.kg_liquido_usado||0)>0?`<span class="lt-parcial">de ${ltN(ltLiq(r))} (ya usados ${ltN(r.kg_liquido_usado)})</span>`:''}</td>
         <td class="num" onclick="event.stopPropagation()">${loteSel.has(r.id)?`<input type="number" class="lt-kg" min="1" max="${Math.floor(ltSaldo(r)*100)/100}" step="any" value="${loteKg[r.id]}" oninput="ltKgInput('${r.id}',this.value)" onchange="ltKgFin('${r.id}',this.value)" title="Kg líquidos a usar de esta carga">`:'<span class="lt-muted">-</span>'}</td></tr>`).join('')}
     </tbody></table>`;
   }
@@ -2278,7 +2405,7 @@ function ltBarra(fs){
   const liq = sel.reduce((a,r) => a + use(r), 0);
   const neto = sel.reduce((a,r) => a + Number(r.peso_neto_kg||0) * frac(r), 0);
   const w = f => neto ? sel.reduce((a,r) => a + Number(r.peso_neto_kg||0) * frac(r) * f(r), 0) / neto : null;
-  const hum = w(r => Number(r.pct_humedad||0)), imp = w(r => Number(r.pct_impureza_gruesa||0)+Number(r.pct_impureza_fina||0));
+  const hum = w(r => Number(r.pct_humedad||0)), imp = w(r => impDe(r));
   const bySilo = {}; sel.forEach(r => { const k = ltSiloNum(r); bySilo[k] = (bySilo[k]||0) + 1; });
   const desglose = Object.entries(bySilo).map(([k,v]) => `${mpEsc(k)}: ${v}`).join(' · ');
   const parciales = sel.filter(r => use(r) < ltSaldo(r) - 0.5).length;
@@ -2573,7 +2700,7 @@ async function renderCierre(){
     <button class="btn" onclick="cerrarLoteFinal()">${ICONS.check} Cerrar lote definitivamente</button>
   </div>
   <div class="card">
-    <h2>Historial de ajustes de este lote</h2>
+    <h2 id="turnoTit">Historial de ajustes de este lote</h2>
     <div id="turnoList" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div>
   </div>`;
 
@@ -2615,7 +2742,7 @@ async function mezCargar(){
   (data || []).forEach(l => { MEZ.info[l.lote_id] = l; });
   mezRender();
 }
-function mezToggle(id, on){ if(on) MEZ.ids.add(id); else MEZ.ids.delete(id); mezRender(); if(MEZ.modo === 'bb') loadBigbagList(); }
+function mezToggle(id, on){ if(on) MEZ.ids.add(id); else MEZ.ids.delete(id); mezRender(); if(MEZ.modo === 'bb') loadBigbagList(); else loadTurnoList(); }
 function mezRender(){
   const box = document.getElementById('mezBox'); if(!box) return;
   if(MEZ.modo === 'cierre') concRefrescar();
@@ -2657,16 +2784,28 @@ async function _submitTurno(e){
   const { error } = await sb.from('lote_turno_cierre').upsert(filas, {onConflict:'lote_id,fecha,turno'});
   if(error){ toast('Error: ' + error.message, 'err'); return; }
   toast(mez ? 'Ajuste de turno guardado en ' + grupo.length + ' lotes (mezcla)' : 'Ajuste de turno guardado', 'ok');
-  loadTurnoList();
+  loadTurnoList(); concRefrescar();
 }
 
+function _turnoIds(){ return (MEZ.modo === 'cierre' && loteActivoId) ? mezGrupo() : [loteActivoId]; }
 async function loadTurnoList(){
-  const { data, error } = await sb.from('lote_turno_cierre').select('*').eq('lote_id', loteActivoId).order('fecha',{ascending:false});
+  const ids = _turnoIds(), g = ids.length > 1;
+  const tit = document.getElementById('turnoTit'); if(tit) tit.textContent = g ? 'Historial de ajustes de la mezcla ' + ids.join(' + ') : 'Historial de ajustes de este lote';
+  const { data, error } = await sb.from('lote_turno_cierre').select('*').in('lote_id', ids).order('fecha',{ascending:false});
   const el = document.getElementById('turnoList');
+  if(!el || ids.join('|') !== _turnoIds().join('|')) return;
   if(error){ el.innerHTML = `<div class="empty">Error: ${mpEsc(error.message)}</div>`; return; }
-  if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay ajustes cargados para este lote.</div>'; return; }
-  el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Turno</th><th>Kg reales</th><th>Mermas</th><th>Ajustó</th></tr></thead><tbody>
-    ${data.map(t => `<tr><td>${fmtDate(t.fecha)}</td><td>${mpEsc(t.turno)}</td><td>${fmtKg(t.kg_reales_procesados)}</td><td>${fmtKg(t.mermas_kg)}</td><td>${mpEsc(t.ajustado_por||'-')}</td></tr>`).join('')}
+  if(!data || !data.length){ el.innerHTML = '<div class="empty">Todavía no hay ajustes cargados para ' + (g ? 'esta mezcla' : 'este lote') + '.</div>'; return; }
+  const m = new Map();
+  data.forEach(t => {
+    const k = t.fecha + '|' + t.turno, a = m.get(k) || { fecha:t.fecha, turno:t.turno, kg:null, mer:null, por:t.ajustado_por };
+    if(t.kg_reales_procesados != null) a.kg = (a.kg || 0) + Number(t.kg_reales_procesados);
+    if(t.mermas_kg != null) a.mer = (a.mer || 0) + Number(t.mermas_kg);
+    m.set(k, a);
+  });
+  const filas = Array.from(m.values()).sort((x, y) => String(y.fecha).localeCompare(String(x.fecha)) || String(x.turno).localeCompare(String(y.turno)));
+  el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Turno</th><th>Kg reales${g ? ' (total mezcla)' : ''}</th><th>Mermas</th><th>Ajustó</th></tr></thead><tbody>
+    ${filas.map(t => `<tr><td>${fmtDate(t.fecha)}</td><td>${mpEsc(t.turno)}</td><td>${t.kg == null ? '-' : fmtKg(_r2(t.kg))}</td><td>${t.mer == null ? '-' : fmtKg(_r2(t.mer))}</td><td>${mpEsc(t.por||'-')}</td></tr>`).join('')}
   </tbody></table>`;
 }
 
@@ -2675,13 +2814,13 @@ let CONC = null;
 const _r2 = n => Math.round(Number(n) * 100) / 100;
 async function concDatos(ids){
   const [t, b] = await Promise.all([
-    sb.from('lote_turno_cierre').select('kg_reales_procesados,mermas_kg').in('lote_id', ids),
+    sb.from('lote_turno_cierre').select('fecha,turno,kg_reales_procesados,mermas_kg').in('lote_id', ids),
     sb.from('produccion_bigbag').select('id,mezcla_id').in('lote_id', ids)
   ]);
   if(t.error || b.error) return null;
   const ts = t.data || [];
   return {
-    nTurnos: ts.length,
+    nTurnos: new Set(ts.map(x => x.fecha + '|' + x.turno)).size,
     kgTurnos: _r2(ts.reduce((a, x) => a + (Number(x.kg_reales_procesados) || 0), 0)),
     merTurnos: _r2(ts.reduce((a, x) => a + (Number(x.mermas_kg) || 0), 0)),
     bigbags: new Set((b.data || []).map(x => x.mezcla_id || ('i' + x.id))).size
@@ -2976,7 +3115,7 @@ async function renderUsuarios(){
 }
 
 async function loadUsuarios(){
-  const { data, error } = await sb.from('perfiles').select('*').order('creado_en');
+  const { data, error } = await sbPub.from('perfiles').select('*').order('creado_en');
   const el = document.getElementById('usuariosList');
   if(error){ el.innerHTML = `<div class="empty">Error: ${mpEsc(error.message)}</div>`; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">No hay usuarios todavía.</div>'; return; }
@@ -2996,7 +3135,7 @@ async function guardarUsuario(id){
   const activo = document.getElementById('activo-'+id).checked;
   const nombre = String(document.getElementById('nom-'+id).value || '').trim().replace(/\s+/g, ' ');
   if(!nombre){ toast('Escribí un nombre para este usuario', 'err'); return; }
-  const { error } = await sb.from('perfiles').update({ nombre, rol, activo }).eq('id', id);
+  const { error } = await sbPub.from('perfiles').update({ nombre, rol, activo }).eq('id', id);
   if(error){ toast('Error: ' + error.message, 'err'); return; }
   toast('Usuario actualizado', 'ok');
   if(currentUser && id === currentUser.id){
@@ -3222,6 +3361,7 @@ window.addEventListener('focus', () => { if(_verPend) aplicarVersion(); else ver
 window.addEventListener('online', verNuevaVersion);
 
 const RENDERERS = { mp: renderMP, silo: renderSilo, lote: renderLote, bigbag: renderBigbag, cierre: renderCierre, resumen: renderResumen, correcciones: renderCorrecciones, usuarios: renderUsuarios };
+
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
