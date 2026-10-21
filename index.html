@@ -9,6 +9,14 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="supabase-2.117.2.js"></script>
+
+  /* ==============================================================================
+     ==  VARIABLES DE COLOR Y MEDIDAS
+     ============================================================================== */
+<!-- ==============================================================================
+     ==  ESTILOS (CSS)
+     ==  Todo el diseño de la app está en este bloque.
+     ============================================================================== -->
 <style>
   :root{
     --surface-1:#fcfcfb; --surface-2:#f5f4ee; --card:#ffffff;
@@ -20,6 +28,11 @@
     --radius:14px;
     --shadow-sm:0 1px 2px rgba(20,18,10,.06),0 1px 4px rgba(20,18,10,.05);
     --shadow-md:0 10px 28px rgba(20,18,10,.10),0 2px 8px rgba(20,18,10,.06);
+
+  /* ==============================================================================
+     ==  BASE
+     ==  Reset, tipografía y contenedor general.
+     ============================================================================== */
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--surface-2);color:var(--text-primary);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent;}
@@ -27,6 +40,11 @@
   @media(min-width:960px){
     body{padding:28px 16px;}
     .app-shell{border-radius:18px;box-shadow:var(--shadow-md);border:1px solid var(--gridline);overflow:hidden;min-height:0;}
+
+  /* ==============================================================================
+     ==  BARRA SUPERIOR
+     ==  Encabezado, botón de usuario y estilos base de la barra.
+     ============================================================================== */
   }
   header.appbar{position:relative;overflow:hidden;padding:20px 20px 22px;color:#fff;background:#1a160e;}
   header.appbar::before{content:'';position:absolute;top:-60px;right:-50px;width:220px;height:220px;background:none;pointer-events:none;}
@@ -42,13 +60,19 @@
   .usuario-btn svg{width:13px;height:13px;opacity:.85;}
 
   main{padding:18px 16px 50px;max-width:920px;margin:0 auto;}
+
+  /* ==============================================================================
+     ==  SELECTOR DE PRODUCTO
+     ==  Pastilla de la barra superior y pantallas de login/elección de producto.
+     ============================================================================== */
   .hidden{display:none !important;}
-  .prod-chip{appearance:none;display:inline-flex;align-items:center;gap:9px;background:var(--text-primary);border:1px solid var(--text-primary);border-radius:22px;padding:8px 14px 8px 12px;font:inherit;font-size:13px;font-weight:800;letter-spacing:.01em;color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .18s ease,transform .18s ease;}
-  .prod-chip i{display:none;}
-  .prod-chip svg{width:14px;height:14px;opacity:.75;transition:transform .25s ease,opacity .18s ease;}
-  .prod-chip:hover{background:var(--accent-dark);border-color:var(--accent-dark);}
-  .prod-chip:hover svg{transform:rotate(180deg);opacity:1;}
-  .prod-chip:active{transform:scale(.96);}
+  .prod-chip{appearance:none;display:inline-flex;align-items:center;gap:9px;height:38px;background:#fff;border:1px solid var(--gridline);border-radius:19px;padding:0 10px 0 6px;font:inherit;font-size:13.5px;font-weight:700;color:var(--text-primary);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:border-color .15s ease,background .15s ease;}
+  .prod-chip i{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-style:normal;font-size:13px;font-weight:800;line-height:1;transition:background .15s ease;}
+  .prod-chip svg{width:14px;height:14px;color:var(--text-muted);flex:none;transition:color .15s ease;}
+  .prod-chip:hover,.prod-chip:focus-visible{border-color:var(--accent);outline:none;}
+  .prod-chip:hover i{background:var(--accent-dark);}
+  .prod-chip:hover svg{color:var(--accent-dark);}
+  .prod-chip:active{background:var(--surface-2);}
   #prodScreen{transition:opacity .22s ease;}
   #prodScreen.saliendo{opacity:0;}
   #authScreen,#prodScreen{position:relative;background:#2d3b2a url("fondo.jpg") center/cover no-repeat;}
@@ -79,7 +103,11 @@
   #prodScreen:not(.hidden) .prod-opt:nth-child(2){animation-delay:.15s;}
   #appShell.entra{animation:prodFade .35s ease both;}
   @keyframes prodFade{from{opacity:0;}to{opacity:1;}}
-  @media (prefers-reduced-motion:reduce){#prodScreen *,#appShell.entra,.prod-chip,.prod-chip svg{animation:none !important;transition:none !important;}}
+  @media (prefers-reduced-motion:reduce){#prodScreen *,#appShell.entra,.prod-chip,.prod-chip i,.prod-chip svg{animation:none !important;transition:none !important;}}
+
+  /* ==============================================================================
+     ==  BOTÓN VOLVER Y TARJETAS DE MENÚ
+     ============================================================================== */
 
   .volver-btn{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--gridline);color:var(--text-secondary);font-size:13px;font-weight:700;padding:9px 15px;border-radius:20px;cursor:pointer;margin-bottom:16px;box-shadow:var(--shadow-sm);}
   .volver-btn:hover{border-color:var(--accent);color:var(--accent-dark);}
@@ -92,6 +120,10 @@
   .vista-menu-card .vmc-icon{width:52px;height:52px;border-radius:50%;background:rgba(var(--accent-rgb),.12);color:var(--accent-dark);display:flex;align-items:center;justify-content:center;}
   .vista-menu-card .vmc-icon svg{width:24px;height:24px;}
   .vista-menu-card .vmc-label{font-size:13.5px;font-weight:800;color:var(--text-primary);}
+
+  /* ==============================================================================
+     ==  TARJETAS, FORMULARIOS Y BOTONES
+     ============================================================================== */
 
   .card{background:var(--card);border:1px solid var(--gridline);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
   .card h2{margin:0 0 14px;font-size:15px;display:flex;align-items:center;gap:2px;}
@@ -115,6 +147,10 @@
           .btn.danger-ghost{background:transparent;color:var(--danger);border:1px solid var(--danger-bg);width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:16px;line-height:1;margin-bottom:10px;flex:0 0 40px;}
     .parcela-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:8px;}
     .parcela-row > div{flex:1;}
+
+  /* ==============================================================================
+     ==  TABLAS Y ETIQUETAS
+     ============================================================================== */
     .parcela-row .pr-pct{max-width:130px;flex:0 0 130px;}
   table{width:100%;border-collapse:collapse;font-size:13px;}
   th{text-align:left;color:var(--text-muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;padding:8px 9px;border-bottom:1px solid var(--gridline);background:var(--surface-2);}
@@ -126,6 +162,10 @@
   .badge.warn{background:var(--warn-bg);color:var(--warn);}
   .badge.off{background:var(--surface-2);color:var(--text-muted);}
   .empty{color:var(--text-muted);font-size:13px;padding:14px 4px;text-align:center;}
+
+  /* ==============================================================================
+     ==  AVISOS (TOAST)
+     ============================================================================== */
   #toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:100;max-width:90vw;pointer-events:none;}
   .toast{background:var(--ink-1);border:1px solid rgba(255,255,255,.1);color:#fff;padding:11px 20px;border-radius:10px;font-size:13.5px;box-shadow:var(--shadow-md);max-width:90vw;}
   .toast.err{background:var(--danger);}
@@ -141,6 +181,10 @@
   .stat .n{font-size:20px;font-weight:800;color:var(--text-primary);}
   .stat .l{font-size:11px;color:var(--text-muted);text-transform:uppercase;}
   .section-title{font-size:12px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;margin:16px 0 8px;}
+
+  /* ==============================================================================
+     ==  LOTES Y SELECCIÓN DE CARGAS
+     ============================================================================== */
   .icon{width:17px;height:17px;vertical-align:-3px;margin-right:4px;}
   .lote-pill{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--gridline);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:var(--shadow-sm);}
   .lote-pill.active{border-color:var(--accent);color:var(--accent-dark);background:rgba(var(--accent-rgb),.08);}
@@ -178,6 +222,10 @@
   .vista-menu-grid{margin-top:4px;}
 
   .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:var(--surface-2);}
+
+  /* ==============================================================================
+     ==  LOGIN Y CAMBIO DE CONTRASEÑA
+     ============================================================================== */
   .auth-card{width:100%;max-width:380px;background:var(--card);border:1px solid var(--gridline);border-radius:18px;padding:28px 26px 24px;box-shadow:var(--shadow-md);text-align:center;}
   .auth-logo{width:132px;height:132px;margin:0 auto 12px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;padding:4px;border:1px solid var(--gridline);box-shadow:var(--shadow-sm);overflow:hidden;}
   .auth-logo svg{width:100%;height:100%;}
@@ -202,6 +250,10 @@
   .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;}
   .tools > div{flex:1;min-width:130px;} .tools input,.tools select{margin-bottom:0;}
   #mpList tfoot td{font-weight:800;background:var(--surface-2);border-top:2px solid var(--gridline);}
+
+  /* ==============================================================================
+     ==  RECEPCIÓN: TARJETAS DE SILO Y PLANILLA
+     ============================================================================== */
   #mpList td.sep,#mpList th.sep{border-left:2px solid var(--gridline);}
   .silo-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
   .silo-card{background:var(--surface-2);border:1px solid var(--gridline);border-radius:12px;padding:12px 14px;}
@@ -224,7 +276,11 @@
   .pwd-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;}
   .pwd-row{display:flex;gap:8px;align-items:flex-start;}
   .pwd-row > input{flex:1;}
-  /* ===== v11: sensacion de app nativa ===== */
+
+  /* ==============================================================================
+     ==  APP NATIVA (MÓVIL)
+     ==  Sensación de app: barra inferior, hoja de menú, toques.
+     ============================================================================== */
   :root{--nav-h:62px;}
   html,body{overscroll-behavior-y:none;}
   button,.vista-menu-card,.navb,.sheet-item,.lote-pill,.lt-chip,.edit-btn,.volver-btn,.btn{touch-action:manipulation;-webkit-user-select:none;user-select:none;}
@@ -267,7 +323,11 @@
   .anim-u{animation:viewInU .17s ease-out;}
   @media (prefers-reduced-motion:reduce){.anim-r,.anim-l,.anim-u{animation:none;}.sheet,.sheet-bg{transition:none;}}
   .sheet-bg{will-change:opacity;}
-  /* ===== v13: version de escritorio (barra lateral) ===== */
+
+  /* ==============================================================================
+     ==  ESCRITORIO
+     ==  Barra lateral en pantallas anchas.
+     ============================================================================== */
   .sidebar{display:none;}
   @media(min-width:960px){
     body{padding:0;background:var(--surface-1);}
@@ -293,7 +353,10 @@
     .vista-menu-card{padding:34px 16px;}
     .lt-scroll{max-height:calc(100vh - 300px);min-height:320px;}
   }
-  /* ===== v16: barra superior minimalista ===== */
+
+  /* ==============================================================================
+     ==  BARRA SUPERIOR MINIMALISTA
+     ============================================================================== */
   :root{--hdr-h:54px;}
   header.appbar{position:sticky;top:0;z-index:55;overflow:visible;height:calc(var(--hdr-h) + env(safe-area-inset-top));padding:env(safe-area-inset-top) 14px 0;background:var(--surface-1);color:var(--text-primary);border-bottom:1px solid var(--gridline);transition:box-shadow .2s;}
   header.appbar.scrolled{box-shadow:0 6px 18px rgba(20,18,10,.07);}
@@ -332,9 +395,16 @@
     .sb-bn{font-size:16px;font-weight:800;letter-spacing:-.02em;line-height:1.15;}
     .sb-bt{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-top:1px;}
   }
-  /* ===== v18: logo real ===== */
+
+  /* ==============================================================================
+     ==  LOGO REAL
+     ============================================================================== */
   img.brandmark{width:36px;height:auto;border-radius:0;background:none;box-shadow:none;object-fit:contain;display:block;}
-  /* ===== v17: estilo ERP (barra blanca, buscador, menu lateral colapsable) ===== */
+
+  /* ==============================================================================
+     ==  ESTILO ERP
+     ==  Barra blanca, buscador y menú lateral colapsable.
+     ============================================================================== */
   header.appbar{background:#fff;}
   .avatar-btn{width:38px;height:38px;border:none;background:#6b4f00;color:#fff;font-size:13px;letter-spacing:.02em;box-shadow:0 1px 4px rgba(60,45,0,.35);}
   .avatar-btn:hover{background:#7a5a00;border:none;}
@@ -388,7 +458,10 @@
     .vista-menu-card:hover{box-shadow:0 8px 24px rgba(20,18,10,.08);transform:none;}
     .vista-menu-card:hover .vmc-label{color:var(--accent-dark);}
   }
-  /* ===== v19: logo completo sin recortar ===== */
+
+  /* ==============================================================================
+     ==  LOGO COMPLETO
+     ============================================================================== */
   img.brandmark{width:auto;height:44px;max-width:none;}
   header.appbar:not(.is-tab) h1,header.appbar:not(.is-tab) .appbar-tag{display:none;}
   @media(min-width:960px){
@@ -398,7 +471,10 @@
     .app-shell:not(.sb-open) .sb-brand img.brandmark{height:auto;width:60px;}
     .app-shell.sb-open .sb-brand{justify-content:center;padding:0;}
   }
-  /* ===== v23: alineacion ===== */
+
+  /* ==============================================================================
+     ==  ALINEACIÓN
+     ============================================================================== */
   .navb .icon,.sb-item .icon,.sheet-ic .icon,.gs-item .icon{margin:0;vertical-align:middle;display:block;flex:none;}
   .navb.on .icon{transform:none;}
   header.appbar{padding-left:16px;padding-right:16px;}
@@ -407,7 +483,10 @@
     .app-shell.sb-open .sb-item{gap:14px;}
     .vista-menu-card{padding:36px 16px;}
   }
-  /* ===== v24: alineacion fina ===== */
+
+  /* ==============================================================================
+     ==  ALINEACIÓN FINA
+     ============================================================================== */
   .vmc-icon .icon{margin:0;vertical-align:middle;display:block;}
   .vmc-icon{display:flex;align-items:center;justify-content:center;}
   @media(min-width:960px){
@@ -418,7 +497,10 @@
   .vista-menu-card[onclick*="'usuarios'"] .vmc-icon .icon{transform:translateX(-1px);}
   .sb-item[data-id="usuarios"] .icon{transform:translateX(-.8px);}
   @media(min-width:960px){.vista-menu-card[onclick*="'usuarios'"] .vmc-icon .icon{transform:translateX(-2px);}}
-  /* ===== v25: consistencia de formularios ===== */
+
+  /* ==============================================================================
+     ==  FORMULARIOS: CONSISTENCIA
+     ============================================================================== */
   input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=hidden]),select{height:40px;padding-top:0;padding-bottom:0;}
   table input:not([type=checkbox]):not([type=radio]),table select{height:auto !important;padding-top:10px !important;padding-bottom:10px !important;}
   .gsearch input{height:34px !important;padding:0 !important;}
@@ -432,7 +514,10 @@
   .btn .icon{margin:0;}
   .stat .n{white-space:nowrap;}
   @media(max-width:600px){.stat .n{font-size:16px;}}
-  /* ===== v26: login con logo real ===== */
+
+  /* ==============================================================================
+     ==  LOGIN CON LOGO REAL
+     ============================================================================== */
   .auth-logo-img{display:block;width:230px;max-width:80%;height:auto;margin:4px auto 24px;}
   .auth-card{padding:30px 26px 4px;}
 
@@ -442,7 +527,10 @@
   .verbar button{appearance:none;font-family:inherit;border:none;border-radius:9px;background:var(--accent);color:#fff;font-weight:800;font-size:13px;padding:8px 14px;cursor:pointer;}
   @media(min-width:960px){.verbar{bottom:20px;}}
 
-  /* ===== v34: pantallas bloqueadas por rol ===== */
+
+  /* ==============================================================================
+     ==  PANTALLAS BLOQUEADAS POR ROL
+     ============================================================================== */
   .vista-menu-card{position:relative;}
   .vista-menu-card.bloq{background:#e3e0d4;border-color:#d3cfc0;box-shadow:none;cursor:not-allowed;}
   .vista-menu-card.bloq:hover,.vista-menu-card.bloq:active{background:#e3e0d4;border-color:#d3cfc0;box-shadow:none;transform:none;}
@@ -512,7 +600,11 @@
   .mez-add{width:auto;max-width:100%;min-height:36px;border:1px dashed var(--accent);background:var(--card);color:var(--accent-dark);border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:700;cursor:pointer;}
   .mez-aviso{background:#f1ead2;border:1px solid var(--accent);color:var(--accent-dark);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;margin:8px 0;}
 
-  /* ===== Panel de inicio (colores planos) ===== */
+
+  /* ==============================================================================
+     ==  PANEL DE INICIO
+     ==  Estilos del panel de indicadores (colores planos).
+     ============================================================================== */
   .dash{margin-top:14px;display:flex;flex-direction:column;gap:16px;}
   .dash-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
   .dash-top h2{font-size:21px;font-weight:800;color:var(--text-primary);margin:0;letter-spacing:-.01em;}
@@ -683,6 +775,10 @@
 </head>
 <body>
 
+<!-- ==============================================================================
+     ==  PANTALLA DE LOGIN
+     ============================================================================== -->
+
 <div id="authScreen" class="auth-wrap">
   <div class="auth-card">
     <img class="auth-logo-img" alt="Progresso NH S.A." width="480" height="236">
@@ -697,6 +793,10 @@
   </div>
 </div>
 
+<!-- ==============================================================================
+     ==  PANTALLA: ELEGIR PRODUCTO
+     ============================================================================== -->
+
 <div id="prodScreen" class="auth-wrap hidden">
   <div class="auth-card">
     <img class="auth-logo-img" alt="Progresso NH S.A." width="480" height="236">
@@ -706,6 +806,10 @@
     <button type="button" class="prod-salir" onclick="cerrarSesion()">Cerrar sesión</button>
   </div>
 </div>
+
+<!-- ==============================================================================
+     ==  APP: BARRA SUPERIOR, MENÚ Y PANTALLAS
+     ============================================================================== -->
 
 <div class="app-shell hidden" id="appShell">
   <header class="appbar" id="appbar">
@@ -721,7 +825,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         <span id="usuarioChipText">Cargando...</span>
       </button>
-      <button type="button" class="prod-chip" id="prodChip" onclick="cambiarProducto()" title="Cambiar de producto" aria-label="Cambiar de producto"><i></i><span id="prodChipTxt"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg></button>
+      <button type="button" class="prod-chip" id="prodChip" onclick="cambiarProducto()" title="Cambiar de producto" aria-label="Cambiar de producto"><i id="prodChipIc"></i><span id="prodChipTxt"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9l5-5 5 5"/><path d="M7 15l5 5 5-5"/></svg></button>
       <div class="gsearch" id="gsearch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
         <input id="gsInput" type="text" placeholder="Buscar módulo" autocomplete="off" spellcheck="false" aria-label="Buscar módulo">
@@ -762,10 +866,24 @@
   </div>
 </div>
 
+
+/* ==============================================================================
+   ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
+   ==  Versión de la app, URL/clave pública y cliente de base de datos.
+   ============================================================================== */
+<!-- ==============================================================================
+     ==  CÓDIGO (JAVASCRIPT)
+     ==  Todo el funcionamiento de la app está en este bloque, ordenado por secciones.
+     ============================================================================== -->
 <script>
-const APP_VERSION = 'v49';
+const APP_VERSION = 'v50';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
+
+/* ==============================================================================
+   ==  PRODUCTOS: CHÍA Y SÉSAMO
+   ==  Cada producto vive en su propio esquema de la base (datos separados).
+   ============================================================================== */
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 /* Un producto = un esquema de la base (datos 100% separados). Chía vive en "public", Sésamo en "sesamo".
    Usuarios y roles (perfiles) son compartidos: siempre en "public". */
@@ -780,6 +898,11 @@ const sbPub = _sbRaw;
 function prodGuardado(){ try{ const p = sessionStorage.getItem('nh_prod'); return PROD_INFO[p] ? p : null; }catch(e){ return null; } }
 function prodOpts(){ return `<option value="${PROD_INFO[PROD].producto}">${PROD_INFO[PROD].producto}</option>`; }
 
+
+/* ==============================================================================
+   ==  QUÉ LLEVA CADA PRODUCTO
+   ==  Campos, descuentos, tipos, destinos y calidades de Chía y de Sésamo.
+   ============================================================================== */
 const CATEGORIAS = ['Organico','Organico BNN','Convencional UE','Convencional ROW'];
 /* Qué lleva cada producto (formulario, descuentos, calidades). Chía queda exactamente como estaba. */
 const PROD_CFG = {
@@ -801,6 +924,10 @@ const impDe = r => PC().imp.reduce((a, k) => a + Number(r[k] || 0), 0);
 const VARIEDADES = ['K3','Equinom','Criollo','Jazmin'];
 
 
+/* ==============================================================================
+   ==  ICONOS
+   ============================================================================== */
+
 const ICONS = {
   mp: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M5 7l1 13h12l1-13M9 11v6M15 11v6M9 7V4h6v3"/></svg>',
   silo: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10c0-4 2.5-7 6-7s6 3 6 7v9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-9z"/><path d="M6 14h12"/></svg>',
@@ -816,6 +943,11 @@ const ICONS = {
   home: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>',
   mas: '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>'
 };
+
+/* ==============================================================================
+   ==  SESIÓN, LOGIN Y SELECTOR DE PRODUCTO
+   ==  Entrar, elegir producto, cambiar de producto y cerrar sesión.
+   ============================================================================== */
 
 let usuario = null;
 let currentUser = null;
@@ -894,7 +1026,7 @@ function cambiarProducto(){
 function entrarApp(){
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('prodScreen').classList.add('hidden');
-  document.getElementById('prodChipTxt').textContent = PROD_INFO[PROD].nombre;
+  document.getElementById('prodChipTxt').textContent = PROD_INFO[PROD].nombre; document.getElementById('prodChipIc').textContent = PROD_INFO[PROD].nombre.charAt(0);
   document.getElementById('appShell').classList.remove('hidden');
   renderHomeMenu();
   document.getElementById('navbar').classList.remove('hidden');
@@ -947,6 +1079,11 @@ sb.auth.onAuthStateChange((event, session) => {
   if(session){ onLogin(session); } else { showAuthScreen(); }
 });
 
+/* ==============================================================================
+   ==  UTILIDADES GENERALES
+   ==  Anti doble toque, avisos (toast), formatos de número y fecha.
+   ============================================================================== */
+
 const _busy = {};
 async function _once(clave, fn, e){
   if(_busy[clave]) return;
@@ -986,6 +1123,11 @@ function fmtPct(n){ return n === null || n === undefined ? '-' : Number(n).toLoc
 function fmtDate(d){ if(!d) return '-'; const s=String(d); if(s.length===10){ const p=s.split('-'); return (+p[2])+'/'+(+p[1])+'/'+p[0]; } return new Date(d).toLocaleDateString('es-PY'); }
 function opt(list, sel){ return list.map(v => `<option value="${v}" ${v===sel?'selected':''}>${v}</option>`).join(''); }
 
+/* ==============================================================================
+   ==  PANTALLAS (PESTAÑAS), ROLES Y PERMISOS
+   ==  Qué pantallas existen y cuáles ve cada rol.
+   ============================================================================== */
+
 const TABS = [
   {id:'mp', label:'Recepción MP', icon:ICONS.mp},
   {id:'silo', label:'Silos Bolsa', icon:ICONS.silo},
@@ -998,7 +1140,11 @@ const TAB_CORR = {id:'correcciones', label:'Correcciones', icon:ICONS.correccion
 const TAB_ADMIN = {id:'usuarios', label:'Usuarios', icon:ICONS.usuarios};
 const TABS_ADMIN = [TAB_CORR, TAB_ADMIN];
 
-/* ===== roles y permisos por pantalla (tabs:null = todas) ===== */
+
+/* ==============================================================================
+   ==  ROLES Y PERMISOS POR PANTALLA
+   ==  tabs:null = todas las pantallas.
+   ============================================================================== */
 const ROLES = {
   admin:       { label:'Administrador', tabs:null },
   operario:    { label:'Operario',      tabs:null },
@@ -1040,7 +1186,11 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarSinAcce
 let activeTab = null;
 let navInitialized = false;
 
-/* ================= PANEL DE INICIO ================= */
+
+/* ==============================================================================
+   ==  PANEL DE INICIO
+   ==  Indicadores, gráficos, alertas y días trabajados.
+   ============================================================================== */
 const DASH = { rec:[], silos:[], lotes:[], bbs:[], tcs:[], labs:{}, ok:false, anio:null, mes:null, tok:0, ts:0, metrica:'t', hideBar:{}, hideCal:{}, todosSilos:false, abierto:-1, pintado:false };
 const D_MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const D_MES3 = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
@@ -1510,6 +1660,11 @@ function renderHomeMenu(){
   renderDash();
 }
 
+/* ==============================================================================
+   ==  NAVEGACIÓN
+   ==  Barra inferior, menú lateral, buscador, menú de usuario y cambio de pestaña.
+   ============================================================================== */
+
 const NAV_ORDER = ['home','mp','lote','bigbag','silo','cierre','resumen','correcciones','usuarios'];
 const NAV_BAR = ['home','mp','lote','bigbag'];
 let sheetOpen = false, sheetPushed = false, skipPop = false, navExtra = 0, navTok = 0;
@@ -1709,6 +1864,11 @@ function goTab(id){
   renderNavbar();
   window.scrollTo(0,0);
 }
+
+/* ==============================================================================
+   ==  RECEPCIÓN DE MATERIA PRIMA
+   ==  Formulario, descuentos, parcelas, planilla y humedad máxima.
+   ============================================================================== */
 
 let MP_ROWS = [];
 let mpLimit = 40;
@@ -2091,7 +2251,11 @@ function mpRenderList(){
   }${fs.length > mpLimit ? `<tr><td colspan="40" style="text-align:center;padding:12px"><button type="button" class="btn secondary small" onclick="mpLimit+=80;mpRenderList()">Mostrar más (${fs.length - mpLimit} restantes)</button></td></tr>` : ''}</tbody><tfoot><tr><td colspan="${PC().variedad ? 9 : 8}">Totales · ${fs.length} filas</td><td class="num sep">${mpFk(tb)}</td><td></td><td class="num">${mpFk(tn)}</td><td class="num sep">${mpFk(hp,1)} prom.</td><td colspan="5" class="num">${mpFk(pp,2)} prom.</td><td class="num sep">${mpFk(td)}</td><td class="num">${mpFk(tf)}</td><td colspan="8" class="sep"></td></tr></tfoot></table>`;
 }
 
-/* ================= EXPORTAR A EXCEL (.xlsx real, sin librerías) ================= */
+
+/* ==============================================================================
+   ==  EXPORTAR A EXCEL (.XLSX REAL, SIN LIBRERÍAS)
+   ==  Generador de .xlsx propio + exportación de recepciones y resumen.
+   ============================================================================== */
 const XL_CRC = (() => { const t = []; for(let n = 0; n < 256; n++){ let c = n; for(let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
 function xlCrc(b){ let c = 0xFFFFFFFF; for(let i = 0; i < b.length; i++) c = XL_CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
 function xlZip(files){
@@ -2238,6 +2402,11 @@ async function resumenExport(){
   xlsxDescargar('resumen_produccion_' + hoyLocal() + '.xlsx', hojas);
 }
 
+/* ==============================================================================
+   ==  SILOS BOLSA
+   ==  Crear, listar, cambiar calidad y cerrar silos.
+   ============================================================================== */
+
 async function renderSilo(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
@@ -2298,6 +2467,11 @@ async function cerrarSilo(id){
   if(error){ toast('Error: ' + error.message, 'err'); return; }
   loadSiloList();
 }
+
+/* ==============================================================================
+   ==  LOTES
+   ==  Crear lotes eligiendo cargas (carga completa o uso parcial) y listado.
+   ============================================================================== */
 
 let LOTE_ROWS = [];
 let loteSel = new Set();
@@ -2511,6 +2685,11 @@ function loteListRender(){
   </tbody></table>`;
 }
 
+/* ==============================================================================
+   ==  SELECTOR DE LOTE
+   ==  Buscador de lotes compartido por Bigbag, Cierre y Correcciones.
+   ============================================================================== */
+
 let loteActivoId = null;
 
 function loteSelectorHTML(pref){
@@ -2545,6 +2724,11 @@ function loteSelectorInit(pref, lotes, onPick, key, opts){
   fill();
   pick(current);
 }
+
+/* ==============================================================================
+   ==  CARGA DE BIGBAGS
+   ==  Alta de bigbags (con mezcla de lotes) y listado.
+   ============================================================================== */
 
 async function renderBigbag(){
   MEZ.modo = 'bb';
@@ -2666,6 +2850,11 @@ async function loadBigbagList(){
   </tbody><tfoot><tr style="font-weight:700;background:var(--surface-2)"><td colspan="6">PROMEDIO ${g ? 'de la mezcla' : 'del lote'} (${filas.length} bigbag${filas.length===1?'':'s'})</td><td></td><td>${avg('pureza_pct')===null?'-':fa(avg('pureza_pct'),2)+'%'}</td><td>${avg('humedad_grano_pct')===null?'-':fa(avg('humedad_grano_pct'),2)+'%'}</td><td>${fa(avg('temperatura_ambiente_c'),1)}</td><td>${fa(avg('temperatura_grano_c'),1)}</td><td></td><td></td></tr></tfoot></table>`;
 }
 
+/* ==============================================================================
+   ==  CIERRE DE LOTE
+   ==  Pantalla de cierre: ajustes por turno y cierre definitivo.
+   ============================================================================== */
+
 async function renderCierre(){
   MEZ.modo = 'cierre';
   const main = document.getElementById('main');
@@ -2726,7 +2915,11 @@ async function elegirLoteCierre(id){
   loadTurnoList();
 }
 
-/* ================= MEZCLA DE LOTES (2 o más lotes que funcionan como uno) ================= */
+
+/* ==============================================================================
+   ==  MEZCLA DE LOTES
+   ==  2 o más lotes que funcionan como uno: se cargan y cierran juntos.
+   ============================================================================== */
 let MEZ = { ids:new Set(), info:{}, modo:'cierre' };
 function mezReparto(total, pesos){
   let s = pesos.reduce((a, b) => a + b, 0), w = pesos;
@@ -2809,7 +3002,11 @@ async function loadTurnoList(){
   </tbody></table>`;
 }
 
-/* ================= CONCILIACIÓN DE CIERRE ================= */
+
+/* ==============================================================================
+   ==  CONCILIACIÓN DE CIERRE
+   ==  Compara MP asignada, procesado por turno y bigbags antes de cerrar.
+   ============================================================================== */
 let CONC = null;
 const _r2 = n => Math.round(Number(n) * 100) / 100;
 async function concDatos(ids){
@@ -2906,6 +3103,11 @@ async function _cerrarLoteFinal(){
   renderCierre();
 }
 
+/* ==============================================================================
+   ==  RESUMEN DE PRODUCCIÓN
+   ==  Tabla de lotes con MP, procesado, bigbags y exportación a Excel.
+   ============================================================================== */
+
 async function renderResumen(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card"><div class="res-h"><h2>${ICONS.resumen} Resumen de producción</h2><button class="btn secondary" type="button" onclick="resumenExport()">Exportar a Excel</button></div>
@@ -2933,7 +3135,11 @@ async function renderResumen(){
   </tbody></table></div>`;
 }
 
-/* ================= CORRECCIONES (solo administrador) ================= */
+
+/* ==============================================================================
+   ==  CORRECCIONES (SOLO ADMINISTRADOR)
+   ==  Editar/borrar bigbags y turnos, quitar cargas, reabrir lotes.
+   ============================================================================== */
 let CORR = { id:null, bb:{}, lotes:{} };
 async function renderCorrecciones(){
   const main = document.getElementById('main');
@@ -3105,6 +3311,11 @@ async function coQuitarCarga(rec){
   });
 }
 
+/* ==============================================================================
+   ==  USUARIOS (SOLO ADMINISTRADOR)
+   ==  Lista de usuarios, roles y activación.
+   ============================================================================== */
+
 async function renderUsuarios(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
@@ -3148,6 +3359,11 @@ async function guardarUsuario(id){
   }
   loadUsuarios();
 }
+
+/* ==============================================================================
+   ==  CAMBIO DE CONTRASEÑA
+   ==  Ventana para cambiar la clave (con código por mail si hace falta).
+   ============================================================================== */
 
 let pwdModo = 'actual';
 let pwdFallos = 0;
@@ -3308,7 +3524,11 @@ async function pwdGuardar(e){
 
 initBotonPass();
 
-/* ===== auto-actualización: detecta una versión nueva publicada y recarga sola ===== */
+
+/* ==============================================================================
+   ==  AUTO-ACTUALIZACIÓN
+   ==  Detecta una versión nueva publicada y recarga sola.
+   ============================================================================== */
 let _verPend = false, _verBusy = false, _verNueva = null, _dirty = false;
 ['input','change'].forEach(ev => document.addEventListener(ev, e => { if(e.target && e.target.closest && e.target.closest('#main')) _dirty = true; }, true));
 document.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('#main .lt-chip,#main .lote-pill,#main input[type=checkbox]')) _dirty = true; }, true);
@@ -3359,6 +3579,11 @@ setInterval(() => { verNuevaVersion(); if(_verPend) aplicarVersion(); }, 90000);
 document.addEventListener('visibilitychange', () => { if(!document.hidden) setTimeout(() => { if(_verPend) aplicarVersion(); else verNuevaVersion(); }, 400); });
 window.addEventListener('focus', () => { if(_verPend) aplicarVersion(); else verNuevaVersion(); });
 window.addEventListener('online', verNuevaVersion);
+
+/* ==============================================================================
+   ==  MAPA DE PANTALLAS Y ARRANQUE
+   ==  Cada pestaña con su función de dibujo; registro del service worker.
+   ============================================================================== */
 
 const RENDERERS = { mp: renderMP, silo: renderSilo, lote: renderLote, bigbag: renderBigbag, cierre: renderCierre, resumen: renderResumen, correcciones: renderCorrecciones, usuarios: renderUsuarios };
 
