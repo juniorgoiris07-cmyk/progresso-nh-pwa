@@ -73,9 +73,57 @@
   .prod-chip:hover i{background:var(--accent-dark);}
   .prod-chip:hover svg{color:var(--accent-dark);}
   .prod-chip:active{background:var(--surface-2);}
+  /* ---- menú del selector de producto (se abre desde la pastilla) ---- */
+  .prodmenu{position:relative;flex:none;display:inline-flex;}
+  .prod-chip svg{transition:transform .28s cubic-bezier(.2,.7,.2,1),color .15s ease;}
+  .prod-chip[aria-expanded="true"]{border-color:var(--accent);}
+  .prod-chip[aria-expanded="true"] svg{transform:rotate(180deg);color:var(--accent-dark);}
+  .prod-chip span{display:inline-block;transition:opacity .16s ease,transform .16s ease;}
+  .prod-chip.cambia span{opacity:0;transform:translateY(4px);}
+  .prod-chip.flip i{animation:tileFlip .42s cubic-bezier(.4,0,.2,1);}
+  .prod-chip.pop i{animation:tilePop .5s cubic-bezier(.2,.9,.3,1.4) both;}
+  @keyframes tileFlip{0%{transform:perspective(260px) rotateY(0);}50%{transform:perspective(260px) rotateY(90deg);}100%{transform:perspective(260px) rotateY(0);}}
+  @keyframes tilePop{0%{transform:scale(.55);}100%{transform:scale(1);}}
+  .prod-pop{position:absolute;top:calc(100% + 8px);left:0;z-index:80;width:236px;padding:6px;background:#fff;border:1px solid var(--gridline);border-radius:16px;box-shadow:var(--shadow-md);transform-origin:top left;opacity:0;transform:translateY(-6px) scale(.96);visibility:hidden;pointer-events:none;transition:opacity .16s ease,transform .22s cubic-bezier(.2,.7,.2,1),visibility 0s linear .22s;}
+  .prod-pop.open{opacity:1;transform:none;visibility:visible;pointer-events:auto;transition-delay:0s;}
+  .pp-lbl{padding:8px 10px 6px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
+  .pp-item{appearance:none;display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;font:inherit;text-align:left;padding:8px 10px;border-radius:11px;color:var(--text-primary);cursor:pointer;transition:background .14s ease;}
+  .pp-item:hover,.pp-item:focus-visible{background:var(--surface-2);outline:none;}
+  .pp-item:active{background:var(--gridline);}
+  .pp-item i{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--accent-dark);font-style:normal;font-size:14px;font-weight:800;transition:background .15s ease,color .15s ease;}
+  .pp-item:hover i{background:#fff;}
+  .pp-item.on i{background:var(--accent);color:#fff;}
+  .pp-item .pp-t{flex:1;min-width:0;}
+  .pp-item b{display:block;font-size:14px;font-weight:700;line-height:1.2;}
+  .pp-item small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--text-muted);}
+  .pp-item .chk{flex:none;width:16px;height:16px;color:var(--accent);opacity:0;transform:scale(.5);transition:opacity .15s ease,transform .25s cubic-bezier(.2,.9,.3,1.4);}
+  .pp-item.on .chk{opacity:1;transform:none;}
+  .prod-pop.open .pp-item{animation:ppIn .26s cubic-bezier(.2,.7,.2,1) both;}
+  .prod-pop.open .pp-item:nth-of-type(2){animation-delay:.04s;}
+  @keyframes ppIn{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;}}
+  .prod-bar{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--accent);pointer-events:none;z-index:2;}
+  /* ---- cambio de producto: sale el contenido, entra el nuevo ---- */
+  #main,#homeMenu{transition:opacity .22s ease,transform .22s ease;}
+  #appShell.cambiando #main,#appShell.cambiando #homeMenu{opacity:0;transform:translateY(12px);}
+  #appShell.cambiando .prod-bar{width:100%;transition:width .5s cubic-bezier(.3,.7,.2,1);}
+  #appShell.entra-cambio #main,#appShell.entra-cambio #homeMenu{animation:cambioIn .5s cubic-bezier(.2,.7,.2,1) both;}
+  #appShell.entra-cambio #homeMenu .vista-menu-card{animation:cambioIn .5s cubic-bezier(.2,.7,.2,1) both;}
+  #appShell.entra-cambio #homeMenu .vista-menu-card:nth-child(2){animation-delay:.03s;}
+  #appShell.entra-cambio #homeMenu .vista-menu-card:nth-child(3){animation-delay:.06s;}
+  #appShell.entra-cambio #homeMenu .vista-menu-card:nth-child(4){animation-delay:.09s;}
+  #appShell.entra-cambio #homeMenu .vista-menu-card:nth-child(5){animation-delay:.12s;}
+  #appShell.entra-cambio #homeMenu .vista-menu-card:nth-child(6){animation-delay:.15s;}
+  #appShell.entra-cambio #homeMenu .vista-menu-card:nth-child(7){animation-delay:.18s;}
+  #appShell.entra-cambio #homeMenu .vista-menu-card:nth-child(8){animation-delay:.21s;}
+  @keyframes cambioIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  /* ---- pantalla de elección: la opción elegida se marca y las otras se apagan ---- */
+  .prod-opt{transition:opacity .2s ease,transform .2s ease,border-color .15s ease,background .15s ease;}
+  #prodScreen.saliendo .prod-opt.off{opacity:.35;transform:scale(.97);}
+  #prodScreen.saliendo .prod-opt.sel{border-color:var(--accent);transform:scale(1.02);}
+  #prodScreen.saliendo .prod-opt.sel .prod-ic{background:var(--accent-dark);}
   #prodScreen{transition:opacity .22s ease;}
   #prodScreen.saliendo{opacity:0;}
-  #authScreen,#prodScreen{position:relative;background:#2d3b2a url("fondo.jpg") center/cover no-repeat;}
+  #authScreen,#prodScreen{position:relative;background:#2d3b2a url("fondo.jpg?v=52") center/cover no-repeat;}
   #authScreen::before,#prodScreen::before{content:"";position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(23,21,15,.14);pointer-events:none;}
   #authScreen .auth-card{position:relative;z-index:1;border:none;border-radius:22px;box-shadow:0 24px 60px rgba(0,0,0,.30);}
   #authScreen:not(.hidden) .auth-card{animation:prodIn .38s cubic-bezier(.2,.7,.2,1) both;}
@@ -103,7 +151,7 @@
   #prodScreen:not(.hidden) .prod-opt:nth-child(2){animation-delay:.15s;}
   #appShell.entra{animation:prodFade .35s ease both;}
   @keyframes prodFade{from{opacity:0;}to{opacity:1;}}
-  @media (prefers-reduced-motion:reduce){#prodScreen *,#appShell.entra,.prod-chip,.prod-chip i,.prod-chip svg{animation:none !important;transition:none !important;}}
+  @media (prefers-reduced-motion:reduce){#prodScreen *,#appShell.entra,#appShell.entra-cambio *,.prod-chip,.prod-chip i,.prod-chip svg,.prod-chip span,.prod-pop,.pp-item,.pp-item *,#main,#homeMenu{animation:none !important;transition:none !important;}}
 
 
   /* ==============================================================================
@@ -813,6 +861,7 @@
      ============================================================================== -->
 <div class="app-shell hidden" id="appShell">
   <header class="appbar" id="appbar">
+    <div class="prod-bar" id="prodBar"></div>
     <div class="appbar-top">
       <div class="appbar-title">
         <img class="brandmark" src="data:image/png;base64,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" alt="Progresso NH S.A." width="480" height="236">
@@ -825,7 +874,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         <span id="usuarioChipText">Cargando...</span>
       </button>
-      <button type="button" class="prod-chip" id="prodChip" onclick="cambiarProducto()" title="Cambiar de producto" aria-label="Cambiar de producto"><i id="prodChipIc"></i><span id="prodChipTxt"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9l5-5 5 5"/><path d="M7 15l5 5 5-5"/></svg></button>
+      <div class="prodmenu" id="prodMenu"><button type="button" class="prod-chip" id="prodChip" onclick="cambiarProducto(event)" aria-haspopup="menu" aria-expanded="false" title="Cambiar de producto" aria-label="Cambiar de producto"><i id="prodChipIc"></i><span id="prodChipTxt"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9l5-5 5 5"/><path d="M7 15l5 5 5-5"/></svg></button><div class="prod-pop" id="prodPop" role="menu" aria-label="Elegir producto"></div></div>
       <div class="gsearch" id="gsearch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
         <input id="gsInput" type="text" placeholder="Buscar módulo" autocomplete="off" spellcheck="false" aria-label="Buscar módulo">
@@ -876,7 +925,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v51';
+const APP_VERSION = 'v52';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -963,7 +1012,7 @@ function showAuthScreen(){
   currentUser = null;
   miRol = null;
   PROD = null;
-  try{ sessionStorage.removeItem('nh_prod'); }catch(e){}
+  try{ sessionStorage.removeItem('nh_prod'); sessionStorage.removeItem('nh_cambio'); }catch(e){}
   document.getElementById('prodScreen').classList.add('hidden');
 }
 
@@ -1012,16 +1061,64 @@ function elegirProducto(k){
   try{ sessionStorage.setItem('nh_prod', k); localStorage.setItem('nh_prod_ult', k); }catch(e){}
   const ps = document.getElementById('prodScreen');
   if(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches){ entrarApp(); return; }
+  const ops = Array.from(ps.querySelectorAll('.prod-opt')), ix = Object.keys(PROD_INFO).indexOf(k);
+  ops.forEach((o, i) => o.classList.add(i === ix ? 'sel' : 'off'));
   ps.classList.add('saliendo');
-  setTimeout(() => { ps.classList.remove('saliendo'); entrarApp(); const sh = document.getElementById('appShell'); sh.classList.remove('entra'); void sh.offsetWidth; sh.classList.add('entra'); }, 200);
+  setTimeout(() => { ps.classList.remove('saliendo'); ops.forEach(o => o.classList.remove('sel', 'off')); entrarApp(); animEntradaApp(); }, 320);
 }
 
-function cambiarProducto(){
-  if(_dirty && !confirm('Hay datos sin guardar. ¿Cambiar de producto igual?')) return;
-  try{ sessionStorage.removeItem('nh_prod'); }catch(e){}
-  const sh = document.getElementById('appShell'); sh.style.transition = 'opacity .18s ease'; sh.style.opacity = '0';
-  setTimeout(() => location.reload(), 180);
+/* menú del selector de producto (pastilla de la barra superior) */
+const _sinAnim = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
+function prodPopRender(){
+  const chk = '<svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  document.getElementById('prodPop').innerHTML = '<div class="pp-lbl">Producto</div>' + Object.keys(PROD_INFO).map(k =>
+    `<button type="button" role="menuitem" class="pp-item${k === PROD ? ' on' : ''}" onclick="cambiarAProducto('${k}')"><i>${PROD_INFO[k].nombre.charAt(0)}</i><span class="pp-t"><b>${PROD_INFO[k].nombre}</b><small>${k === PROD ? 'Estás acá' : 'Tocá para cambiar'}</small></span>${chk}</button>`).join('');
 }
+function cerrarProdMenu(){
+  const p = document.getElementById('prodPop'); if(!p || !p.classList.contains('open')) return;
+  p.classList.remove('open');
+  document.getElementById('prodChip').setAttribute('aria-expanded', 'false');
+}
+function cambiarProducto(e){
+  if(e) e.stopPropagation();
+  const p = document.getElementById('prodPop');
+  if(p.classList.contains('open')){ cerrarProdMenu(); return; }
+  cerrarUserMenu();
+  prodPopRender();
+  p.style.left = '0px';
+  p.classList.add('open');
+  document.getElementById('prodChip').setAttribute('aria-expanded', 'true');
+  const r = p.getBoundingClientRect(), over = r.right - (window.innerWidth - 10);
+  if(over > 0) p.style.left = (-over) + 'px';
+  vibrar(8);
+}
+function cambiarAProducto(k){
+  if(!PROD_INFO[k]) return;
+  if(k === PROD){ cerrarProdMenu(); return; }
+  if(_dirty && !confirm('Hay datos sin guardar. ¿Cambiar de producto igual?')) return;
+  cerrarProdMenu();
+  ['nh_lote_carga','nh_lote_cierre','nh_lote_corr'].forEach(x => { try{ localStorage.removeItem(x); }catch(e){} });
+  try{ sessionStorage.setItem('nh_prod', k); sessionStorage.setItem('nh_cambio', '1'); localStorage.setItem('nh_prod_ult', k); }catch(e){}
+  if(_sinAnim()){ location.reload(); return; }
+  const chip = document.getElementById('prodChip'), sh = document.getElementById('appShell');
+  sh.classList.add('cambiando');
+  chip.classList.remove('pop'); chip.classList.add('flip', 'cambia');
+  setTimeout(() => {
+    document.getElementById('prodChipIc').textContent = PROD_INFO[k].nombre.charAt(0);
+    document.getElementById('prodChipTxt').textContent = PROD_INFO[k].nombre;
+    chip.classList.remove('cambia');
+  }, 200);
+  setTimeout(() => location.reload(), 560);
+}
+function animEntradaApp(){
+  if(_sinAnim()) return;
+  const sh = document.getElementById('appShell'), chip = document.getElementById('prodChip');
+  sh.classList.remove('entra-cambio'); void sh.offsetWidth; sh.classList.add('entra-cambio');
+  chip.classList.remove('flip'); chip.classList.add('pop');
+  setTimeout(() => { sh.classList.remove('entra-cambio'); chip.classList.remove('pop'); }, 1000);
+}
+document.addEventListener('click', e => { const m = document.getElementById('prodMenu'); if(m && !m.contains(e.target)) cerrarProdMenu(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarProdMenu(); });
 
 function entrarApp(){
   document.getElementById('authScreen').classList.add('hidden');
@@ -1031,6 +1128,7 @@ function entrarApp(){
   renderHomeMenu();
   document.getElementById('navbar').classList.remove('hidden');
   renderNavbar();
+  try{ if(sessionStorage.getItem('nh_cambio')){ sessionStorage.removeItem('nh_cambio'); animEntradaApp(); } }catch(e){}
   if(activeTab && !puedeVer(activeTab)) goHome(false);
   if(!navInitialized){
     navInitialized = true;
