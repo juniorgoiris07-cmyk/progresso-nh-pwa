@@ -73,34 +73,10 @@
   .prod-chip:hover i{background:var(--accent-dark);}
   .prod-chip:hover svg{color:var(--accent-dark);}
   .prod-chip:active{background:var(--surface-2);}
-  /* ---- menú del selector de producto (se abre desde la pastilla) ---- */
-  .prodmenu{position:relative;flex:none;display:inline-flex;}
-  .prod-chip svg{transition:transform .28s cubic-bezier(.2,.7,.2,1),color .15s ease;}
-  .prod-chip[aria-expanded="true"]{border-color:var(--accent);}
-  .prod-chip[aria-expanded="true"] svg{transform:rotate(180deg);color:var(--accent-dark);}
-  .prod-chip span{display:inline-block;transition:opacity .16s ease,transform .16s ease;}
-  .prod-chip.cambia span{opacity:0;transform:translateY(4px);}
-  .prod-chip.flip i{animation:tileFlip .42s cubic-bezier(.4,0,.2,1);}
+  .prod-chip.flip i{animation:tileFlip .42s cubic-bezier(.4,0,.2,1) both;}
   .prod-chip.pop i{animation:tilePop .5s cubic-bezier(.2,.9,.3,1.4) both;}
-  @keyframes tileFlip{0%{transform:perspective(260px) rotateY(0);}50%{transform:perspective(260px) rotateY(90deg);}100%{transform:perspective(260px) rotateY(0);}}
+  @keyframes tileFlip{0%{transform:perspective(260px) rotateY(0);}100%{transform:perspective(260px) rotateY(360deg);}}
   @keyframes tilePop{0%{transform:scale(.55);}100%{transform:scale(1);}}
-  .prod-pop{position:absolute;top:calc(100% + 8px);left:0;z-index:80;width:236px;padding:6px;background:#fff;border:1px solid var(--gridline);border-radius:16px;box-shadow:var(--shadow-md);transform-origin:top left;opacity:0;transform:translateY(-6px) scale(.96);visibility:hidden;pointer-events:none;transition:opacity .16s ease,transform .22s cubic-bezier(.2,.7,.2,1),visibility 0s linear .22s;}
-  .prod-pop.open{opacity:1;transform:none;visibility:visible;pointer-events:auto;transition-delay:0s;}
-  .pp-lbl{padding:8px 10px 6px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
-  .pp-item{appearance:none;display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;font:inherit;text-align:left;padding:8px 10px;border-radius:11px;color:var(--text-primary);cursor:pointer;transition:background .14s ease;}
-  .pp-item:hover,.pp-item:focus-visible{background:var(--surface-2);outline:none;}
-  .pp-item:active{background:var(--gridline);}
-  .pp-item i{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--accent-dark);font-style:normal;font-size:14px;font-weight:800;transition:background .15s ease,color .15s ease;}
-  .pp-item:hover i{background:#fff;}
-  .pp-item.on i{background:var(--accent);color:#fff;}
-  .pp-item .pp-t{flex:1;min-width:0;}
-  .pp-item b{display:block;font-size:14px;font-weight:700;line-height:1.2;}
-  .pp-item small{display:block;margin-top:2px;font-size:11.5px;font-weight:600;color:var(--text-muted);}
-  .pp-item .chk{flex:none;width:16px;height:16px;color:var(--accent);opacity:0;transform:scale(.5);transition:opacity .15s ease,transform .25s cubic-bezier(.2,.9,.3,1.4);}
-  .pp-item.on .chk{opacity:1;transform:none;}
-  .prod-pop.open .pp-item{animation:ppIn .26s cubic-bezier(.2,.7,.2,1) both;}
-  .prod-pop.open .pp-item:nth-of-type(2){animation-delay:.04s;}
-  @keyframes ppIn{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:none;}}
   .prod-bar{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--accent);pointer-events:none;z-index:2;}
   /* ---- cambio de producto: sale el contenido, entra el nuevo ---- */
   #main,#homeMenu{transition:opacity .22s ease,transform .22s ease;}
@@ -118,6 +94,7 @@
   @keyframes cambioIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
   /* ---- pantalla de elección: la opción elegida se marca y las otras se apagan ---- */
   .prod-opt{transition:opacity .2s ease,transform .2s ease,border-color .15s ease,background .15s ease;}
+  .prod-opt.act{border-color:var(--accent);background:#fbf8ee;}
   #prodScreen.saliendo .prod-opt.off{opacity:.35;transform:scale(.97);}
   #prodScreen.saliendo .prod-opt.sel{border-color:var(--accent);transform:scale(1.02);}
   #prodScreen.saliendo .prod-opt.sel .prod-ic{background:var(--accent-dark);}
@@ -151,7 +128,7 @@
   #prodScreen:not(.hidden) .prod-opt:nth-child(2){animation-delay:.15s;}
   #appShell.entra{animation:prodFade .35s ease both;}
   @keyframes prodFade{from{opacity:0;}to{opacity:1;}}
-  @media (prefers-reduced-motion:reduce){#prodScreen *,#appShell.entra,#appShell.entra-cambio *,.prod-chip,.prod-chip i,.prod-chip svg,.prod-chip span,.prod-pop,.pp-item,.pp-item *,#main,#homeMenu{animation:none !important;transition:none !important;}}
+  @media (prefers-reduced-motion:reduce){#prodScreen *,#appShell.entra,#appShell.entra-cambio *,.prod-chip,.prod-chip i,.prod-chip svg,#main,#homeMenu{animation:none !important;transition:none !important;}}
 
 
   /* ==============================================================================
@@ -874,7 +851,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         <span id="usuarioChipText">Cargando...</span>
       </button>
-      <div class="prodmenu" id="prodMenu"><button type="button" class="prod-chip" id="prodChip" onclick="cambiarProducto(event)" aria-haspopup="menu" aria-expanded="false" title="Cambiar de producto" aria-label="Cambiar de producto"><i id="prodChipIc"></i><span id="prodChipTxt"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9l5-5 5 5"/><path d="M7 15l5 5 5-5"/></svg></button><div class="prod-pop" id="prodPop" role="menu" aria-label="Elegir producto"></div></div>
+      <button type="button" class="prod-chip" id="prodChip" onclick="cambiarProducto()" title="Cambiar de producto" aria-label="Cambiar de producto"><i id="prodChipIc"></i><span id="prodChipTxt"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9l5-5 5 5"/><path d="M7 15l5 5 5-5"/></svg></button>
       <div class="gsearch" id="gsearch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
         <input id="gsInput" type="text" placeholder="Buscar módulo" autocomplete="off" spellcheck="false" aria-label="Buscar módulo">
@@ -925,7 +902,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v52';
+const APP_VERSION = 'v53';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -1012,7 +989,7 @@ function showAuthScreen(){
   currentUser = null;
   miRol = null;
   PROD = null;
-  try{ sessionStorage.removeItem('nh_prod'); sessionStorage.removeItem('nh_cambio'); }catch(e){}
+  try{ sessionStorage.removeItem('nh_prod'); }catch(e){}
   document.getElementById('prodScreen').classList.add('hidden');
 }
 
@@ -1050,7 +1027,7 @@ function mostrarProductos(){
   document.getElementById('prodHello').textContent = 'Hola, ' + usuario + '. ¿Con qué producto vas a trabajar?';
   let ult = null; try{ ult = localStorage.getItem('nh_prod_ult'); }catch(e){}
   const flecha = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
-  document.getElementById('prodList').innerHTML = Object.keys(PROD_INFO).map(k => `<button type="button" class="prod-opt" onclick="elegirProducto('${k}')"><i class="prod-ic">${PROD_INFO[k].nombre.charAt(0)}</i><span class="prod-txt"><b>${PROD_INFO[k].nombre}</b><small>${k === ult ? 'Último que usaste' : 'Lotes, recepciones y producción'}</small></span>${flecha}</button>`).join('');
+  document.getElementById('prodList').innerHTML = Object.keys(PROD_INFO).map(k => `<button type="button" class="prod-opt${k === ult ? ' act' : ''}" onclick="elegirProducto('${k}')"><i class="prod-ic">${PROD_INFO[k].nombre.charAt(0)}</i><span class="prod-txt"><b>${PROD_INFO[k].nombre}</b><small>${k === ult ? 'Último que usaste' : 'Lotes, recepciones y producción'}</small></span>${flecha}</button>`).join('');
 }
 
 function elegirProducto(k){
@@ -1067,48 +1044,15 @@ function elegirProducto(k){
   setTimeout(() => { ps.classList.remove('saliendo'); ops.forEach(o => o.classList.remove('sel', 'off')); entrarApp(); animEntradaApp(); }, 320);
 }
 
-/* menú del selector de producto (pastilla de la barra superior) */
+/* cambiar de producto: la pastilla de la barra lleva a la pantalla de elección (la misma del login) */
 const _sinAnim = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
-function prodPopRender(){
-  const chk = '<svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-  document.getElementById('prodPop').innerHTML = '<div class="pp-lbl">Producto</div>' + Object.keys(PROD_INFO).map(k =>
-    `<button type="button" role="menuitem" class="pp-item${k === PROD ? ' on' : ''}" onclick="cambiarAProducto('${k}')"><i>${PROD_INFO[k].nombre.charAt(0)}</i><span class="pp-t"><b>${PROD_INFO[k].nombre}</b><small>${k === PROD ? 'Estás acá' : 'Tocá para cambiar'}</small></span>${chk}</button>`).join('');
-}
-function cerrarProdMenu(){
-  const p = document.getElementById('prodPop'); if(!p || !p.classList.contains('open')) return;
-  p.classList.remove('open');
-  document.getElementById('prodChip').setAttribute('aria-expanded', 'false');
-}
-function cambiarProducto(e){
-  if(e) e.stopPropagation();
-  const p = document.getElementById('prodPop');
-  if(p.classList.contains('open')){ cerrarProdMenu(); return; }
-  cerrarUserMenu();
-  prodPopRender();
-  p.style.left = '0px';
-  p.classList.add('open');
-  document.getElementById('prodChip').setAttribute('aria-expanded', 'true');
-  const r = p.getBoundingClientRect(), over = r.right - (window.innerWidth - 10);
-  if(over > 0) p.style.left = (-over) + 'px';
-  vibrar(8);
-}
-function cambiarAProducto(k){
-  if(!PROD_INFO[k]) return;
-  if(k === PROD){ cerrarProdMenu(); return; }
+function cambiarProducto(){
   if(_dirty && !confirm('Hay datos sin guardar. ¿Cambiar de producto igual?')) return;
-  cerrarProdMenu();
-  ['nh_lote_carga','nh_lote_cierre','nh_lote_corr'].forEach(x => { try{ localStorage.removeItem(x); }catch(e){} });
-  try{ sessionStorage.setItem('nh_prod', k); sessionStorage.setItem('nh_cambio', '1'); localStorage.setItem('nh_prod_ult', k); }catch(e){}
+  try{ sessionStorage.removeItem('nh_prod'); }catch(e){}
   if(_sinAnim()){ location.reload(); return; }
-  const chip = document.getElementById('prodChip'), sh = document.getElementById('appShell');
-  sh.classList.add('cambiando');
-  chip.classList.remove('pop'); chip.classList.add('flip', 'cambia');
-  setTimeout(() => {
-    document.getElementById('prodChipIc').textContent = PROD_INFO[k].nombre.charAt(0);
-    document.getElementById('prodChipTxt').textContent = PROD_INFO[k].nombre;
-    chip.classList.remove('cambia');
-  }, 200);
-  setTimeout(() => location.reload(), 560);
+  document.getElementById('appShell').classList.add('cambiando');
+  document.getElementById('prodChip').classList.add('flip');
+  setTimeout(() => location.reload(), 520);
 }
 function animEntradaApp(){
   if(_sinAnim()) return;
@@ -1117,8 +1061,6 @@ function animEntradaApp(){
   chip.classList.remove('flip'); chip.classList.add('pop');
   setTimeout(() => { sh.classList.remove('entra-cambio'); chip.classList.remove('pop'); }, 1000);
 }
-document.addEventListener('click', e => { const m = document.getElementById('prodMenu'); if(m && !m.contains(e.target)) cerrarProdMenu(); });
-document.addEventListener('keydown', e => { if(e.key === 'Escape') cerrarProdMenu(); });
 
 function entrarApp(){
   document.getElementById('authScreen').classList.add('hidden');
@@ -1128,8 +1070,7 @@ function entrarApp(){
   renderHomeMenu();
   document.getElementById('navbar').classList.remove('hidden');
   renderNavbar();
-  try{ if(sessionStorage.getItem('nh_cambio')){ sessionStorage.removeItem('nh_cambio'); animEntradaApp(); } }catch(e){}
-  if(activeTab && !puedeVer(activeTab)) goHome(false);
+    if(activeTab && !puedeVer(activeTab)) goHome(false);
   if(!navInitialized){
     navInitialized = true;
     history.replaceState({view:'home'}, '');
