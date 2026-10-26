@@ -902,7 +902,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v53';
+const APP_VERSION = 'v54';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -935,12 +935,14 @@ const PROD_CFG = {
   chia: {
     tipos:['Corte hilerado','Desecado','Convencional'], destinos:['Warrants','Interno'],
     cats:['Organico','Organico BNN','Convencional UE','Convencional ROW'],
+    catsLote:['Organico','Organico BNN','Convencional UE','Convencional ROW'],
     desc:[{k:'pct_impureza_gruesa',l:'% Impureza gruesa'},{k:'pct_impureza_fina',l:'% Impureza fina'},{k:'pct_descuento_calidad',l:'% Descuento calidad',cero:true}],
     imp:['pct_impureza_gruesa','pct_impureza_fina'], hum:true, lab:true, variedad:false, marcado:false
   },
   sesamo: {
     tipos:['Organico','Posible Traza','Convencional','Trazas'], destinos:['Warrants','Sin Warrants','Semillero'],
     cats:['Organico','Posible Traza','Convencional','Trazas'],
+    catsLote:['Organico','Organico BNN','Convencional UE','Convencional ROW','Aceitero premium','Aceitero común','Posible Traza','Convencional','Trazas'],
     desc:[{k:'pct_impureza',l:'% Impureza',cero:true},{k:'pct_contraste',l:'% Contraste',cero:true},{k:'pct_danos_mecanicos',l:'% Daños mecánicos',cero:true}],
     imp:['pct_impureza'], hum:false, lab:false, variedad:true, marcado:true
   }
@@ -2526,7 +2528,7 @@ async function renderLote(){
     <h2>${ICONS.lote} Crear lote</h2>
     <div class="grid">
       <div><label>Producto *</label><select id="loteProducto">${prodOpts()}</select></div>
-      <div><label>Calidad</label><select id="loteCategoria"><option value="">-</option>${opt(PC().cats)}</select></div>
+      <div><label>Calidad</label><select id="loteCategoria"><option value="">-</option>${opt(PC().catsLote)}</select></div>
       <div><label>Responsable</label><input id="loteResponsable"></div>
       <div><label>Código de laboratorio</label><input id="loteCodigoLab" placeholder="Ej: ${PROD_INFO[PROD].lab} 030-26"></div>
     </div>
