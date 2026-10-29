@@ -902,7 +902,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v54';
+const APP_VERSION = 'v55';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -1242,6 +1242,7 @@ const D_DIAS_STOCK = 30, D_DIAS_BIGBAG = 7;
 const dT = kg => (Number(kg||0)/1000).toLocaleString('es-PY',{maximumFractionDigits:1});
 const dN = (v,d) => Number(v||0).toLocaleString('es-PY',{minimumFractionDigits:d||0,maximumFractionDigits:d||0});
 const dSaldo = r => Math.max(0, Number(r.kg_liquido_carga||0) - Number(r.kg_liquido_usado||0));
+const dDiasT = n => n + (n === 1 ? ' día' : ' días');
 const dDias = f => { if(!f) return 0; const a = new Date(String(f).slice(0,10) + 'T00:00:00'), b = new Date(hoyLocal() + 'T00:00:00'); return Math.max(0, Math.round((b - a) / 864e5)); };
 const dKey = f => String(f||'').slice(0,7);
 const dRed = () => window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -1433,7 +1434,7 @@ function dDona(items, total, cargas){
     acc += len;
   });
   const leg = items.map((it, i) => `<div class="dleg" data-i="${i}"><span class="dot" style="background:${it.c}"></span><span class="dleg-n">${mpEsc(it.n)}</span><span class="dleg-v"><span><b>${dT(it.v)} t</b> · ${dN(it.v/total*100,0)}%</span><small>${it.c2} carga${it.c2 === 1 ? '' : 's'}${it.h != null ? ' · ' + dN(it.h,1) + '% hum.' : ''}</small></span></div>`).join('');
-  return `<div class="ddona"><svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}" role="img">${arcs}<text id="dCenN" x="${c}" y="${c+1}" text-anchor="middle" font-size="24" font-weight="800" fill="#17150f">${dT(total)}</text><text id="dCenL" x="${c}" y="${c+19}" text-anchor="middle" font-size="12" fill="#938d79">t · ${cargas} cargas</text></svg><div class="dlegs">${leg}</div></div>`;
+  return `<div class="ddona"><svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}" role="img">${arcs}<text id="dCenN" x="${c}" y="${c+1}" text-anchor="middle" font-size="24" font-weight="800" fill="#17150f">${dT(total)}</text><text id="dCenL" x="${c}" y="${c+19}" text-anchor="middle" font-size="12" fill="#938d79">t · ${cargas} carga${Number(cargas)===1?'':'s'}</text></svg><div class="dlegs">${leg}</div></div>`;
 }
 function dDonaHi(host, i){
   const dn = host.querySelector('.ddona'); if(!dn) return;
@@ -1442,7 +1443,7 @@ function dDonaHi(host, i){
   const n = document.getElementById('dCenN'), l = document.getElementById('dCenL'), it = DASH.donaItems && DASH.donaItems[i];
   if(!n || !l) return;
   if(i != null && it){ n.textContent = dT(it.v); l.textContent = 't · ' + dCorto(it.n, 14); }
-  else { n.textContent = dT(DASH.donaTotal); l.textContent = 't · ' + DASH.donaCargas + ' cargas'; }
+  else { n.textContent = dT(DASH.donaTotal); l.textContent = 't · ' + DASH.donaCargas + ' carga' + (Number(DASH.donaCargas)===1?'':'s'); }
 }
 
 /* ---- tarjetas ---- */
@@ -1539,8 +1540,8 @@ function dashPintar(anim){
   const dT0 = diasData(refK);
   const kpis = `<div class="dash-kpis ${cerr.length ? 'k6' : 'k5'}">
     <div class="dkpi" style="--i:0"><div class="l">Recibido en ${mesRefNom.toLowerCase()}</div><div class="n">${dCu(kgRef/1000, 1, 't')} ${recRef.length ? dChip(dPct(kgRef, kgPrevP), `vs ${refK === hoyK ? 'el mismo período (1 al ' + diaHoy + ')' : 'el mes anterior'} de ${D_MESES[Number(prevK.slice(5,7)) - 1].toLowerCase()}: ${dT(kgPrevP)} t`) : ''}</div><div class="s">${recRef.length ? recRef.length + ' carga' + (recRef.length===1?'':'s') + ' · ' + dT(kgRef / recRef.length) + ' t por carga' : 'Sin recepciones este mes' + (kgPrev > 0 ? ' · ' + D_MESES[Number(prevK.slice(5,7)) - 1].toLowerCase() + ': ' + dT(kgPrev) + ' t' : '')}</div>${dSpark(serie6, D_COL[0])}</div>
-    <div class="dkpi" style="--i:1"><div class="l">Recibido en ${anioRef}</div><div class="n">${dCu(kgAnio/1000, 1, 't')}</div><div class="s">${recAnio.length} cargas · ${provAnio} proveedor${provAnio===1?'':'es'}</div>${dMiniBarras(mAn.rec.map(v => v/1000), D_COL[1], Number(refK.slice(5,7)) - 1)}</div>
-    <div class="dkpi" style="--i:2"><div class="l">Stock sin asignar</div><div class="n">${dCu(stock/1000, 1, 't')}</div><div class="s">${libres.length} carga${libres.length===1?'':'s'} libres${libres.length ? ' · la más vieja, ' + masVieja + ' días' : ''}</div><div class="dprog" title="${dN(pctStock,0)}% de lo recibido sigue sin asignar"><i style="--w:${Math.min(100, pctStock).toFixed(1)}%"></i></div><div class="dprog-l">${dN(pctStock,0)}% de lo recibido</div></div>
+    <div class="dkpi" style="--i:1"><div class="l">Recibido en ${anioRef}</div><div class="n">${dCu(kgAnio/1000, 1, 't')}</div><div class="s">${recAnio.length} carga${recAnio.length===1?'':'s'} · ${provAnio} proveedor${provAnio===1?'':'es'}</div>${dMiniBarras(mAn.rec.map(v => v/1000), D_COL[1], Number(refK.slice(5,7)) - 1)}</div>
+    <div class="dkpi" style="--i:2"><div class="l">Stock sin asignar</div><div class="n">${dCu(stock/1000, 1, 't')}</div><div class="s">${libres.length} carga${libres.length===1?'':'s'} libre${libres.length===1?'':'s'}${libres.length ? ' · la más vieja, ' + dDiasT(masVieja) : ''}</div><div class="dprog" title="${dN(pctStock,0)}% de lo recibido sigue sin asignar"><i style="--w:${Math.min(100, pctStock).toFixed(1)}%"></i></div><div class="dprog-l">${dN(pctStock,0)}% de lo recibido</div></div>
     <div class="dkpi" style="--i:3"><div class="l">Lotes en proceso</div><div class="n">${dCu(enProc.length, 0)}</div><div class="s">${dT(kgEnProc)} t de MP asignada · ${bbEnProc} bigbag${bbEnProc===1?'':'s'}</div><div class="dprog"><i style="--w:${enProc.length ? Math.round(enProc.filter(l => conBB.has(l.lote_id)).length / enProc.length * 100) : 0}%"></i></div><div class="dprog-l">${enProc.filter(l => conBB.has(l.lote_id)).length} de ${enProc.length} ya registran bigbags</div></div>
     <button type="button" class="dkpi dkpi-btn" style="--i:4" onclick="diasAbrir()" aria-label="Ver detalle de días trabajados"><div class="l">Días trabajados en ${mesRefNom.toLowerCase()}</div><div class="n">${dCu(dT0.dias.length, 0)}</div><div class="s">${dT0.dias.length ? dT0.turnos + ' turno' + (dT0.turnos===1?'':'s') + ' · ' + dT0.bb + ' bigbag' + (dT0.bb===1?'':'s') : 'Todavía no hay producción cargada este mes'}</div><div class="dprog-l">Ver detalle por día y turno ›</div></button>
     ${cerr.length ? `<div class="dkpi" style="--i:4"><div class="l">Rendimiento ${anioHoy}</div><div class="n">${rend == null ? '<span class="dnil">—</span>' : dCu(rend, 1, '%')}</div><div class="s">${cerr.length ? dT(kgProc) + ' t procesadas · ' + cerr.length + ' lote' + (cerr.length===1?'':'s') + ' cerrado' + (cerr.length===1?'':'s') : 'Aparece al cerrar el primer lote'}</div><div class="dprog ok"><i style="--w:${rend == null ? 0 : Math.min(100, rend).toFixed(1)}%"></i></div><div class="dprog-l">${rend == null ? 'Sin lotes cerrados' : 'de la MP ingresada'}</div></div>` : ''}
@@ -1571,12 +1572,12 @@ function dashPintar(anim){
 function dashAtencion(libres){
   const items = [];
   const viejas = libres.filter(r => dDias(r.fecha) > D_DIAS_STOCK).sort((a,b) => dDias(b.fecha) - dDias(a.fecha));
-  if(viejas.length) items.push({ sev:'danger', n:viejas.length, t:`Carga${viejas.length===1?'':'s'} con más de ${D_DIAS_STOCK} días sin asignar`, d:dT(viejas.reduce((a,r) => a + dSaldo(r), 0)) + ' t esperando un lote', go:'lote', ir:'Ir a Lotes', rows:viejas.slice(0,5).map(r => [mpEsc(r.nro_boleta) + ' · ' + mpEsc(dCorto(r.proveedor,24)), dDias(r.fecha) + ' días', dT(dSaldo(r)) + ' t']), mas:viejas.length - 5 });
+  if(viejas.length) items.push({ sev:'danger', n:viejas.length, t:`Carga${viejas.length===1?'':'s'} con más de ${D_DIAS_STOCK} días sin asignar`, d:dT(viejas.reduce((a,r) => a + dSaldo(r), 0)) + ' t esperando un lote', go:'lote', ir:'Ir a Lotes', rows:viejas.slice(0,5).map(r => [mpEsc(r.nro_boleta) + ' · ' + mpEsc(dCorto(r.proveedor,24)), dDiasT(dDias(r.fecha)), dT(dSaldo(r)) + ' t']), mas:viejas.length - 5 });
   const sinCalar = libres.filter(r => r.laboratorio === 'Sin calar').sort((a,b) => dSaldo(b) - dSaldo(a));
   if(sinCalar.length) items.push({ sev:'warn', n:sinCalar.length, t:`Carga${sinCalar.length===1?'':'s'} disponible${sinCalar.length===1?'':'s'} sin calar`, d:dT(sinCalar.reduce((a,r) => a + dSaldo(r), 0)) + ' t sin resultado de laboratorio', go:'mp', ir:'Ir a Recepción', rows:sinCalar.slice(0,5).map(r => [mpEsc(r.nro_boleta) + ' · ' + mpEsc(dCorto(r.proveedor,24)), mpFd(r.fecha), dT(dSaldo(r)) + ' t']), mas:sinCalar.length - 5 });
   const conBB = new Set(DASH.bbs.map(b => b.lote_id));
   const sinBB = DASH.lotes.filter(l => l.estado === 'EN_PROCESO' && !conBB.has(l.lote_id) && dDias(l.fecha_creacion) > D_DIAS_BIGBAG).sort((a,b) => dDias(b.fecha_creacion) - dDias(a.fecha_creacion));
-  if(sinBB.length) items.push({ sev:'warn', n:sinBB.length, t:`Lote${sinBB.length===1?'':'s'} en proceso sin bigbags hace más de ${D_DIAS_BIGBAG} días`, d:'Todavía no registran producción', go:'bigbag', ir:'Ir a Carga', rows:sinBB.slice(0,5).map(l => [mpEsc(l.lote_id) + (DASH.labs[l.lote_id] ? ' · ' + mpEsc(DASH.labs[l.lote_id]) : ''), dDias(l.fecha_creacion) + ' días', mpEsc(dCorto(l.producto,14))]), mas:sinBB.length - 5 });
+  if(sinBB.length) items.push({ sev:'warn', n:sinBB.length, t:`Lote${sinBB.length===1?'':'s'} en proceso sin bigbags hace más de ${D_DIAS_BIGBAG} días`, d:'Todavía no registran producción', go:'bigbag', ir:'Ir a Carga', rows:sinBB.slice(0,5).map(l => [mpEsc(l.lote_id) + (DASH.labs[l.lote_id] ? ' · ' + mpEsc(DASH.labs[l.lote_id]) : ''), dDiasT(dDias(l.fecha_creacion)), mpEsc(dCorto(l.producto,14))]), mas:sinBB.length - 5 });
   DASH.avisos = items;
   const cuerpo = items.length ? items.map((i, k) => `<div class="dalert sev-${i.sev}${DASH.abierto === k ? ' open' : ''}" data-k="${k}"><button type="button" class="dalert-h" aria-expanded="${DASH.abierto === k}" onclick="dAbrir(${k})"><span class="dalert-n">${i.n}</span><span class="dalert-t"><b>${i.t}</b><small>${i.d}</small></span><span class="dalert-c" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="dalert-body"><div class="dalert-in">${i.rows.map(r => `<div class="drow"><span>${r[0]}</span><span>${r[1]}</span><b>${r[2]}</b></div>`).join('')}${i.mas > 0 ? `<div class="dmas">y ${i.mas} más…</div>` : ''}${puedeVer(i.go) ? `<button type="button" class="dir" onclick="goTab('${i.go}')">${i.ir} <span aria-hidden="true">→</span></button>` : ''}</div></div></div>`).join('')
     : `<div class="dok"><div class="dok-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></div><b>¡Todo en orden!</b><span>No hay nada pendiente que requiera atención.</span></div>`;
@@ -1593,7 +1594,7 @@ function dashLotes(enProc, conBB){
   const max = Math.max(1, ...orden.map(l => Number(l.kg_mp_asignado||0)));
   const tot = enProc.reduce((a,l) => a + Number(l.kg_mp_asignado||0), 0);
   const filas = orden.slice(0, 6).map(l => { const d = dDias(l.fecha_creacion), nb = bbPor[l.lote_id] || 0;
-    return `<button type="button" class="dlote" onclick="dIrLote('${mpEsc(l.lote_id)}')"${dTipAttr(`<b>${mpEsc(l.lote_id)}</b>${DASH.labs[l.lote_id] ? ' · ' + mpEsc(DASH.labs[l.lote_id]) : ''}<br>${mpEsc(l.producto)}${l.categoria ? ' · ' + mpEsc(l.categoria) : ''}<br>${l.cantidad_cargas_mp} cargas · ${dT(l.kg_mp_asignado)} t MP<br>Responsable: ${mpEsc(l.responsable || '-')}`)}><span class="dlote-id"><b>${mpEsc(l.lote_id)}</b><small>${mpEsc(dCorto(l.producto,16))}${l.categoria ? ' · ' + mpEsc(dCorto(l.categoria,16)) : ''}</small></span><span class="dlote-bar"><i style="--w:${Math.max(3, Number(l.kg_mp_asignado||0) / max * 100).toFixed(1)}%"></i></span><span class="dlote-v"><b>${dT(l.kg_mp_asignado)} t</b><small>${nb ? nb + ' bigbag' + (nb===1?'':'s') : 'sin bigbags'} · ${d} d</small></span></button>`; }).join('');
+    return `<button type="button" class="dlote" onclick="dIrLote('${mpEsc(l.lote_id)}')"${dTipAttr(`<b>${mpEsc(l.lote_id)}</b>${DASH.labs[l.lote_id] ? ' · ' + mpEsc(DASH.labs[l.lote_id]) : ''}<br>${mpEsc(l.producto)}${l.categoria ? ' · ' + mpEsc(l.categoria) : ''}<br>${l.cantidad_cargas_mp} carga${Number(l.cantidad_cargas_mp)===1?'':'s'} · ${dT(l.kg_mp_asignado)} t MP<br>Responsable: ${mpEsc(l.responsable || '-')}`)}><span class="dlote-id"><b>${mpEsc(l.lote_id)}</b><small>${mpEsc(dCorto(l.producto,16))}${l.categoria ? ' · ' + mpEsc(dCorto(l.categoria,16)) : ''}</small></span><span class="dlote-bar"><i style="--w:${Math.max(3, Number(l.kg_mp_asignado||0) / max * 100).toFixed(1)}%"></i></span><span class="dlote-v"><b>${dT(l.kg_mp_asignado)} t</b><small>${nb ? nb + ' bigbag' + (nb===1?'':'s') : 'sin bigbags'} · ${d} d</small></span></button>`; }).join('');
   document.getElementById('dcLotes').innerHTML = `<div class="dcard-h"><div><h3>Lotes en proceso</h3><div class="dsub">${enProc.length ? dT(tot) + ' t de MP · promedio ' + dT(tot / enProc.length) + ' t por lote · más antiguos primero' : 'No hay lotes abiertos'}</div></div><span class="dbadge ok">${enProc.length}</span></div>`
     + (filas ? `<div class="dlotes">${filas}</div>${enProc.length > 6 ? `<button type="button" class="dir" onclick="goTab('resumen')">Ver los ${enProc.length} lotes <span aria-hidden="true">→</span></button>` : ''}` : '<div class="empty">No hay lotes en proceso.</div>');
 }
@@ -1606,9 +1607,9 @@ function dashSilos(libres){
   const filas = DASH.todosSilos ? todas : todas.slice(0, 8), max = filas.length ? filas[0].o.kg : 1;
   const tot = todas.reduce((a,x) => a + x.o.kg, 0), sc = libres.filter(r => r.laboratorio === 'Sin calar').reduce((a,r) => a + dSaldo(r), 0);
   const cuerpo = filas.length ? filas.map(f => { const hp = f.o.h.length ? f.o.h.reduce((a,b) => a + b, 0) / f.o.h.length : null;
-    return `<button type="button" class="dbar" onclick="goTab('lote')"${dTipAttr(`<b>Silo ${mpEsc(f.s.numero)}</b><br>${dT(f.o.kg)} t libres en ${f.o.n} carga${f.o.n===1?'':'s'}<br>Carga más vieja: ${f.o.vieja} días${hp != null ? '<br>Humedad promedio: ' + dN(hp,1) + '%' : ''}`)}><span class="dbar-l"><b>${mpEsc(f.s.numero)}</b><small>${f.o.n} carga${f.o.n===1?'':'s'}${f.s.categoria ? ' · ' + mpEsc(dCorto(f.s.categoria,14)) : ''}</small></span><span class="dbar-t"><span class="dbar-f" style="--w:${Math.max(2, f.o.kg / max * 100).toFixed(1)}%"></span></span><span class="dbar-v"><b>${dT(f.o.kg)} t</b><small class="${f.o.vieja > D_DIAS_STOCK ? 'old' : ''}">${f.o.vieja} d</small></span></button>`; }).join('')
+    return `<button type="button" class="dbar" onclick="goTab('lote')"${dTipAttr(`<b>Silo ${mpEsc(f.s.numero)}</b><br>${dT(f.o.kg)} t libres en ${f.o.n} carga${f.o.n===1?'':'s'}<br>Carga más vieja: ${dDiasT(f.o.vieja)}${hp != null ? '<br>Humedad promedio: ' + dN(hp,1) + '%' : ''}`)}><span class="dbar-l"><b>${mpEsc(f.s.numero)}</b><small>${f.o.n} carga${f.o.n===1?'':'s'}${f.s.categoria ? ' · ' + mpEsc(dCorto(f.s.categoria,14)) : ''}</small></span><span class="dbar-t"><span class="dbar-f" style="--w:${Math.max(2, f.o.kg / max * 100).toFixed(1)}%"></span></span><span class="dbar-v"><b>${dT(f.o.kg)} t</b><small class="${f.o.vieja > D_DIAS_STOCK ? 'old' : ''}">${f.o.vieja} d</small></span></button>`; }).join('')
     : '<div class="empty">No hay stock sin asignar en los silos.</div>';
-  document.getElementById('dcSilos').innerHTML = `<div class="dcard-h"><div><h3>Stock sin asignar por silo</h3><div class="dsub">${todas.length ? dT(tot - sc) + ' t caladas · ' + dT(sc) + ' t sin calar · tocá un silo para armar un lote' : 'Todo el stock está asignado'}</div></div>${todas.length > 8 ? `<button type="button" class="dlink" onclick="DASH.todosSilos=!DASH.todosSilos;dashSilos(DASH.rec.filter(r => dSaldo(r) > 0.5))">${DASH.todosSilos ? 'Ver menos' : 'Ver los ' + todas.length}</button>` : ''}</div><div class="dbars canim">${cuerpo}</div>`;
+  document.getElementById('dcSilos').innerHTML = `<div class="dcard-h"><div><h3>Stock sin asignar por silo</h3><div class="dsub">${todas.length ? (PC().lab ? dT(tot - sc) + ' t caladas · ' + dT(sc) + ' t sin calar' : dT(tot) + ' t en ' + todas.length + ' silo' + (todas.length===1?'':'s')) + ' · tocá un silo para armar un lote' : 'Todo el stock está asignado'}</div></div>${todas.length > 8 ? `<button type="button" class="dlink" onclick="DASH.todosSilos=!DASH.todosSilos;dashSilos(DASH.rec.filter(r => dSaldo(r) > 0.5))">${DASH.todosSilos ? 'Ver menos' : 'Ver los ' + todas.length}</button>` : ''}</div><div class="dbars canim">${cuerpo}</div>`;
 }
 
 function dashGraficos(anim, solo){
@@ -2011,7 +2012,7 @@ async function renderMP(){
 
   const f = document.getElementById('frmMP');
   f.fecha.value = hoyLocal();
-  f.addEventListener('submit', mpSubmit);
+  f.addEventListener('submit', e => { e.preventDefault(); return _once('mpSubmit', mpSubmit, e); });
 
   const { data: silos } = await sb.from('silos_bolsa').select('*').eq('estado','ABIERTO').order('creado_en',{ascending:false});
   mpFillSilos(silos || [], null);
@@ -2592,8 +2593,8 @@ function ltRender(){
   const silos = Object.values(porSilo).sort((a,b) => String(a.num).localeCompare(String(b.num), 'es', {numeric:true}));
   const totKg = LOTE_ROWS.reduce((a,r) => a + ltSaldo(r), 0);
   document.getElementById('ltSilos').innerHTML =
-    `<button type="button" class="lt-chip${loteFiltro.silo===''?' on':''}" onclick="ltSilo('')"><b>Todos</b><span>${LOTE_ROWS.length} cargas · ${ltN(totKg)} kg</span></button>` +
-    silos.map(s => `<button type="button" class="lt-chip${loteFiltro.silo===s.id?' on':''}" onclick="ltSilo('${s.id}')"><b>${mpEsc(s.num)}</b><span>${s.n} cargas · ${ltN(s.kg)} kg</span>${s.sel?`<i>${s.sel} elegida${s.sel===1?'':'s'}</i>`:''}</button>`).join('');
+    `<button type="button" class="lt-chip${loteFiltro.silo===''?' on':''}" onclick="ltSilo('')"><b>Todos</b><span>${LOTE_ROWS.length} carga${LOTE_ROWS.length===1?'':'s'} · ${ltN(totKg)} kg</span></button>` +
+    silos.map(s => `<button type="button" class="lt-chip${loteFiltro.silo===s.id?' on':''}" onclick="ltSilo('${s.id}')"><b>${mpEsc(s.num)}</b><span>${s.n} carga${s.n===1?'':'s'} · ${ltN(s.kg)} kg</span>${s.sel?`<i>${s.sel} elegida${s.sel===1?'':'s'}</i>`:''}</button>`).join('');
   const fs = ltFiltradas();
   const todasSel = fs.length > 0 && fs.every(r => loteSel.has(r.id));
   const el = document.getElementById('ltTabla');
@@ -2751,7 +2752,7 @@ function loteSelectorInit(pref, lotes, onPick, key, opts){
     const t = norm(q.value).trim().split(/\s+/).filter(Boolean);
     const list = lotes.filter(l => { const h = norm(label(l)); return t.every(w => h.includes(w)); });
     sel.innerHTML = list.map(l => `<option value="${mpEsc(l.id)}">${label(l)}</option>`).join('') || '<option value="">Ningún lote coincide</option>';
-    cnt.textContent = t.length ? `${list.length} de ${lotes.length} lotes${suf}` : `${lotes.length} lote${lotes.length===1?'':'s'}${suf}`;
+    cnt.textContent = t.length ? `${list.length} de ${lotes.length} lote${lotes.length===1?'':'s'}${suf}` : `${lotes.length} lote${lotes.length===1?'':'s'}${suf}`;
     if(list.some(l => l.id === current)) sel.value = current;
     else if(list.length){ sel.value = list[0].id; pick(list[0].id); }
   }
