@@ -902,7 +902,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v56';
+const APP_VERSION = 'v57';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -944,7 +944,7 @@ const PROD_CFG = {
     cats:['Organico','Convencional UE','Convencional ROW','Aceitero premium','Aceitero común'],
     catsLote:['Organico','Convencional UE','Convencional ROW','Aceitero premium','Aceitero común'],
     desc:[{k:'pct_impureza',l:'% Impureza',cero:true},{k:'pct_contraste',l:'% Contraste',cero:true},{k:'pct_danos_mecanicos',l:'% Daños mecánicos',cero:true}],
-    imp:['pct_impureza'], hum:false, lab:false, variedad:true, marcado:true
+    imp:['pct_impureza'], hum:false, lab:false, variedad:true, marcado:true, calBb:true
   }
 };
 const PC = () => PROD_CFG[PROD || 'chia'];
@@ -2791,6 +2791,7 @@ async function renderBigbag(){
         <div><label>Humedad del grano %</label><input name="humedad_grano_pct" type="number" step="0.01"></div>
         <div><label>Temp. ambiente °C</label><input name="temperatura_ambiente_c" type="number" step="0.1"></div>
         <div><label>Temp. del grano °C</label><input name="temperatura_grano_c" type="number" step="0.1"></div>
+        ${PC().calBb ? `<div><label>Calidad del bigbag</label><select name="calidad"><option value="">Igual al lote</option>${PC().catsLote.map(c => `<option>${c}</option>`).join('')}</select></div>` : ''}
         <div><label>Encargado</label><input name="encargado"></div>
       </div>
       <label>Observaciones</label><textarea name="observaciones"></textarea>
@@ -2816,7 +2817,7 @@ function elegirLote(id, mantenerMezcla){
   const info = document.getElementById('bbLoteInfo');
   if(info){
     info.style.display = 'block';
-    info.innerHTML = `<b>Lote:</b> ${mpEsc(id)}${l.codigo_lab ? ' (' + mpEsc(l.codigo_lab) + ')' : ''} &nbsp;·&nbsp; <b>Producto:</b> ${mpEsc(l.producto||'-')} &nbsp;·&nbsp; <b>Calidad:</b> ${mpEsc(l.categoria||'-')}`;
+    info.innerHTML = `<b>Lote:</b> ${mpEsc(id)}${l.codigo_lab ? ' (' + mpEsc(l.codigo_lab) + ')' : ''} &nbsp;·&nbsp; <b>Producto:</b> ${mpEsc(l.producto||'-')} &nbsp;·&nbsp; <b>Calidad del lote:</b> ${mpEsc(l.categoria||'-')}`;
   }
   const f = document.getElementById('frmBigbag');
   f.style.display = 'block';
@@ -2839,6 +2840,7 @@ async function _submitBigbag(e){
     payload[k] = payload[k] === '' ? null : Number(payload[k]);
   });
   payload.encargado = payload.encargado || usuario || null;
+  if(PC().calBb) payload.calidad = payload.calidad || null; else delete payload.calidad;
 
   const grupo = mezGrupo(), mez = grupo.length > 1;
   const obsMez = mez ? 'Mezcla ' + grupo.join(' + ') + '.' : '';
@@ -2859,6 +2861,12 @@ async function _submitBigbag(e){
   elegirLote(loteActivoId, true);
 }
 
+/* Calidad con la que salió el bigbag; si difiere de la del lote se marca como reproceso. */
+function bbCalidadHTML(b, l){
+  const base = l && l.categoria || '', cal = PC().calBb && b.calidad || '';
+  if(!cal) return mpEsc(base || '-');
+  return mpEsc(cal) + (base && base !== cal ? ' <span class="badge warn" title="Calidad del lote: ' + mpEsc(base) + '">reproceso</span>' : '');
+}
 async function loadBigbagList(){
   const el = document.getElementById('bigbagList');
   const ids = (MEZ.modo === 'bb' ? mezGrupo() : [loteActivoId]);
@@ -2888,7 +2896,7 @@ async function loadBigbagList(){
   const fa = (v,d) => v===null ? '-' : v.toFixed(d).replace('.',',');
   const lt = id => (window.bbLotes||{})[id] || {};
   el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Hora</th><th>Turno</th><th>Producto</th><th>Lote</th><th>Calidad</th><th>Nº Bigbag</th><th>Pureza</th><th>Hum. grano</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th></tr></thead><tbody>
-    ${filas.map(f => { const b = f.b, l = lt(b.lote_id); return `<tr><td>${fmtDate(b.fecha)}</td><td>${hh(b.hora)}</td><td>${mpEsc(b.turno)}</td><td>${mpEsc(l.producto||'-')}</td><td>${f.lotes.map(mpEsc).join(' + ')}</td><td>${mpEsc(l.categoria||'-')}</td><td>${f.nros.map(mpEsc).join(' · ')}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado||'-')}</td><td>${mpEsc(b.observaciones||'')}</td></tr>`; }).join('')}
+    ${filas.map(f => { const b = f.b, l = lt(b.lote_id); return `<tr><td>${fmtDate(b.fecha)}</td><td>${hh(b.hora)}</td><td>${mpEsc(b.turno)}</td><td>${mpEsc(l.producto||'-')}</td><td>${f.lotes.map(mpEsc).join(' + ')}</td><td>${bbCalidadHTML(b, l)}</td><td>${f.nros.map(mpEsc).join(' · ')}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado||'-')}</td><td>${mpEsc(b.observaciones||'')}</td></tr>`; }).join('')}
   </tbody><tfoot><tr style="font-weight:700;background:var(--surface-2)"><td colspan="6">PROMEDIO ${g ? 'de la mezcla' : 'del lote'} (${filas.length} bigbag${filas.length===1?'':'s'})</td><td></td><td>${avg('pureza_pct')===null?'-':fa(avg('pureza_pct'),2)+'%'}</td><td>${avg('humedad_grano_pct')===null?'-':fa(avg('humedad_grano_pct'),2)+'%'}</td><td>${fa(avg('temperatura_ambiente_c'),1)}</td><td>${fa(avg('temperatura_grano_c'),1)}</td><td></td><td></td></tr></tfoot></table>`;
 }
 
@@ -3233,8 +3241,8 @@ async function coElegir(id){
     if(mids.length){ const r2 = await sb.from('produccion_bigbag').select('lote_id,mezcla_id').in('mezcla_id', mids); ((r2 && r2.data) || []).forEach(x => { (lotesMez[x.mezcla_id] = lotesMez[x.mezcla_id] || []).push(x.lote_id); }); }
     if(CORR.id !== id) return;
     const n = v => (v === null || v === undefined || v === '') ? '-' : v;
-    elbb.innerHTML = rows.length ? `<table><thead><tr><th>Nº</th><th>Fecha</th><th>Hora</th><th>Turno</th><th>Pureza</th><th>Hum.</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th><th></th></tr></thead><tbody>
-      ${rows.map(b => `<tr><td>${mpEsc(b.nro_bigbag)}${b.mezcla_id ? ' <span class="badge off" title="' + mpEsc((lotesMez[b.mezcla_id] || []).join(' + ')) + '">mezcla</span>' : ''}</td><td>${fmtDate(b.fecha)}</td><td>${b.hora ? String(b.hora).slice(0,5) : '-'}</td><td>${mpEsc(b.turno)}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado || '-')}</td><td>${mpEsc(b.observaciones || '')}</td>
+    elbb.innerHTML = rows.length ? `<table><thead><tr><th>Nº</th><th>Fecha</th><th>Hora</th><th>Turno</th>${PC().calBb ? '<th>Calidad</th>' : ''}<th>Pureza</th><th>Hum.</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th><th></th></tr></thead><tbody>
+      ${rows.map(b => `<tr><td>${mpEsc(b.nro_bigbag)}${b.mezcla_id ? ' <span class="badge off" title="' + mpEsc((lotesMez[b.mezcla_id] || []).join(' + ')) + '">mezcla</span>' : ''}</td><td>${fmtDate(b.fecha)}</td><td>${b.hora ? String(b.hora).slice(0,5) : '-'}</td><td>${mpEsc(b.turno)}</td>${PC().calBb ? '<td>' + bbCalidadHTML(b, l) + '</td>' : ''}<td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado || '-')}</td><td>${mpEsc(b.observaciones || '')}</td>
         <td style="white-space:nowrap"><button class="btn secondary" type="button" onclick="coEditar(${Number(b.id)})">Editar</button> <button class="btn danger" type="button" onclick="coBorrarBb(${Number(b.id)})">Borrar</button></td></tr>`).join('')}
     </tbody></table>` : '<div class="empty">Este lote no tiene bigbags.</div>';
     CORR.mez = lotesMez;
@@ -3292,6 +3300,7 @@ function coEditar(id){
         <div><label>Humedad del grano %</label><input name="humedad_grano_pct" type="number" step="0.01" value="${v(b.humedad_grano_pct)}"></div>
         <div><label>Temp. ambiente °C</label><input name="temperatura_ambiente_c" type="number" step="0.1" value="${v(b.temperatura_ambiente_c)}"></div>
         <div><label>Temp. del grano °C</label><input name="temperatura_grano_c" type="number" step="0.1" value="${v(b.temperatura_grano_c)}"></div>
+        ${PC().calBb ? `<div><label>Calidad del bigbag</label><select name="calidad"><option value="">Igual al lote</option>${PC().catsLote.map(c => `<option${b.calidad === c ? ' selected' : ''}>${c}</option>`).join('')}</select></div>` : ''}
         <div><label>Encargado</label><input name="encargado" value="${v(b.encargado)}"></div>
       </div>
       <label>Observaciones</label><textarea name="observaciones">${v(b.observaciones)}</textarea>
