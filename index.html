@@ -902,7 +902,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v55';
+const APP_VERSION = 'v56';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -941,8 +941,8 @@ const PROD_CFG = {
   },
   sesamo: {
     tipos:['Organico','Posible Traza','Convencional','Trazas'], destinos:['Warrants','Sin Warrants','Semillero'],
-    cats:['Organico','Posible Traza','Convencional','Trazas'],
-    catsLote:['Organico','Organico BNN','Convencional UE','Convencional ROW','Aceitero premium','Aceitero común','Posible Traza','Convencional','Trazas'],
+    cats:['Organico','Convencional UE','Convencional ROW','Aceitero premium','Aceitero común'],
+    catsLote:['Organico','Convencional UE','Convencional ROW','Aceitero premium','Aceitero común'],
     desc:[{k:'pct_impureza',l:'% Impureza',cero:true},{k:'pct_contraste',l:'% Contraste',cero:true},{k:'pct_danos_mecanicos',l:'% Daños mecánicos',cero:true}],
     imp:['pct_impureza'], hum:false, lab:false, variedad:true, marcado:true
   }
