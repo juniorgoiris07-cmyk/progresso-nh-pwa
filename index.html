@@ -902,7 +902,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v57';
+const APP_VERSION = 'v59';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -944,7 +944,7 @@ const PROD_CFG = {
     cats:['Organico','Convencional UE','Convencional ROW','Aceitero premium','Aceitero común'],
     catsLote:['Organico','Convencional UE','Convencional ROW','Aceitero premium','Aceitero común'],
     desc:[{k:'pct_impureza',l:'% Impureza',cero:true},{k:'pct_contraste',l:'% Contraste',cero:true},{k:'pct_danos_mecanicos',l:'% Daños mecánicos',cero:true}],
-    imp:['pct_impureza'], hum:false, lab:false, variedad:true, marcado:true, calBb:true
+    imp:['pct_impureza'], hum:false, lab:false, variedad:true, marcado:true, calBb:true, ctPallet:true
   }
 };
 const PC = () => PROD_CFG[PROD || 'chia'];
@@ -1611,6 +1611,8 @@ function dashSilos(libres){
     : '<div class="empty">No hay stock sin asignar en los silos.</div>';
   document.getElementById('dcSilos').innerHTML = `<div class="dcard-h"><div><h3>Stock sin asignar por silo</h3><div class="dsub">${todas.length ? (PC().lab ? dT(tot - sc) + ' t caladas · ' + dT(sc) + ' t sin calar' : dT(tot) + ' t en ' + todas.length + ' silo' + (todas.length===1?'':'s')) + ' · tocá un silo para armar un lote' : 'Todo el stock está asignado'}</div></div>${todas.length > 8 ? `<button type="button" class="dlink" onclick="DASH.todosSilos=!DASH.todosSilos;dashSilos(DASH.rec.filter(r => dSaldo(r) > 0.5))">${DASH.todosSilos ? 'Ver menos' : 'Ver los ' + todas.length}</button>` : ''}</div><div class="dbars canim">${cuerpo}</div>`;
 }
+
+function resumenAbrirLote(id){ RES_ABRIR = id; goTab('resumen'); }
 
 function dashGraficos(anim, solo){
   const quiere = k => !solo || solo.indexOf(k) >= 0;
@@ -2417,7 +2419,7 @@ function mpExport(){
   xlsxDescargar('recepcion_materia_prima_' + hoyLocal() + '.xlsx', [{ nombre:'Recepciones', titulo:'Planilla de recepciones · Progresso NH S.A.', sub:'Exportado el ' + xlTs() + ' · ' + fs.length + ' filas' + (filtros ? ' · ' + filtros : '') + ' · Humedad y descuento total en la fila de totales = promedio', cols, filas, tot, fijas:1 }]);
 }
 
-let RES_ROWS = [], RES_LAB = {};
+let RES_ROWS = [], RES_LAB = {}, RES_ABRIR = null, FICHA = null;
 async function resumenExport(){
   if(!RES_ROWS.length){ toast('No hay lotes para exportar', 'err'); return; }
   const { data: cie } = await sb.from('lote_cierre').select('*');
@@ -2788,6 +2790,7 @@ async function renderBigbag(){
         <div><label>Turno *</label><select name="turno" required><option value="DIA">Día (06-18h)</option><option value="NOCHE">Noche (18-06h)</option></select></div>
         <div><label>Nº Bigbag (vacío = automático)</label><input name="nro_bigbag" type="number"></div>
         <div><label>Pureza %</label><input name="pureza_pct" type="number" step="0.01"></div>
+        ${PC().ctPallet ? '<div><label>Contraste del pallet %</label><input name="contraste_pallet_pct" type="number" step="0.01" min="0" max="100"></div>' : ''}
         <div><label>Humedad del grano %</label><input name="humedad_grano_pct" type="number" step="0.01"></div>
         <div><label>Temp. ambiente °C</label><input name="temperatura_ambiente_c" type="number" step="0.1"></div>
         <div><label>Temp. del grano °C</label><input name="temperatura_grano_c" type="number" step="0.1"></div>
@@ -2836,9 +2839,10 @@ async function _submitBigbag(e){
   const payload = Object.fromEntries(new FormData(e.target).entries());
   if(!payload.nro_bigbag) delete payload.nro_bigbag; else payload.nro_bigbag = Number(payload.nro_bigbag);
   if(!payload.hora) delete payload.hora;
-  ['pureza_pct','humedad_grano_pct','temperatura_ambiente_c','temperatura_grano_c'].forEach(k=>{
+  ['pureza_pct','humedad_grano_pct','temperatura_ambiente_c','temperatura_grano_c'].concat(PC().ctPallet ? ['contraste_pallet_pct'] : []).forEach(k=>{
     payload[k] = payload[k] === '' ? null : Number(payload[k]);
   });
+  if(PC().ctPallet && payload.contraste_pallet_pct != null && (payload.contraste_pallet_pct < 0 || payload.contraste_pallet_pct > 100)){ toast('El contraste del pallet tiene que estar entre 0 y 100 %', 'err'); return; }
   payload.encargado = payload.encargado || usuario || null;
   if(PC().calBb) payload.calidad = payload.calidad || null; else delete payload.calidad;
 
@@ -2895,9 +2899,9 @@ async function loadBigbagList(){
   const avg = k => { const v = filas.map(f => f.b[k]).filter(x => x!==null && x!==undefined && x!=='').map(Number); return v.length ? v.reduce((a,x)=>a+x,0)/v.length : null; };
   const fa = (v,d) => v===null ? '-' : v.toFixed(d).replace('.',',');
   const lt = id => (window.bbLotes||{})[id] || {};
-  el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Hora</th><th>Turno</th><th>Producto</th><th>Lote</th><th>Calidad</th><th>Nº Bigbag</th><th>Pureza</th><th>Hum. grano</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th></tr></thead><tbody>
-    ${filas.map(f => { const b = f.b, l = lt(b.lote_id); return `<tr><td>${fmtDate(b.fecha)}</td><td>${hh(b.hora)}</td><td>${mpEsc(b.turno)}</td><td>${mpEsc(l.producto||'-')}</td><td>${f.lotes.map(mpEsc).join(' + ')}</td><td>${bbCalidadHTML(b, l)}</td><td>${f.nros.map(mpEsc).join(' · ')}</td><td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado||'-')}</td><td>${mpEsc(b.observaciones||'')}</td></tr>`; }).join('')}
-  </tbody><tfoot><tr style="font-weight:700;background:var(--surface-2)"><td colspan="6">PROMEDIO ${g ? 'de la mezcla' : 'del lote'} (${filas.length} bigbag${filas.length===1?'':'s'})</td><td></td><td>${avg('pureza_pct')===null?'-':fa(avg('pureza_pct'),2)+'%'}</td><td>${avg('humedad_grano_pct')===null?'-':fa(avg('humedad_grano_pct'),2)+'%'}</td><td>${fa(avg('temperatura_ambiente_c'),1)}</td><td>${fa(avg('temperatura_grano_c'),1)}</td><td></td><td></td></tr></tfoot></table>`;
+  el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Hora</th><th>Turno</th><th>Producto</th><th>Lote</th><th>Calidad</th><th>Nº Bigbag</th><th>Pureza</th>${PC().ctPallet ? '<th>Contraste pallet</th>' : ''}<th>Hum. grano</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th></tr></thead><tbody>
+    ${filas.map(f => { const b = f.b, l = lt(b.lote_id); return `<tr><td>${fmtDate(b.fecha)}</td><td>${hh(b.hora)}</td><td>${mpEsc(b.turno)}</td><td>${mpEsc(l.producto||'-')}</td><td>${f.lotes.map(mpEsc).join(' + ')}</td><td>${bbCalidadHTML(b, l)}</td><td>${f.nros.map(mpEsc).join(' · ')}</td><td>${fmtPct(b.pureza_pct)}</td>${PC().ctPallet ? '<td>' + fmtPct(b.contraste_pallet_pct) + '</td>' : ''}<td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado||'-')}</td><td>${mpEsc(b.observaciones||'')}</td></tr>`; }).join('')}
+  </tbody><tfoot><tr style="font-weight:700;background:var(--surface-2)"><td colspan="6">PROMEDIO ${g ? 'de la mezcla' : 'del lote'} (${filas.length} bigbag${filas.length===1?'':'s'})</td><td></td><td>${avg('pureza_pct')===null?'-':fa(avg('pureza_pct'),2)+'%'}</td>${PC().ctPallet ? '<td>' + (avg('contraste_pallet_pct')===null?'-':fa(avg('contraste_pallet_pct'),2)+'%') + '</td>' : ''}<td>${avg('humedad_grano_pct')===null?'-':fa(avg('humedad_grano_pct'),2)+'%'}</td><td>${fa(avg('temperatura_ambiente_c'),1)}</td><td>${fa(avg('temperatura_grano_c'),1)}</td><td></td><td></td></tr></tfoot></table>`;
 }
 
 
@@ -3161,7 +3165,7 @@ async function _cerrarLoteFinal(){
 async function renderResumen(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card"><div class="res-h"><h2>${ICONS.resumen} Resumen de producción</h2><button class="btn secondary" type="button" onclick="resumenExport()">Exportar a Excel</button></div>
-  <div id="resumenBody"><div class="empty">Cargando...</div></div></div>`;
+  <div class="mez-aviso" style="margin:8px 0">Tocá un lote para ver su ficha completa.</div><div id="resumenBody"><div class="empty">Cargando...</div></div></div>`;
 
   const { data, error } = await sb.from('v_resumen_lotes').select('*').order('fecha_creacion',{ascending:false});
   const el = document.getElementById('resumenBody');
@@ -3180,9 +3184,174 @@ async function renderResumen(){
     <div class="stat"><div class="n">${fmtKg(totalMp)}</div><div class="l">MP asignada</div></div>
     <div class="stat"><div class="n">${fmtKg(totalProc)}</div><div class="l">Procesado</div></div>
   </div>
-  <div class="table-wrap"><table><thead><tr><th>Lote</th><th>Cód. lab.</th><th>Producto</th><th>Estado</th><th>Cargas MP</th><th>Kg MP</th><th>Bigbags</th><th>Rendimiento</th></tr></thead><tbody>
-    ${data.map(r => `<tr><td>${mpEsc(r.lote_id)}</td><td>${mpEsc(labDe[r.lote_id]||'-')}</td><td>${mpEsc(r.producto)}</td><td><span class="badge ${r.estado==='EN_PROCESO'?'warn':'ok'}">${r.estado}</span></td><td>${r.cantidad_cargas_mp}</td><td>${fmtKg(r.kg_mp_asignado)}</td><td>${r.cantidad_bigbags}</td><td>${fmtPct(r.rendimiento_pct)}</td></tr>`).join('')}
+  <div class="table-wrap"><table><thead><tr><th>Lote</th><th>Cód. lab.</th><th>Producto</th><th>Estado</th><th>Cargas MP</th><th>Kg MP</th><th>Bigbags</th><th>Rendimiento</th><th></th></tr></thead><tbody>
+    ${data.map(r => `<tr data-lote="${mpEsc(r.lote_id)}" onclick="resumenLote(this.dataset.lote)" style="cursor:pointer"><td><b style="text-decoration:underline">${mpEsc(r.lote_id)}</b></td><td>${mpEsc(labDe[r.lote_id]||'-')}</td><td>${mpEsc(r.producto)}</td><td><span class="badge ${r.estado==='EN_PROCESO'?'warn':'ok'}">${r.estado}</span></td><td>${r.cantidad_cargas_mp}</td><td>${fmtKg(r.kg_mp_asignado)}</td><td>${r.cantidad_bigbags}</td><td>${fmtPct(r.rendimiento_pct)}</td><td><button class="btn secondary" type="button" data-lote="${mpEsc(r.lote_id)}" onclick="event.stopPropagation();resumenLote(this.dataset.lote)">Ver ficha</button></td></tr>`).join('')}
   </tbody></table></div>`;
+  if(RES_ABRIR){ const i = RES_ABRIR; RES_ABRIR = null; resumenLote(i); }
+}
+
+/* ==============================================================================
+   ==  FICHA DE LOTE
+   ==  Todo lo de un lote: cargas de MP, resultados por bigbag, turnos y cierre.
+   ============================================================================== */
+async function resumenLote(id){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="card"><div class="res-h"><h2>${ICONS.resumen} Ficha del lote ${mpEsc(id)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" type="button" onclick="renderResumen()">Volver al resumen</button><button class="btn secondary" type="button" onclick="fichaExport()">Exportar a Excel</button></div></div><div id="fichaBody"><div class="empty">Cargando...</div></div></div><div id="fichaRest"></div>`;
+  const [lt, rs, ci, bb, tn, lr] = await Promise.all([
+    sb.from('lotes').select('*').eq('id', id).maybeSingle(),
+    sb.from('v_resumen_lotes').select('*').eq('lote_id', id).maybeSingle(),
+    sb.from('lote_cierre').select('*').eq('lote_id', id).maybeSingle(),
+    sb.from('produccion_bigbag').select('*').eq('lote_id', id).order('nro_bigbag'),
+    sb.from('lote_turno_cierre').select('*').eq('lote_id', id).order('fecha'),
+    sb.from('lote_recepcion').select('*').eq('lote_id', id).order('asignado_en')
+  ]);
+  const el = document.getElementById('fichaBody'); if(!el) return;
+  const err = [lt, rs, ci, bb, tn, lr].find(x => x && x.error);
+  if(err){ el.innerHTML = `<div class="empty">Error: ${mpEsc(err.error.message)}</div>`; return; }
+  const l = lt.data; if(!l){ el.innerHTML = '<div class="empty">No se encontró el lote.</div>'; return; }
+  const ids = (lr.data || []).map(x => x.recepcion_mp_id);
+  const rc = ids.length ? await sb.from('recepcion_mp').select('*, silos_bolsa(numero)').in('id', ids) : { data:[] };
+  const rcPor = {}; ((rc && rc.data) || []).forEach(r => { rcPor[r.id] = r; });
+  const cargas = (lr.data || []).map(x => ({ x, r:rcPor[x.recepcion_mp_id] || {} }));
+  const mids = Array.from(new Set((bb.data || []).map(b => b.mezcla_id).filter(Boolean)));
+  let mezLotes = [];
+  if(mids.length){ const r2 = await sb.from('produccion_bigbag').select('lote_id,mezcla_id').in('mezcla_id', mids); mezLotes = Array.from(new Set(((r2 && r2.data) || []).map(x => x.lote_id).filter(x => x !== id))).sort((a, b) => String(a).localeCompare(String(b), 'es', {numeric:true})); }
+  FICHA = { l, rs:rs.data || {}, ci:ci.data || null, bb:bb.data || [], tn:tn.data || [], cargas, mezLotes };
+  fichaPintar();
+}
+/* ---- cálculos de la ficha: se usan igual en pantalla y en el Excel ---- */
+function fichaCalc(){
+  const { l, rs, ci, bb, tn, cargas, mezLotes } = FICHA, ct = !!PC().ctPallet, num = v => v == null || v === '' ? null : Number(v);
+  const stats = (arr) => { const v = arr.filter(x => x != null && !isNaN(x)); return v.length ? { n:v.length, avg:v.reduce((a, x) => a + x, 0) / v.length, min:Math.min(...v), max:Math.max(...v) } : null; };
+  const kgUsadoDe = c => c.x.kg_liquido_usado != null ? Number(c.x.kg_liquido_usado) : num(c.r.kg_liquido_carga);
+  const kgMp = cargas.reduce((a, c) => a + (kgUsadoDe(c) || 0), 0);
+  // producto terminado (bigbags)
+  const pt = [{ t:'Pureza', u:'%', d:2, s:stats(bb.map(b => num(b.pureza_pct))) }];
+  if(ct) pt.push({ t:'Contraste del pallet', u:'%', d:2, s:stats(bb.map(b => num(b.contraste_pallet_pct))) });
+  pt.push({ t:'Humedad del grano', u:'%', d:2, s:stats(bb.map(b => num(b.humedad_grano_pct))) }, { t:'Temp. ambiente', u:'°C', d:1, s:stats(bb.map(b => num(b.temperatura_ambiente_c))) }, { t:'Temp. del grano', u:'°C', d:1, s:stats(bb.map(b => num(b.temperatura_grano_c))) });
+  // calidad producida
+  const porCal = {}; bb.forEach(b => { const c = (PC().calBb && b.calidad) || l.categoria || 'Sin calidad'; porCal[c] = (porCal[c] || 0) + 1; });
+  const cal = Object.keys(porCal).map(c => ({ c, n:porCal[c], pct:bb.length ? porCal[c] / bb.length * 100 : 0, rep:!!(l.categoria && c !== l.categoria) })).sort((a, b) => b.n - a.n);
+  // materia prima: promedios ponderados por kg usados
+  const campos = [{ k:'pct_humedad', t:'Humedad' }].concat(PC().desc.map(x => ({ k:x.k, t:x.l.replace(/^% ?/, '') })), [{ k:'pct_total_descuento', t:'Descuento total' }]);
+  const mp = campos.map(f => { let pe = 0, w = 0, mn = null, mx = null, n = 0; cargas.forEach(c => { const v = num(c.r[f.k]); if(v == null) return; const k = kgUsadoDe(c) || 0; pe += v * k; w += k; n++; mn = mn == null ? v : Math.min(mn, v); mx = mx == null ? v : Math.max(mx, v); }); return { t:f.t, k:f.k, n, avg:w > 0 ? pe / w : null, min:mn, max:mx }; }).filter(x => x.n > 0);
+  const agrup = (fn) => { const o = {}; cargas.forEach(c => { const key = fn(c) || '-'; const r = o[key] = o[key] || { n:0, kg:0 }; r.n++; r.kg += kgUsadoDe(c) || 0; }); return Object.keys(o).map(k => ({ k, n:o[k].n, kg:o[k].kg, pct:kgMp > 0 ? o[k].kg / kgMp * 100 : 0 })).sort((a, b) => b.kg - a.kg); };
+  const porProv = agrup(c => c.r.proveedor), porSilo = agrup(c => c.r.silos_bolsa && c.r.silos_bolsa.numero), porVar = PC().variedad ? agrup(c => c.r.variedad) : [];
+  // producción por día (bigbags + turnos)
+  const dias = {}; const dd = f => dias[f] = dias[f] || { f, bb:0, kg:0, mer:0, turnos:0 };
+  bb.forEach(b => { dd(b.fecha).bb++; }); tn.forEach(t => { const d = dd(t.fecha); d.kg += Number(t.kg_reales_procesados || 0); d.mer += Number(t.mermas_kg || 0); d.turnos++; });
+  const porDia = Object.values(dias).sort((a, b) => String(a.f).localeCompare(String(b.f)));
+  const kgTn = tn.reduce((a, t) => a + Number(t.kg_reales_procesados || 0), 0), merTn = tn.reduce((a, t) => a + Number(t.mermas_kg || 0), 0);
+  const fechasBb = bb.map(b => b.fecha).filter(Boolean).sort();
+  const diasProc = (() => { const ini = new Date(String(l.fecha_creacion).slice(0, 10) + 'T00:00:00'), fin = l.estado === 'CERRADO' && l.fecha_cierre ? new Date(String(l.fecha_cierre).slice(0, 10) + 'T00:00:00') : new Date(hoyLocal() + 'T00:00:00'); return Math.max(0, Math.round((fin - ini) / 86400000)); })();
+  const cMp = mp.find(x => x.k === 'pct_contraste'), cPt = pt.find(x => x.t === 'Contraste del pallet');
+  return { ct, num, kgUsadoDe, kgMp, pt, cal, mp, porProv, porSilo, porVar, porDia, kgTn, merTn, fechasBb, diasProc, cMp, cPt };
+}
+function fichaPintar(){
+  const el = document.getElementById('fichaBody'); if(!el || !FICHA) return;
+  const { l, rs, ci, bb, tn, cargas, mezLotes } = FICHA, c = fichaCalc(), cerr = l.estado === 'CERRADO';
+  const fm = (v, d) => v == null ? '-' : Number(v).toLocaleString('es-PY', { minimumFractionDigits:d, maximumFractionDigits:d });
+  const kv = (a, b) => `<tr><td style="font-weight:700;white-space:normal;width:42%;vertical-align:top">${a}</td><td style="white-space:normal;overflow-wrap:anywhere;vertical-align:top">${b}</td></tr>`;
+  const tabla = (head, filas, pie) => `<div class="table-wrap"><table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${filas.join('')}${pie || ''}</tbody></table></div>`;
+  const vacio = t => `<div class="empty">${t}</div>`;
+  const ult = c.fechasBb.length ? fmtDate(c.fechasBb[c.fechasBb.length - 1]) : '-', prim = c.fechasBb.length ? fmtDate(c.fechasBb[0]) : '-';
+  const cmp = (c.ct && c.cMp && c.cPt && c.cPt.s) ? `<div class="mez-aviso" style="margin-top:10px">Contraste: la materia prima entró con <b>${fm(c.cMp.avg, 2)}%</b> (promedio ponderado por kg) y los pallets salieron con <b>${fm(c.cPt.s.avg, 2)}%</b> (promedio de ${c.cPt.s.n} bigbag${c.cPt.s.n === 1 ? '' : 's'}).</div>` : '';
+  el.innerHTML = `
+    <div class="table-wrap"><table><tbody>
+      ${kv('Lote', mpEsc(l.id) + (l.codigo_lab ? ' · ' + mpEsc(l.codigo_lab) : ''))}
+      ${kv('Producto', mpEsc(l.producto || '-'))}
+      ${kv('Calidad del lote', mpEsc(l.categoria || '-'))}
+      ${kv('Estado', `<span class="badge ${cerr ? 'ok' : 'warn'}">${cerr ? 'CERRADO' : 'EN PROCESO'}</span>`)}
+      ${kv('Responsable', mpEsc(l.responsable || '-'))}
+      ${kv('Creado', fmtDate(l.fecha_creacion))}
+      ${cerr ? kv('Cerrado', fmtDate(l.fecha_cierre)) : ''}
+      ${kv(cerr ? 'Duración' : 'Días en proceso', c.diasProc + (c.diasProc === 1 ? ' día' : ' días'))}
+      ${kv('Primer / último bigbag', bb.length ? prim + ' / ' + ult : '-')}
+      ${mezLotes.length ? kv('Mezclado con', mezLotes.map(mpEsc).join(' + ')) : ''}
+    </tbody></table></div>
+    <div class="stat-grid" style="margin-top:12px">
+      <div class="stat"><div class="n">${fmtKg(c.kgMp)}</div><div class="l">MP asignada · ${cargas.length} carga${cargas.length === 1 ? '' : 's'}</div></div>
+      <div class="stat"><div class="n">${bb.length}</div><div class="l">Bigbags</div></div>
+      <div class="stat"><div class="n">${fmtKg(rs.kg_procesado_total != null ? rs.kg_procesado_total : c.kgTn)}</div><div class="l">Procesado</div></div>
+      <div class="stat"><div class="n">${fmtKg(rs.mermas_totales_kg != null ? rs.mermas_totales_kg : c.merTn)}</div><div class="l">Mermas</div></div>
+      <div class="stat"><div class="n">${fmtPct(rs.rendimiento_pct)}</div><div class="l">Rendimiento</div></div>
+    </div>${cmp}`;
+  const rest = document.getElementById('fichaRest'); if(!rest) return;
+  rest.innerHTML = `
+    <div class="card"><h2>Producto terminado · resultados de los bigbags</h2>
+      ${bb.length ? tabla(['Parámetro', 'Promedio', 'Mínimo', 'Máximo', 'Medidos'], c.pt.map(r => `<tr><td><b>${r.t}</b></td><td>${r.s ? fm(r.s.avg, r.d) + ' ' + r.u : '-'}</td><td>${r.s ? fm(r.s.min, r.d) : '-'}</td><td>${r.s ? fm(r.s.max, r.d) : '-'}</td><td>${r.s ? r.s.n + ' de ' + bb.length : '0 de ' + bb.length}</td></tr>`)) : vacio('Este lote todavía no tiene bigbags.')}
+      ${bb.length && PC().calBb ? `<h3 style="margin:14px 0 6px;font-size:14px">Calidad de lo producido</h3>` + tabla(['Calidad', 'Bigbags', '% del total'], c.cal.map(r => `<tr><td>${mpEsc(r.c)}${r.rep ? ' <span class="badge warn">reproceso</span>' : ''}</td><td>${r.n}</td><td>${fm(r.pct, 1)}%</td></tr>`)) : ''}
+    </div>
+    <div class="card"><h2>Bigbags del lote (${bb.length})</h2>
+      <div class="table-wrap">${bb.length ? `<table><thead><tr><th>Nº</th><th>Fecha</th><th>Hora</th><th>Turno</th>${PC().calBb ? '<th>Calidad</th>' : ''}<th>Pureza</th>${c.ct ? '<th>Contraste pallet</th>' : ''}<th>Hum. grano</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th></tr></thead><tbody>
+      ${bb.map(b => `<tr><td>${mpEsc(b.nro_bigbag)}${b.mezcla_id ? ' <span class="badge off">mezcla</span>' : ''}</td><td>${fmtDate(b.fecha)}</td><td>${b.hora ? String(b.hora).slice(0, 5) : '-'}</td><td>${mpEsc(b.turno)}</td>${PC().calBb ? '<td>' + bbCalidadHTML(b, l) + '</td>' : ''}<td>${fmtPct(b.pureza_pct)}</td>${c.ct ? '<td>' + fmtPct(b.contraste_pallet_pct) + '</td>' : ''}<td>${fmtPct(b.humedad_grano_pct)}</td><td>${b.temperatura_ambiente_c == null ? '-' : mpEsc(b.temperatura_ambiente_c)}</td><td>${b.temperatura_grano_c == null ? '-' : mpEsc(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado || '-')}</td><td>${mpEsc(b.observaciones || '')}</td></tr>`).join('')}
+      </tbody></table>` : vacio('Sin bigbags.')}</div></div>
+    <div class="card"><h2>Materia prima del lote</h2>
+      ${cargas.length ? `<div class="mez-aviso" style="margin-bottom:8px">Promedios ponderados por los kg usados de cada carga.</div>` + tabla(['Parámetro', 'Promedio', 'Mínimo', 'Máximo'], c.mp.map(r => `<tr><td><b>${mpEsc(r.t)}</b></td><td>${fm(r.avg, 2)}%</td><td>${fm(r.min, 2)}%</td><td>${fm(r.max, 2)}%</td></tr>`)) : vacio('Sin cargas.')}
+      ${cargas.length ? `<h3 style="margin:14px 0 6px;font-size:14px">De dónde viene</h3>` + tabla(['Proveedor', 'Cargas', 'Kg', '%'], c.porProv.map(r => `<tr><td>${mpEsc(r.k)}</td><td>${r.n}</td><td>${fmtKg(r.kg)}</td><td>${fm(r.pct, 1)}%</td></tr>`))
+        + tabla(['Silo', 'Cargas', 'Kg', '%'], c.porSilo.map(r => `<tr><td>${mpEsc(r.k)}</td><td>${r.n}</td><td>${fmtKg(r.kg)}</td><td>${fm(r.pct, 1)}%</td></tr>`))
+        + (c.porVar.length ? tabla(['Variedad', 'Cargas', 'Kg', '%'], c.porVar.map(r => `<tr><td>${mpEsc(r.k)}</td><td>${r.n}</td><td>${fmtKg(r.kg)}</td><td>${fm(r.pct, 1)}%</td></tr>`)) : '') : ''}
+    </div>
+    <div class="card"><h2>Cargas de materia prima (${cargas.length})</h2><div class="table-wrap">${cargas.length ? `<table><thead><tr><th>Remisión</th><th>Fecha</th><th>Proveedor</th><th>Silo</th>${PC().variedad ? '<th>Variedad</th>' : ''}<th>Kg líquidos usados</th><th>Humedad</th><th>Desc. total</th></tr></thead><tbody>
+      ${cargas.map(k => `<tr><td>${mpEsc(k.r.nro_boleta || k.x.recepcion_mp_id)}</td><td>${fmtDate(k.r.fecha)}</td><td>${mpEsc(k.r.proveedor || '-')}</td><td>${mpEsc(k.r.silos_bolsa ? k.r.silos_bolsa.numero : '-')}</td>${PC().variedad ? '<td>' + mpEsc(k.r.variedad || '-') + '</td>' : ''}<td>${c.kgUsadoDe(k) === null ? '-' : fmtKg(c.kgUsadoDe(k))}${k.x.kg_liquido_usado == null ? '' : ' <span class="badge off">parcial</span>'}</td><td>${fmtPct(k.r.pct_humedad)}</td><td>${fmtPct(k.r.pct_total_descuento)}</td></tr>`).join('')}
+    </tbody></table>` : vacio('Sin cargas.')}</div></div>
+    <div class="card"><h2>Producción por día</h2>${c.porDia.length ? tabla(['Fecha', 'Bigbags', 'Turnos ajustados', 'Kg procesados', 'Mermas'], c.porDia.map(d => `<tr><td>${fmtDate(d.f)}</td><td>${d.bb}</td><td>${d.turnos}</td><td>${d.turnos ? fmtKg(d.kg) : '-'}</td><td>${d.turnos ? fmtKg(d.mer) : '-'}</td></tr>`), `<tr style="font-weight:700;background:var(--surface-2)"><td>Total</td><td>${bb.length}</td><td>${tn.length}</td><td>${fmtKg(c.kgTn)}</td><td>${fmtKg(c.merTn)}</td></tr>`) : vacio('Todavía no hay producción registrada.')}</div>
+    <div class="card"><h2>Ajustes de turno (${tn.length})</h2><div class="table-wrap">${tn.length ? `<table><thead><tr><th>Fecha</th><th>Turno</th><th>Kg reales procesados</th><th>Mermas</th><th>Ajustó</th><th>Obs.</th></tr></thead><tbody>
+      ${tn.map(t => `<tr><td>${fmtDate(t.fecha)}</td><td>${mpEsc(t.turno)}</td><td>${fmtKg(t.kg_reales_procesados)}</td><td>${fmtKg(t.mermas_kg)}</td><td>${mpEsc(t.ajustado_por || '-')}</td><td>${mpEsc(t.observaciones || '')}</td></tr>`).join('')}
+      <tr style="font-weight:700;background:var(--surface-2)"><td colspan="2">Total</td><td>${fmtKg(c.kgTn)}</td><td>${fmtKg(c.merTn)}</td><td></td><td></td></tr>
+    </tbody></table>` : vacio('Sin ajustes de turno.')}</div></div>
+    <div class="card"><h2>Cierre del lote</h2>${cerr && ci ? `<div class="table-wrap"><table><tbody>
+      ${kv('Kg ingresado MP', fmtKg(ci.kg_ingresado_mp))}${kv('Kg procesado', fmtKg(ci.kg_procesado_total))}${kv('Mermas', fmtKg(ci.mermas_totales_kg))}${kv('Rendimiento', fmtPct(ci.rendimiento_pct))}
+      ${kv('Análisis de la MP', mpEsc(ci.analisis_mp_resumen || '-'))}${kv('Análisis del producto terminado', mpEsc(ci.analisis_pt_resumen || '-'))}${kv('Diferencia / observaciones', mpEsc(ci.diferencia_analisis || '-'))}
+      ${kv('Cerrado por', mpEsc(ci.cerrado_por || '-') + (ci.cerrado_en ? ' · ' + fmtDate(String(ci.cerrado_en).slice(0, 10)) : ''))}
+    </tbody></table></div>` : vacio(cerr ? 'El lote figura cerrado pero no tiene datos de cierre.' : 'El lote sigue en proceso. El cierre aparece cuando se cierre.')}</div>
+  `;
+}
+function fichaExport(){
+  if(!FICHA){ toast('Esperá que cargue la ficha', 'err'); return; }
+  const { l, rs, ci, bb, tn, cargas, mezLotes } = FICHA, c = fichaCalc(), ct = c.ct, cerr = l.estado === 'CERRADO', num = c.num, kgUsadoDe = c.kgUsadoDe;
+  const pf = v => v == null ? '-' : Number(v).toLocaleString('es-PY', { maximumFractionDigits:2 });
+  const sub = 'Exportado el ' + xlTs();
+  // hoja 1: datos del lote
+  const datos = [['Lote', l.id], ['Código laboratorio', l.codigo_lab || '-'], ['Producto', l.producto || '-'], ['Calidad del lote', l.categoria || '-'], ['Estado', cerr ? 'Cerrado' : 'En proceso'], ['Responsable', l.responsable || '-'], ['Creado', fmtDate(l.fecha_creacion)], ['Cerrado', cerr ? fmtDate(l.fecha_cierre) : '-'], [cerr ? 'Duración (días)' : 'Días en proceso', String(c.diasProc)], ['Mezclado con', mezLotes.join(' + ') || '-'],
+    ['Kg MP asignada', pf(c.kgMp)], ['Cargas de MP', String(cargas.length)], ['Bigbags', String(bb.length)], ['Kg procesado', pf(rs.kg_procesado_total != null ? rs.kg_procesado_total : c.kgTn)], ['Mermas (kg)', pf(rs.mermas_totales_kg != null ? rs.mermas_totales_kg : c.merTn)], ['Rendimiento %', pf(rs.rendimiento_pct)]];
+  if(ct && c.cMp && c.cPt && c.cPt.s) datos.push(['Contraste de la MP (ponderado) %', pf(c.cMp.avg)], ['Contraste de los pallets (promedio) %', pf(c.cPt.s.avg)]);
+  if(ci) datos.push(['Análisis de la MP', ci.analisis_mp_resumen || '-'], ['Análisis del producto terminado', ci.analisis_pt_resumen || '-'], ['Diferencia / observaciones', ci.diferencia_analisis || '-'], ['Cerrado por', ci.cerrado_por || '-']);
+  // hoja 2: estadísticas
+  const colsE = [{t:'Sección',w:24},{t:'Parámetro',w:26},{t:'Promedio',k:'n2',w:12},{t:'Mínimo',k:'n2',w:12},{t:'Máximo',k:'n2',w:12},{t:'Medidos / cargas',k:'n0',w:16}];
+  const filasE = [];
+  c.pt.forEach(r => filasE.push(['Producto terminado', r.t + ' (' + r.u + ')', r.s ? r.s.avg : null, r.s ? r.s.min : null, r.s ? r.s.max : null, r.s ? r.s.n : 0]));
+  c.mp.forEach(r => filasE.push(['Materia prima (ponderado)', r.t + ' (%)', r.avg, r.min, r.max, r.n]));
+  if(PC().calBb) c.cal.forEach(r => filasE.push(['Calidad producida', r.c + (r.rep ? ' (reproceso)' : '') + ' · % del total', r.pct, null, null, r.n]));
+  c.porProv.forEach(r => filasE.push(['MP por proveedor', r.k + ' · kg', r.kg, null, null, r.n]));
+  c.porSilo.forEach(r => filasE.push(['MP por silo', r.k + ' · kg', r.kg, null, null, r.n]));
+  c.porVar.forEach(r => filasE.push(['MP por variedad', r.k + ' · kg', r.kg, null, null, r.n]));
+  // hoja 3: bigbags
+  const colsB = [{t:'Nº Bigbag',k:'n0',w:10},{t:'Fecha',k:'f',w:12},{t:'Hora',w:8},{t:'Turno',w:9}].concat(PC().calBb ? [{t:'Calidad',w:18}] : [], [{t:'Pureza %',k:'n2',w:10}], ct ? [{t:'Contraste pallet %',k:'n2',w:16}] : [], [{t:'Humedad grano %',k:'n2',w:15},{t:'Temp. ambiente °C',k:'n1',w:15},{t:'Temp. grano °C',k:'n1',w:14},{t:'Encargado',w:16},{t:'Observaciones',w:36}]);
+  const filasB = bb.map(b => [num(b.nro_bigbag), b.fecha, b.hora ? String(b.hora).slice(0, 5) : '', b.turno].concat(PC().calBb ? [b.calidad || l.categoria || ''] : [], [num(b.pureza_pct)], ct ? [num(b.contraste_pallet_pct)] : [], [num(b.humedad_grano_pct), num(b.temperatura_ambiente_c), num(b.temperatura_grano_c), b.encargado || '', b.observaciones || '']));
+  const totB = colsB.map(() => null); totB[0] = 'Promedio · ' + bb.length + ' bigbag' + (bb.length === 1 ? '' : 's');
+  const iP = colsB.findIndex(x => x.t === 'Pureza %'), av = k => { const r = c.pt.find(x => x.t === k); return r && r.s ? r.s.avg : null; };
+  totB[iP] = av('Pureza'); if(ct) totB[iP + 1] = av('Contraste del pallet'); totB[iP + (ct ? 2 : 1)] = av('Humedad del grano'); totB[iP + (ct ? 3 : 2)] = av('Temp. ambiente'); totB[iP + (ct ? 4 : 3)] = av('Temp. del grano');
+  // hoja 4: cargas
+  const colsC = [{t:'Remisión',w:14},{t:'Fecha',k:'f',w:12},{t:'Proveedor',w:28},{t:'Silo',w:10}].concat(PC().variedad ? [{t:'Variedad',w:14}] : [], [{t:'Kg líquidos usados',k:'n0',w:17},{t:'Uso',w:10},{t:'Humedad %',k:'n1',w:11},{t:'Desc. total %',k:'n2',w:13}]);
+  const filasC = cargas.map(k => [k.r.nro_boleta || k.x.recepcion_mp_id, k.r.fecha, k.r.proveedor || '', k.r.silos_bolsa ? k.r.silos_bolsa.numero : ''].concat(PC().variedad ? [k.r.variedad || ''] : [], [kgUsadoDe(k), k.x.kg_liquido_usado != null ? 'Parcial' : 'Completa', num(k.r.pct_humedad), num(k.r.pct_total_descuento)]));
+  const totC = colsC.map(() => null); totC[0] = 'Total · ' + cargas.length + ' carga' + (cargas.length === 1 ? '' : 's'); totC[PC().variedad ? 5 : 4] = filasC.reduce((a, f) => a + (f[PC().variedad ? 5 : 4] || 0), 0);
+  // hoja 5: por día
+  const colsD = [{t:'Fecha',k:'f',w:12},{t:'Bigbags',k:'n0',w:10},{t:'Turnos ajustados',k:'n0',w:16},{t:'Kg procesados',k:'n0',w:15},{t:'Mermas (kg)',k:'n0',w:13}];
+  const filasD = c.porDia.map(d => [d.f, d.bb, d.turnos, d.turnos ? d.kg : null, d.turnos ? d.mer : null]);
+  const totD = colsD.map(() => null); totD[0] = 'Total'; totD[1] = bb.length; totD[2] = tn.length; totD[3] = c.kgTn; totD[4] = c.merTn;
+  // hoja 6: turnos
+  const colsT = [{t:'Fecha',k:'f',w:12},{t:'Turno',w:9},{t:'Kg reales procesados',k:'n0',w:20},{t:'Mermas (kg)',k:'n0',w:13},{t:'Ajustó',w:18},{t:'Observaciones',w:30}];
+  const filasT = tn.map(t => [t.fecha, t.turno, num(t.kg_reales_procesados), num(t.mermas_kg), t.ajustado_por || '', t.observaciones || '']);
+  const totT = colsT.map(() => null); totT[0] = 'Total'; totT[2] = c.kgTn; totT[3] = c.merTn;
+  xlsxDescargar('ficha_lote_' + String(l.id).replace(/[^A-Za-z0-9_-]/g, '') + '_' + hoyLocal() + '.xlsx', [
+    { nombre:'Resumen del lote', titulo:'Ficha del lote ' + l.id + ' · Progresso NH S.A.', sub, cols:[{t:'Dato',w:34},{t:'Valor',w:70}], filas:datos, fijas:1 },
+    { nombre:'Estadísticas', titulo:'Estadísticas del lote ' + l.id, sub, cols:colsE, filas:filasE, fijas:1 },
+    { nombre:'Bigbags', titulo:'Bigbags del lote ' + l.id, sub, cols:colsB, filas:filasB, tot:totB, fijas:1 },
+    { nombre:'Cargas MP', titulo:'Cargas de materia prima del lote ' + l.id, sub, cols:colsC, filas:filasC, tot:totC, fijas:1 },
+    { nombre:'Por día', titulo:'Producción por día del lote ' + l.id, sub, cols:colsD, filas:filasD, tot:totD, fijas:1 },
+    { nombre:'Turnos', titulo:'Ajustes de turno del lote ' + l.id, sub, cols:colsT, filas:filasT, tot:totT, fijas:1 }
+  ]);
 }
 
 
@@ -3241,8 +3410,8 @@ async function coElegir(id){
     if(mids.length){ const r2 = await sb.from('produccion_bigbag').select('lote_id,mezcla_id').in('mezcla_id', mids); ((r2 && r2.data) || []).forEach(x => { (lotesMez[x.mezcla_id] = lotesMez[x.mezcla_id] || []).push(x.lote_id); }); }
     if(CORR.id !== id) return;
     const n = v => (v === null || v === undefined || v === '') ? '-' : v;
-    elbb.innerHTML = rows.length ? `<table><thead><tr><th>Nº</th><th>Fecha</th><th>Hora</th><th>Turno</th>${PC().calBb ? '<th>Calidad</th>' : ''}<th>Pureza</th><th>Hum.</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th><th></th></tr></thead><tbody>
-      ${rows.map(b => `<tr><td>${mpEsc(b.nro_bigbag)}${b.mezcla_id ? ' <span class="badge off" title="' + mpEsc((lotesMez[b.mezcla_id] || []).join(' + ')) + '">mezcla</span>' : ''}</td><td>${fmtDate(b.fecha)}</td><td>${b.hora ? String(b.hora).slice(0,5) : '-'}</td><td>${mpEsc(b.turno)}</td>${PC().calBb ? '<td>' + bbCalidadHTML(b, l) + '</td>' : ''}<td>${fmtPct(b.pureza_pct)}</td><td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado || '-')}</td><td>${mpEsc(b.observaciones || '')}</td>
+    elbb.innerHTML = rows.length ? `<table><thead><tr><th>Nº</th><th>Fecha</th><th>Hora</th><th>Turno</th>${PC().calBb ? '<th>Calidad</th>' : ''}<th>Pureza</th>${PC().ctPallet ? '<th>Contr. pallet</th>' : ''}<th>Hum.</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th><th></th></tr></thead><tbody>
+      ${rows.map(b => `<tr><td>${mpEsc(b.nro_bigbag)}${b.mezcla_id ? ' <span class="badge off" title="' + mpEsc((lotesMez[b.mezcla_id] || []).join(' + ')) + '">mezcla</span>' : ''}</td><td>${fmtDate(b.fecha)}</td><td>${b.hora ? String(b.hora).slice(0,5) : '-'}</td><td>${mpEsc(b.turno)}</td>${PC().calBb ? '<td>' + bbCalidadHTML(b, l) + '</td>' : ''}<td>${fmtPct(b.pureza_pct)}</td>${PC().ctPallet ? '<td>' + fmtPct(b.contraste_pallet_pct) + '</td>' : ''}<td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado || '-')}</td><td>${mpEsc(b.observaciones || '')}</td>
         <td style="white-space:nowrap"><button class="btn secondary" type="button" onclick="coEditar(${Number(b.id)})">Editar</button> <button class="btn danger" type="button" onclick="coBorrarBb(${Number(b.id)})">Borrar</button></td></tr>`).join('')}
     </tbody></table>` : '<div class="empty">Este lote no tiene bigbags.</div>';
     CORR.mez = lotesMez;
@@ -3297,6 +3466,7 @@ function coEditar(id){
         <div><label>Hora</label><input name="hora" type="time" value="${b.hora ? mpEsc(String(b.hora).slice(0,5)) : ''}"></div>
         <div><label>Turno</label><select name="turno"><option value="DIA"${b.turno === 'DIA' ? ' selected' : ''}>Día</option><option value="NOCHE"${b.turno === 'NOCHE' ? ' selected' : ''}>Noche</option></select></div>
         <div><label>Pureza %</label><input name="pureza_pct" type="number" step="0.01" value="${v(b.pureza_pct)}"></div>
+        ${PC().ctPallet ? `<div><label>Contraste del pallet %</label><input name="contraste_pallet_pct" type="number" step="0.01" min="0" max="100" value="${v(b.contraste_pallet_pct)}"></div>` : ''}
         <div><label>Humedad del grano %</label><input name="humedad_grano_pct" type="number" step="0.01" value="${v(b.humedad_grano_pct)}"></div>
         <div><label>Temp. ambiente °C</label><input name="temperatura_ambiente_c" type="number" step="0.1" value="${v(b.temperatura_ambiente_c)}"></div>
         <div><label>Temp. del grano °C</label><input name="temperatura_grano_c" type="number" step="0.1" value="${v(b.temperatura_grano_c)}"></div>
