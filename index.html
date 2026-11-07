@@ -902,7 +902,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v60';
+const APP_VERSION = 'v61';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -2908,7 +2908,7 @@ async function loadBigbagList(){
 
 /* Edición de un bigbag desde Carga (administrador y operario; solo lotes en proceso). */
 let BBL = {};
-function bbPuedeEditar(){ return miRol === 'admin' || miRol === 'operario'; }
+function bbPuedeEditar(){ return miRol === 'admin' || miRol === 'operario' || miRol === 'laboratorio'; }
 function bbEditar(id){
   const b = BBL[id]; if(!b) return;
   const l = (window.bbLotes || {})[b.lote_id] || {};
