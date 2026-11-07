@@ -623,6 +623,9 @@
   .mez-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--accent);background:#f1ead2;color:var(--accent-dark);border-radius:999px;padding:4px 6px 4px 14px;font-size:13.5px;font-weight:600;min-height:36px;}
   .mez-x{border:0;background:var(--accent);color:#fff;border-radius:50%;width:26px;height:26px;font-size:16px;line-height:1;cursor:pointer;padding:0;}
   .mez-add{width:auto;max-width:100%;min-height:36px;border:1px dashed var(--accent);background:var(--card);color:var(--accent-dark);border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:700;cursor:pointer;}
+  /* Recuadro de edición de bigbag (Carga): solo una luz muy sutil que se desvanece hacia afuera (sin contorno), para distinguirlo del formulario de carga */
+  .card-edit{border-color:transparent;box-shadow:0 0 6px rgba(var(--accent-rgb),.40),0 0 18px rgba(var(--accent-rgb),.22);}
+  .card-edit h2{color:var(--accent-dark);}
   .mez-aviso{background:#f1ead2;border:1px solid var(--accent);color:var(--accent-dark);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;margin:8px 0;}
 
 
@@ -902,7 +905,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v62';
+const APP_VERSION = 'v63';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -2913,7 +2916,7 @@ function bbEditar(id){
   const b = BBL[id]; if(!b) return;
   const l = (window.bbLotes || {})[b.lote_id] || {};
   const v = x => (x === null || x === undefined) ? '' : mpEsc(x);
-  document.getElementById('bbEdit').innerHTML = `<div class="card"><h2>Editar bigbag Nº ${mpEsc(b.nro_bigbag)}</h2>
+  document.getElementById('bbEdit').innerHTML = `<div class="card card-edit"><h2>Editando bigbag Nº ${mpEsc(b.nro_bigbag)} (lote ${mpEsc(b.lote_id)})</h2>
     ${b.mezcla_id ? '<div class="mez-aviso">Es un bigbag de mezcla. Los cambios se aplican en todos los lotes de la mezcla.</div>' : ''}
     <form id="frmBbEdit" data-id="${Number(b.id)}">
       <div class="grid">
