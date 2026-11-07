@@ -902,7 +902,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v61';
+const APP_VERSION = 'v62';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -2906,7 +2906,7 @@ async function loadBigbagList(){
   BBL = {}; data.forEach(b => { BBL[b.id] = b; });
 }
 
-/* Edición de un bigbag desde Carga (administrador y operario; solo lotes en proceso). */
+/* Edición de un bigbag desde Carga (admin, operario y laboratorio; solo lotes en proceso): corregir datos, pasarlo a otro lote o borrarlo. */
 let BBL = {};
 function bbPuedeEditar(){ return miRol === 'admin' || miRol === 'operario' || miRol === 'laboratorio'; }
 function bbEditar(id){
@@ -2917,6 +2917,7 @@ function bbEditar(id){
     ${b.mezcla_id ? '<div class="mez-aviso">Es un bigbag de mezcla. Los cambios se aplican en todos los lotes de la mezcla.</div>' : ''}
     <form id="frmBbEdit" data-id="${Number(b.id)}">
       <div class="grid">
+        ${b.mezcla_id ? '' : `<div><label>Lote</label><select name="lote_id">${bbLotesOpc(b.lote_id)}</select></div>`}
         <div><label>Fecha</label><input name="fecha" type="date" value="${v(b.fecha)}"></div>
         <div><label>Hora</label><input name="hora" type="time" value="${b.hora ? mpEsc(String(b.hora).slice(0,5)) : ''}"></div>
         <div><label>Turno</label><select name="turno"><option value="DIA"${b.turno === 'DIA' ? ' selected' : ''}>Día (06-18h)</option><option value="NOCHE"${b.turno === 'NOCHE' ? ' selected' : ''}>Noche (18-06h)</option></select></div>
@@ -2931,19 +2932,45 @@ function bbEditar(id){
       <label>Observaciones</label><textarea name="observaciones">${v(b.observaciones)}</textarea>
       <button class="btn" type="submit">${ICONS.check} Guardar cambios</button>
       <button class="btn secondary" type="button" onclick="document.getElementById('bbEdit').innerHTML=''">Cancelar</button>
+      <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border,#ddd)"><button class="btn danger" type="button" onclick="bbBorrar(${Number(b.id)})">Borrar este bigbag</button></div>
     </form></div>`;
   document.getElementById('frmBbEdit').addEventListener('submit', e => { e.preventDefault(); return _once('bbedit', _bbGuardarEdicion, e); });
   document.getElementById('bbEdit').scrollIntoView({behavior:'smooth', block:'start'});
 }
+/* Opciones del selector de lote: solo lotes en proceso (el actual siempre aparece). */
+function bbLotesOpc(actual){
+  const ids = Object.keys(window.bbLotes || {});
+  if(actual && ids.indexOf(actual) < 0) ids.push(actual);
+  ids.sort((a, b) => String(a).localeCompare(String(b), 'es', {numeric:true}));
+  return ids.map(id => `<option value="${mpEsc(id)}"${id === actual ? ' selected' : ''}>${mpEsc(id)}</option>`).join('');
+}
 async function _bbGuardarEdicion(e){
-  const f = e.target, id = Number(f.dataset.id);
+  const f = e.target, id = Number(f.dataset.id), b = BBL[id] || {};
   const d = Object.fromEntries(new FormData(f).entries());
   if(PC().ctPallet && d.contraste_pallet_pct !== '' && d.contraste_pallet_pct != null && (Number(d.contraste_pallet_pct) < 0 || Number(d.contraste_pallet_pct) > 100)){ toast('El contraste del pallet tiene que estar entre 0 y 100 %', 'err'); return; }
+  const nuevoLote = d.lote_id; delete d.lote_id;
+  let msgLote = '';
+  if(nuevoLote && b.lote_id && nuevoLote !== b.lote_id){
+    const m = await sb.rpc('fn_mover_bigbag', { p_id:id, p_lote:nuevoLote });
+    if(m.error){ toast('Error: ' + m.error.message, 'err'); return; }
+    msgLote = ' y pasó al lote ' + nuevoLote + (m.data && Number(m.data) !== Number(b.nro_bigbag) ? ' como Nº ' + m.data : '');
+  }
   const { data, error } = await sb.rpc('fn_editar_bigbag', { p_id:id, p_data:d });
-  if(error){ toast('Error: ' + error.message, 'err'); return; }
-  toast('Bigbag corregido' + (data > 1 ? ' (' + data + ' lotes de la mezcla)' : ''), 'ok');
+  if(error){ toast('Error: ' + error.message + (msgLote ? ' (el cambio de lote sí se aplicó)' : ''), 'err'); if(msgLote){ document.getElementById('bbEdit').innerHTML = ''; loadBigbagList(); } return; }
+  toast('Bigbag corregido' + msgLote + (data > 1 ? ' (' + data + ' lotes de la mezcla)' : ''), 'ok');
   document.getElementById('bbEdit').innerHTML = '';
   loadBigbagList();
+}
+async function bbBorrar(id){
+  return _once('bbdel' + id, async () => {
+    const b = BBL[id]; if(!b) return;
+    if(!confirm('¿Borrar el bigbag Nº ' + b.nro_bigbag + ' del lote ' + b.lote_id + (b.mezcla_id ? ' y de TODOS los lotes de su mezcla' : '') + '? No se puede deshacer.')) return;
+    const { data, error } = await sb.rpc('fn_eliminar_bigbag', { p_id:id });
+    if(error){ toast('Error: ' + error.message, 'err'); return; }
+    toast('Bigbag Nº ' + b.nro_bigbag + ' borrado' + (data > 1 ? ' (' + data + ' lotes de la mezcla)' : ''), 'ok');
+    document.getElementById('bbEdit').innerHTML = '';
+    loadBigbagList();
+  });
 }
 
 
