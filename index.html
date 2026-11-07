@@ -902,7 +902,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v59';
+const APP_VERSION = 'v60';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -2801,6 +2801,7 @@ async function renderBigbag(){
       <button class="btn" type="submit">${ICONS.plus} <span id="bbBtnTxt">Registrar bigbag</span></button>
     </form>
   </div>
+  <div id="bbEdit"></div>
   <div class="card">
     <h2 id="bbListTit">Bigbags del lote</h2>
     <div id="bigbagList" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div>
@@ -2899,9 +2900,50 @@ async function loadBigbagList(){
   const avg = k => { const v = filas.map(f => f.b[k]).filter(x => x!==null && x!==undefined && x!=='').map(Number); return v.length ? v.reduce((a,x)=>a+x,0)/v.length : null; };
   const fa = (v,d) => v===null ? '-' : v.toFixed(d).replace('.',',');
   const lt = id => (window.bbLotes||{})[id] || {};
-  el.innerHTML = `<table><thead><tr><th>Fecha</th><th>Hora</th><th>Turno</th><th>Producto</th><th>Lote</th><th>Calidad</th><th>Nº Bigbag</th><th>Pureza</th>${PC().ctPallet ? '<th>Contraste pallet</th>' : ''}<th>Hum. grano</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th></tr></thead><tbody>
-    ${filas.map(f => { const b = f.b, l = lt(b.lote_id); return `<tr><td>${fmtDate(b.fecha)}</td><td>${hh(b.hora)}</td><td>${mpEsc(b.turno)}</td><td>${mpEsc(l.producto||'-')}</td><td>${f.lotes.map(mpEsc).join(' + ')}</td><td>${bbCalidadHTML(b, l)}</td><td>${f.nros.map(mpEsc).join(' · ')}</td><td>${fmtPct(b.pureza_pct)}</td>${PC().ctPallet ? '<td>' + fmtPct(b.contraste_pallet_pct) + '</td>' : ''}<td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado||'-')}</td><td>${mpEsc(b.observaciones||'')}</td></tr>`; }).join('')}
-  </tbody><tfoot><tr style="font-weight:700;background:var(--surface-2)"><td colspan="6">PROMEDIO ${g ? 'de la mezcla' : 'del lote'} (${filas.length} bigbag${filas.length===1?'':'s'})</td><td></td><td>${avg('pureza_pct')===null?'-':fa(avg('pureza_pct'),2)+'%'}</td>${PC().ctPallet ? '<td>' + (avg('contraste_pallet_pct')===null?'-':fa(avg('contraste_pallet_pct'),2)+'%') + '</td>' : ''}<td>${avg('humedad_grano_pct')===null?'-':fa(avg('humedad_grano_pct'),2)+'%'}</td><td>${fa(avg('temperatura_ambiente_c'),1)}</td><td>${fa(avg('temperatura_grano_c'),1)}</td><td></td><td></td></tr></tfoot></table>`;
+  el.innerHTML = (bbPuedeEditar() ? '<div class="mez-aviso" style="margin-bottom:8px">Tocá un bigbag para editarlo.</div>' : '') + `<table><thead><tr><th>Fecha</th><th>Hora</th><th>Turno</th><th>Producto</th><th>Lote</th><th>Calidad</th><th>Nº Bigbag</th><th>Pureza</th>${PC().ctPallet ? '<th>Contraste pallet</th>' : ''}<th>Hum. grano</th><th>T° amb.</th><th>T° grano</th><th>Encargado</th><th>Obs.</th>${bbPuedeEditar() ? '<th></th>' : ''}</tr></thead><tbody>
+    ${filas.map(f => { const b = f.b, l = lt(b.lote_id); return `<tr${bbPuedeEditar() ? ` onclick="bbEditar(${Number(b.id)})" style="cursor:pointer"` : ''}><td>${fmtDate(b.fecha)}</td><td>${hh(b.hora)}</td><td>${mpEsc(b.turno)}</td><td>${mpEsc(l.producto||'-')}</td><td>${f.lotes.map(mpEsc).join(' + ')}</td><td>${bbCalidadHTML(b, l)}</td><td>${bbPuedeEditar() ? '<b style="text-decoration:underline">' + f.nros.map(mpEsc).join(' · ') + '</b>' : f.nros.map(mpEsc).join(' · ')}</td><td>${fmtPct(b.pureza_pct)}</td>${PC().ctPallet ? '<td>' + fmtPct(b.contraste_pallet_pct) + '</td>' : ''}<td>${fmtPct(b.humedad_grano_pct)}</td><td>${n(b.temperatura_ambiente_c)}</td><td>${n(b.temperatura_grano_c)}</td><td>${mpEsc(b.encargado||'-')}</td><td>${mpEsc(b.observaciones||'')}</td>${bbPuedeEditar() ? `<td><button class="btn secondary" type="button" onclick="event.stopPropagation();bbEditar(${Number(b.id)})">Editar</button></td>` : ''}</tr>`; }).join('')}
+  </tbody><tfoot><tr style="font-weight:700;background:var(--surface-2)"><td colspan="6">PROMEDIO ${g ? 'de la mezcla' : 'del lote'} (${filas.length} bigbag${filas.length===1?'':'s'})</td><td></td><td>${avg('pureza_pct')===null?'-':fa(avg('pureza_pct'),2)+'%'}</td>${PC().ctPallet ? '<td>' + (avg('contraste_pallet_pct')===null?'-':fa(avg('contraste_pallet_pct'),2)+'%') + '</td>' : ''}<td>${avg('humedad_grano_pct')===null?'-':fa(avg('humedad_grano_pct'),2)+'%'}</td><td>${fa(avg('temperatura_ambiente_c'),1)}</td><td>${fa(avg('temperatura_grano_c'),1)}</td><td></td><td></td>${bbPuedeEditar() ? '<td></td>' : ''}</tr></tfoot></table>`;
+  BBL = {}; data.forEach(b => { BBL[b.id] = b; });
+}
+
+/* Edición de un bigbag desde Carga (administrador y operario; solo lotes en proceso). */
+let BBL = {};
+function bbPuedeEditar(){ return miRol === 'admin' || miRol === 'operario'; }
+function bbEditar(id){
+  const b = BBL[id]; if(!b) return;
+  const l = (window.bbLotes || {})[b.lote_id] || {};
+  const v = x => (x === null || x === undefined) ? '' : mpEsc(x);
+  document.getElementById('bbEdit').innerHTML = `<div class="card"><h2>Editar bigbag Nº ${mpEsc(b.nro_bigbag)}</h2>
+    ${b.mezcla_id ? '<div class="mez-aviso">Es un bigbag de mezcla. Los cambios se aplican en todos los lotes de la mezcla.</div>' : ''}
+    <form id="frmBbEdit" data-id="${Number(b.id)}">
+      <div class="grid">
+        <div><label>Fecha</label><input name="fecha" type="date" value="${v(b.fecha)}"></div>
+        <div><label>Hora</label><input name="hora" type="time" value="${b.hora ? mpEsc(String(b.hora).slice(0,5)) : ''}"></div>
+        <div><label>Turno</label><select name="turno"><option value="DIA"${b.turno === 'DIA' ? ' selected' : ''}>Día (06-18h)</option><option value="NOCHE"${b.turno === 'NOCHE' ? ' selected' : ''}>Noche (18-06h)</option></select></div>
+        <div><label>Pureza %</label><input name="pureza_pct" type="number" step="0.01" value="${v(b.pureza_pct)}"></div>
+        ${PC().ctPallet ? `<div><label>Contraste del pallet %</label><input name="contraste_pallet_pct" type="number" step="0.01" min="0" max="100" value="${v(b.contraste_pallet_pct)}"></div>` : ''}
+        <div><label>Humedad del grano %</label><input name="humedad_grano_pct" type="number" step="0.01" value="${v(b.humedad_grano_pct)}"></div>
+        <div><label>Temp. ambiente °C</label><input name="temperatura_ambiente_c" type="number" step="0.1" value="${v(b.temperatura_ambiente_c)}"></div>
+        <div><label>Temp. del grano °C</label><input name="temperatura_grano_c" type="number" step="0.1" value="${v(b.temperatura_grano_c)}"></div>
+        ${PC().calBb ? `<div><label>Calidad del bigbag</label><select name="calidad"><option value="">Igual al lote</option>${PC().catsLote.map(c => `<option${b.calidad === c ? ' selected' : ''}>${c}</option>`).join('')}</select></div>` : ''}
+        <div><label>Encargado</label><input name="encargado" value="${v(b.encargado)}"></div>
+      </div>
+      <label>Observaciones</label><textarea name="observaciones">${v(b.observaciones)}</textarea>
+      <button class="btn" type="submit">${ICONS.check} Guardar cambios</button>
+      <button class="btn secondary" type="button" onclick="document.getElementById('bbEdit').innerHTML=''">Cancelar</button>
+    </form></div>`;
+  document.getElementById('frmBbEdit').addEventListener('submit', e => { e.preventDefault(); return _once('bbedit', _bbGuardarEdicion, e); });
+  document.getElementById('bbEdit').scrollIntoView({behavior:'smooth', block:'start'});
+}
+async function _bbGuardarEdicion(e){
+  const f = e.target, id = Number(f.dataset.id);
+  const d = Object.fromEntries(new FormData(f).entries());
+  if(PC().ctPallet && d.contraste_pallet_pct !== '' && d.contraste_pallet_pct != null && (Number(d.contraste_pallet_pct) < 0 || Number(d.contraste_pallet_pct) > 100)){ toast('El contraste del pallet tiene que estar entre 0 y 100 %', 'err'); return; }
+  const { data, error } = await sb.rpc('fn_editar_bigbag', { p_id:id, p_data:d });
+  if(error){ toast('Error: ' + error.message, 'err'); return; }
+  toast('Bigbag corregido' + (data > 1 ? ' (' + data + ' lotes de la mezcla)' : ''), 'ok');
+  document.getElementById('bbEdit').innerHTML = '';
+  loadBigbagList();
 }
 
 
