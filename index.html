@@ -779,6 +779,17 @@
   .dskel i:first-child{width:45%;}
   .dskel i:nth-child(2){height:28px;width:60%;}
   .dskel{min-height:120px;}
+  /* Sensación de calidad: los datos entran con un fundido corto y el botón de guardar muestra su progreso */
+  .table-wrap>table,.silo-cards>*,.lt-scroll>table,#resumenBody>*{animation:dIn .30s ease both;}
+  .btn.cargando,.btn.listo{position:relative;color:transparent !important;pointer-events:none;}
+  .btn.cargando>*:not(.btn-ov),.btn.listo>*:not(.btn-ov){visibility:hidden;}
+  .btn-ov{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font-weight:700;visibility:visible;}
+  .btn-ov .spin{width:15px;height:15px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:dSpin .7s linear infinite;}
+  .btn-ov svg{width:16px;height:16px;}
+  .btn.listo{background:var(--good);}
+  #main{position:relative;}
+  .velo{position:absolute;left:0;right:0;top:0;min-height:70vh;z-index:6;background:var(--surface-1);padding:18px 16px;transition:opacity .2s ease;}
+  .velo.sale{opacity:0;}
   @keyframes dPulse{50%{opacity:.45;}}
   /* animaciones de entrada */
   @keyframes dFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
@@ -905,7 +916,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v63';
+const APP_VERSION = 'v65';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -1092,6 +1103,7 @@ function entrarApp(){
         activeTab = view;
         document.getElementById('homeMenu').classList.add('hidden');
         RENDERERS[view]();
+        velo();
         animar(document.getElementById('main'), navDirTo(prev, view));
         renderNavbar();
         window.scrollTo(0,0);
@@ -1128,19 +1140,56 @@ sb.auth.onAuthStateChange((event, session) => {
    ==  UTILIDADES GENERALES
    ==  Anti doble toque, avisos (toast), formatos de número y fecha.
    ============================================================================== */
+/* Ritmo de la app (milisegundos): cuánto se queda el botón "Guardando…", cuánto el "Guardado" y cuánto el velo al cambiar de pantalla. Se ajustan acá. */
+const UX_GUARDAR_MIN = 1100, UX_GUARDADO_OK = 900, UX_PANTALLA_MIN = 450;
+let _difToast = null;
+function velo(){
+  if(_sinAnim()) return;
+  const main = document.getElementById('main'); if(!main) return;
+  main.querySelectorAll(':scope>.velo').forEach(x => x.remove());
+  const v = document.createElement('div'); v.className = 'velo';
+  v.innerHTML = '<div class="dskel"><i></i><i></i><i></i></div><div class="dskel"><i></i><i></i><i></i></div>';
+  main.appendChild(v);
+  setTimeout(() => { v.classList.add('sale'); setTimeout(() => v.remove(), 220); }, UX_PANTALLA_MIN);
+}
 const _busy = {};
 async function _once(clave, fn, e){
   if(_busy[clave]) return;
   _busy[clave] = true;
   const btn = e && e.target && e.target.querySelector ? e.target.querySelector('button[type=submit]') : null;
   if(btn) btn.disabled = true;
+  const t0 = Date.now(), quieto = _sinAnim();
+  let ov = null;
+  if(btn && !quieto){
+    _difToast = [];
+    ov = document.createElement('span'); ov.className = 'btn-ov'; ov.innerHTML = '<i class="spin"></i>Guardando…';
+    btn.classList.add('cargando'); btn.appendChild(ov);
+  }
   try{ return await fn(e); }
-  finally{ _busy[clave] = false; if(btn) btn.disabled = false; }
+  finally{
+    _busy[clave] = false;
+    if(btn){
+      if(ov){
+        const falta = Math.max(0, UX_GUARDAR_MIN - (Date.now() - t0));
+        setTimeout(() => {
+          const q = _difToast; _difToast = null; if(q) q.forEach(a => toast(a[0], a[1]));
+          if(_okAt >= t0){
+            ov.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Guardado';
+            btn.classList.remove('cargando'); btn.classList.add('listo');
+            setTimeout(() => { btn.classList.remove('listo'); ov.remove(); btn.disabled = false; }, UX_GUARDADO_OK);
+          }else{ btn.classList.remove('cargando'); ov.remove(); btn.disabled = false; }
+        }, falta);
+      }else btn.disabled = false;
+    }
+  }
 }
+let _okAt = 0;
 const _normTxt = x => String(x==null?'':x).trim().replace(/\s+/g,' ').toLowerCase();
 const _esDup = err => !!err && (err.code === '23505' || /duplicate key|unique constraint/i.test(err.message||''));
 
 function toast(msg, type){
+  if(type === 'ok') _okAt = Date.now();
+  if(_difToast){ _difToast.push([msg, type]); return; }
   if(type === 'err' && /failed to fetch|networkerror|load failed|network request failed/i.test(String(msg))) msg = 'Sin conexión: no se guardó nada. Revisá la señal e intentá de nuevo.';
   let box = document.getElementById('toasts');
   if(!box){
@@ -1158,7 +1207,7 @@ function toast(msg, type){
   t.textContent = msg;
   box.appendChild(t);
   while(box.children.length > 3) box.firstChild.remove();
-  if(type === 'ok'){ vibrar(12); _dirty = false; } else if(type === 'err') vibrar([40,60,40]);
+  if(type === 'ok'){ _okAt = Date.now(); vibrar(12); _dirty = false; } else if(type === 'err') vibrar([40,60,40]);
   t._t = setTimeout(()=>t.remove(), 3200);
 }
 
@@ -1904,6 +1953,7 @@ function goTab(id){
   document.getElementById('homeMenu').classList.add('hidden');
   document.getElementById('volverBtn').classList.add('hidden');
   RENDERERS[id]();
+  velo();
   if(prev === null && !desdeSheet){ history.pushState({view:id}, ''); navExtra = 1; }
   else{ history.replaceState({view:id}, ''); navExtra = (prev === null) ? 1 : (desdeSheet ? navExtra + 1 : Math.max(1, navExtra)); }
   sheetPushed = false;
@@ -2002,7 +2052,7 @@ async function renderMP(){
 
   <div class="card">
     <h2>Kg ingresados por silo bolsa</h2>
-    <div id="mpSiloCards" class="silo-cards"><div class="empty">Cargando...</div></div>
+    <div id="mpSiloCards" class="silo-cards"><div class="dskel"><i></i><i></i><i></i></div></div>
   </div>
 
   <div class="card">
@@ -2012,7 +2062,7 @@ async function renderMP(){
       <div><label>Silo</label><select id="mpFSilo" onchange="mpRenderList()"><option value="">Todos</option></select></div>
       <div style="flex:0 0 auto;"><button class="btn secondary" type="button" onclick="mpExport()">Exportar a Excel</button></div>
     </div>
-    <div id="mpList" class="table-wrap"><div class="empty">Cargando...</div></div>
+    <div id="mpList" class="table-wrap"><div class="dskel"><i></i><i></i><i></i></div></div>
   </div>`;
 
   const f = document.getElementById('frmMP');
@@ -2471,7 +2521,7 @@ async function renderSilo(){
   </div>
   <div class="card">
     <h2>Silos bolsa</h2>
-    <div id="siloList" class="table-wrap"><div class="empty">Cargando...</div></div>
+    <div id="siloList" class="table-wrap"><div class="dskel"><i></i><i></i><i></i></div></div>
   </div>`;
   document.getElementById('frmSilo').addEventListener('submit', submitSilo);
   loadSiloList();
@@ -2547,13 +2597,13 @@ async function renderLote(){
       <select id="ltProv" onchange="loteFiltro.prov=this.value;ltRender()"><option value="">Todos los proveedores</option></select>
       <label class="lt-solo"><input type="checkbox" id="ltSolo" onchange="loteFiltro.solo=this.checked;ltRender()"> Solo seleccionadas</label>
     </div>
-    <div id="ltTabla" class="lt-scroll"><div class="empty">Cargando...</div></div>
+    <div id="ltTabla" class="lt-scroll"><div class="dskel"><i></i><i></i><i></i></div></div>
     <div id="ltBarra" class="lt-barra"></div>
   </div>
   <div class="card">
     <h2>Lotes</h2>
     <input type="search" id="loteListBuscar" placeholder="Buscar lote, código de laboratorio, producto..." autocomplete="off" oninput="loteListQ=this.value;loteListRender()" style="margin-bottom:10px">
-    <div id="loteList" class="table-wrap"><div class="empty">Cargando...</div></div>
+    <div id="loteList" class="table-wrap"><div class="dskel"><i></i><i></i><i></i></div></div>
   </div>`;
   loteSel = new Set(); loteUltimo = null; loteKg = {}; loteListQ = '';
   loteFiltro = { q:'', silo:'', prov:'', solo:false };
@@ -3237,7 +3287,7 @@ async function _cerrarLoteFinal(){
 async function renderResumen(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card"><div class="res-h"><h2>${ICONS.resumen} Resumen de producción</h2><button class="btn secondary" type="button" onclick="resumenExport()">Exportar a Excel</button></div>
-  <div class="mez-aviso" style="margin:8px 0">Tocá un lote para ver su ficha completa.</div><div id="resumenBody"><div class="empty">Cargando...</div></div></div>`;
+  <div class="mez-aviso" style="margin:8px 0">Tocá un lote para ver su ficha completa.</div><div id="resumenBody"><div class="dskel"><i></i><i></i><i></i></div></div></div>`;
 
   const { data, error } = await sb.from('v_resumen_lotes').select('*').order('fecha_creacion',{ascending:false});
   const el = document.getElementById('resumenBody');
@@ -3268,7 +3318,7 @@ async function renderResumen(){
    ============================================================================== */
 async function resumenLote(id){
   const main = document.getElementById('main');
-  main.innerHTML = `<div class="card"><div class="res-h"><h2>${ICONS.resumen} Ficha del lote ${mpEsc(id)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" type="button" onclick="renderResumen()">Volver al resumen</button><button class="btn secondary" type="button" onclick="fichaExport()">Exportar a Excel</button></div></div><div id="fichaBody"><div class="empty">Cargando...</div></div></div><div id="fichaRest"></div>`;
+  main.innerHTML = `<div class="card"><div class="res-h"><h2>${ICONS.resumen} Ficha del lote ${mpEsc(id)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn secondary" type="button" onclick="renderResumen()">Volver al resumen</button><button class="btn secondary" type="button" onclick="fichaExport()">Exportar a Excel</button></div></div><div id="fichaBody"><div class="dskel"><i></i><i></i><i></i></div></div></div><div id="fichaRest"></div>`;
   const [lt, rs, ci, bb, tn, lr] = await Promise.all([
     sb.from('lotes').select('*').eq('id', id).maybeSingle(),
     sb.from('v_resumen_lotes').select('*').eq('lote_id', id).maybeSingle(),
@@ -3444,7 +3494,7 @@ async function renderCorrecciones(){
   <div class="card"><h2>Bigbags del lote</h2><div id="coBb" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div></div>
   <div class="card"><h2>Ajustes de turno del lote</h2><div id="coTurnos" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div></div>
   <div class="card"><h2>Cargas de MP del lote</h2><div id="coCargas" class="table-wrap"><div class="empty">Elegí un lote arriba.</div></div></div>
-  <div class="card"><h2>Historial de correcciones</h2><div id="coHist" class="table-wrap"><div class="empty">Cargando...</div></div></div>`;
+  <div class="card"><h2>Historial de correcciones</h2><div id="coHist" class="table-wrap"><div class="dskel"><i></i><i></i><i></i></div></div></div>`;
   const { data: lotes, error } = await sb.from('lotes').select('*').order('creado_en', {ascending:false});
   if(error){ document.getElementById('coEstado').innerHTML = `<div class="empty">Error: ${mpEsc(error.message)}</div>`; return; }
   if(!lotes || !lotes.length){ document.querySelector('.lote-sel').style.display = 'none'; document.getElementById('coEstado').innerHTML = '<div class="empty">Todavía no hay lotes.</div>'; return; }
@@ -3613,7 +3663,7 @@ async function renderUsuarios(){
   const main = document.getElementById('main');
   main.innerHTML = `<div class="card">
     <h2>${ICONS.usuarios} Gestión de usuarios</h2>
-    <div id="usuariosList" class="table-wrap"><div class="empty">Cargando...</div></div>
+    <div id="usuariosList" class="table-wrap"><div class="dskel"><i></i><i></i><i></i></div></div>
   </div>`;
   loadUsuarios();
 }
