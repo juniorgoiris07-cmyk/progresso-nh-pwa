@@ -787,6 +787,49 @@
   .btn-ov .spin{width:15px;height:15px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:dSpin .7s linear infinite;}
   .btn-ov svg{width:16px;height:16px;}
   .btn.listo{background:var(--good);}
+  /* Consultor: botón flotante y panel de chat */
+  #cnsBtn{position:fixed;right:14px;bottom:calc(var(--nav-h) + 14px + env(safe-area-inset-bottom));z-index:90;height:50px;padding:0 20px 0 16px;gap:9px;border-radius:999px;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-md);font:inherit;font-size:14.5px;font-weight:800;letter-spacing:.01em;}
+  #cnsBtn svg{width:22px;height:22px;flex:none;}
+  #cnsBtn b{font-weight:800;}
+  #cnsBtn em{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.06em;background:#fff;color:var(--accent-dark);border-radius:6px;padding:2px 5px;line-height:1.2;}
+  #cnsBtn.oculto,body.kb #cnsBtn{display:none;}
+  #cnsBg{position:fixed;inset:0;background:rgba(10,8,4,.45);z-index:9400;opacity:0;pointer-events:none;transition:opacity .2s;}
+  #cnsBg.on{opacity:1;pointer-events:auto;}
+  #cnsPanel{position:fixed;left:0;right:0;bottom:0;height:84vh;height:84dvh;z-index:9401;background:var(--card);border-radius:18px 18px 0 0;display:flex;flex-direction:column;transform:translateY(102%);transition:transform .26s cubic-bezier(.2,.7,.2,1);box-shadow:0 -10px 30px rgba(0,0,0,.18);}
+  #cnsPanel.on{transform:none;}
+  .cns-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;border-bottom:1px solid var(--gridline);}
+  .cns-h b{font-size:16px;display:block;}
+  .cns-h small{color:var(--text-muted);font-size:12px;}
+  .cns-h button{appearance:none;background:none;border:none;font:inherit;font-size:13px;font-weight:700;color:var(--text-secondary);cursor:pointer;padding:8px 10px;border-radius:8px;}
+  .cns-h button.x{font-size:22px;line-height:1;padding:4px 10px;}
+  #cnsMsgs{flex:1;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;}
+  .cns-m{max-width:88%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.5;overflow-wrap:anywhere;}
+  .cns-m p{margin:0 0 6px;} .cns-m p:last-child{margin-bottom:0;}
+  .cns-m ul{margin:4px 0 6px;padding-left:18px;}
+  .cns-m.yo{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
+  .cns-m.ia{align-self:flex-start;background:var(--surface-2);color:var(--text-primary);border-bottom-left-radius:4px;max-width:96%;}
+  .cns-m.err{background:var(--danger-bg);color:var(--danger);}
+  .cns-ep{margin:auto 0;padding:22px 18px;border:1px dashed var(--accent);border-radius:14px;background:#f7f2e0;color:var(--text-primary);text-align:center;}
+  .cns-ep b{display:block;font-size:16px;margin-bottom:8px;}
+  .cns-ep p{margin:0;font-size:14px;line-height:1.5;color:var(--text-secondary);}
+  .cns-tab{overflow-x:auto;margin:6px 0;}
+  .cns-tab table{font-size:12.5px;border-collapse:collapse;}
+  .cns-tab th,.cns-tab td{padding:5px 9px;border-bottom:1px solid var(--gridline);text-align:left;white-space:nowrap;}
+  .cns-pien{display:inline-flex;gap:5px;padding:4px 2px;}
+  .cns-pien i{width:7px;height:7px;border-radius:50%;background:var(--text-muted);animation:dPulse 1s ease-in-out infinite;}
+  .cns-pien i:nth-child(2){animation-delay:.18s;} .cns-pien i:nth-child(3){animation-delay:.36s;}
+  #cnsChips{display:flex;flex-wrap:wrap;gap:8px;padding:6px 14px 4px;}
+  #cnsChips button{appearance:none;font:inherit;font-size:13px;font-weight:600;color:var(--accent-dark);background:#f1ead2;border:1px solid var(--accent);border-radius:999px;padding:8px 13px;cursor:pointer;text-align:left;}
+  #cnsForm{display:flex;gap:8px;align-items:flex-end;padding:8px 12px 4px;}
+  #cnsForm textarea{flex:1;margin:0;resize:none;max-height:110px;min-height:44px;border-radius:12px;}
+  #cnsForm button{flex:none;width:46px;height:46px;border-radius:12px;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  #cnsForm button:disabled{opacity:.5;cursor:default;}
+  #cnsForm button svg{width:20px;height:20px;}
+  .cns-nota{margin:0;padding:2px 16px calc(10px + env(safe-area-inset-bottom));font-size:11.5px;color:var(--text-muted);text-align:center;}
+  @media (min-width:900px){
+    #cnsBtn{bottom:24px;right:24px;}
+    #cnsPanel{left:auto;right:24px;bottom:24px;width:420px;height:640px;max-height:calc(100vh - 48px);border-radius:18px;}
+  }
   #main{position:relative;}
   .velo{position:absolute;left:0;right:0;top:0;min-height:70vh;z-index:6;background:var(--surface-1);padding:18px 16px;transition:opacity .2s ease;}
   .velo.sale{opacity:0;}
@@ -916,7 +959,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v65';
+const APP_VERSION = 'v66';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -970,6 +1013,8 @@ const VARIEDADES = ['K3','Equinom','Criollo','Jazmin'];
 /* ==============================================================================
    ==  ICONOS
    ============================================================================== */
+const CNS_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h6M9 14h4"/></svg>';
+const CNS_SEND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>';
 const ICONS = {
   mp: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M5 7l1 13h12l1-13M9 11v6M15 11v6M9 7V4h6v3"/></svg>',
   silo: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10c0-4 2.5-7 6-7s6 3 6 7v9a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-9z"/><path d="M6 14h12"/></svg>',
@@ -994,6 +1039,7 @@ const ICONS = {
 let usuario = null;
 let currentUser = null;
 let miRol = null;
+let miConsultor = false;
 
 function showAuthScreen(){
   document.getElementById('authScreen').classList.remove('hidden');
@@ -1007,6 +1053,7 @@ function showAuthScreen(){
   PROD = null;
   try{ sessionStorage.removeItem('nh_prod'); }catch(e){}
   document.getElementById('prodScreen').classList.add('hidden');
+  miConsultor = false; consultorMostrar();
 }
 
 async function onLogin(session){
@@ -1025,6 +1072,7 @@ async function onLogin(session){
     return;
   }
   miRol = perfil ? perfil.rol : 'operario';
+  miConsultor = !!perfil && (perfil.rol === 'admin' || perfil.consultor === true);
   usuario = nombre || (session.user.email ? session.user.email.split('@')[0] : 'Usuario');
   document.getElementById('usuarioChipText').textContent = usuario;
   document.getElementById('avTxt').textContent = iniciales(usuario);
@@ -1084,6 +1132,7 @@ function entrarApp(){
   document.getElementById('prodChipTxt').textContent = PROD_INFO[PROD].nombre; document.getElementById('prodChipIc').textContent = PROD_INFO[PROD].nombre.charAt(0);
   document.getElementById('appShell').classList.remove('hidden');
   renderHomeMenu();
+  consultorMostrar();
   document.getElementById('navbar').classList.remove('hidden');
   renderNavbar();
     if(activeTab && !puedeVer(activeTab)) goHome(false);
@@ -3673,11 +3722,12 @@ async function loadUsuarios(){
   const el = document.getElementById('usuariosList');
   if(error){ el.innerHTML = `<div class="empty">Error: ${mpEsc(error.message)}</div>`; return; }
   if(!data || !data.length){ el.innerHTML = '<div class="empty">No hay usuarios todavía.</div>'; return; }
-  el.innerHTML = `<table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th><th></th></tr></thead><tbody>
+  el.innerHTML = `<table><thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Consultor</th><th>Activo</th><th></th></tr></thead><tbody>
     ${data.map(u => `<tr>
       <td><input id="nom-${u.id}" type="text" value="${mpEsc(u.nombre||'')}" maxlength="60" placeholder="Nombre" aria-label="Nombre" style="margin:0;min-width:150px;"></td>
       <td>${mpEsc(u.email||'-')}</td>
       <td><select id="rol-${u.id}" style="width:auto;margin:0;"><option value="operario" ${u.rol==='operario'?'selected':''}>Operario</option><option value="laboratorio" ${u.rol==='laboratorio'?'selected':''}>Laboratorio</option><option value="admin" ${u.rol==='admin'?'selected':''}>Admin</option></select></td>
+      <td>${u.rol === 'admin' ? '<small style="color:var(--text-muted)">Siempre</small>' : `<input type="checkbox" id="cons-${u.id}" style="width:auto;margin:0;" aria-label="Puede usar el consultor" ${u.consultor?'checked':''}>`}</td>
       <td><input type="checkbox" id="activo-${u.id}" style="width:auto;margin:0;" ${u.activo?'checked':''}></td>
       <td><button class="btn small" onclick="guardarUsuario('${u.id}')">Guardar</button></td>
     </tr>`).join('')}
@@ -3689,11 +3739,13 @@ async function guardarUsuario(id){
   const activo = document.getElementById('activo-'+id).checked;
   const nombre = String(document.getElementById('nom-'+id).value || '').trim().replace(/\s+/g, ' ');
   if(!nombre){ toast('Escribí un nombre para este usuario', 'err'); return; }
-  const { error } = await sbPub.from('perfiles').update({ nombre, rol, activo }).eq('id', id);
+  const cEl = document.getElementById('cons-'+id);
+  const upd = { nombre, rol, activo }; if(cEl) upd.consultor = cEl.checked;
+  const { error } = await sbPub.from('perfiles').update(upd).eq('id', id);
   if(error){ toast('Error: ' + error.message, 'err'); return; }
   toast('Usuario actualizado', 'ok');
   if(currentUser && id === currentUser.id){
-    miRol = rol; usuario = nombre;
+    miRol = rol; usuario = nombre; if(cEl) miConsultor = rol === 'admin' || cEl.checked; consultorMostrar();
     document.getElementById('upRol').textContent = rolLabel(miRol);
     document.getElementById('usuarioChipText').textContent = usuario;
     document.getElementById('avTxt').textContent = iniciales(usuario);
@@ -3701,6 +3753,113 @@ async function guardarUsuario(id){
     renderHomeMenu(); renderNavbar();
   }
   loadUsuarios();
+}
+
+
+/* ==============================================================================
+   ==  CONSULTOR (chat que responde preguntas sobre los datos del producto elegido)
+   ==  Solo lee. Llama a la función segura "consultor" de Supabase, que respeta los permisos del usuario.
+   ============================================================================== */
+const CNS_EN_PROCESO = true;   // true = el asistente aún no está conectado: se muestra como "en proceso". Pasar a false cuando esté la clave de la IA.
+const CNS = { msgs:[], abierto:false, ocupado:false };
+const CNS_SUGERENCIAS = ['¿Cuánta materia prima ingresó este mes?', '¿Cuántos bigbags se cargaron ayer en el turno día?', '¿Cuánto producto terminado hay?', '¿Qué lotes están en proceso?'];
+
+function consultorMostrar(){
+  let b = document.getElementById('cnsBtn');
+  const ver = miConsultor && PROD && !document.getElementById('appShell').classList.contains('hidden');
+  if(!ver){ if(b) b.classList.add('oculto'); consultorCerrar(); return; }
+  if(!b){
+    b = document.createElement('button'); b.id = 'cnsBtn'; b.type = 'button'; b.setAttribute('aria-label', 'Abrir el consultor con inteligencia artificial'); b.innerHTML = CNS_ICON + '<b>Consultor</b><em>' + (CNS_EN_PROCESO ? 'PRONTO' : 'IA') + '</em>';
+    b.addEventListener('click', consultorAbrir); document.body.appendChild(b);
+    const bg = document.createElement('div'); bg.id = 'cnsBg'; bg.addEventListener('click', consultorCerrar); document.body.appendChild(bg);
+    const p = document.createElement('section'); p.id = 'cnsPanel'; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', 'Consultor');
+    p.innerHTML = `<div class="cns-h"><div><b>Consultor IA</b><small id="cnsProd"></small></div><div><button type="button" id="cnsNuevo">Nueva consulta</button><button type="button" class="x" id="cnsX" aria-label="Cerrar">×</button></div></div>
+      <div id="cnsMsgs"></div><div id="cnsChips"></div>
+      <form id="cnsForm"><textarea id="cnsTxt" rows="1" maxlength="600" placeholder="Ej: ¿cuánta MP ingresó este mes?" aria-label="Pregunta"></textarea><button type="submit" id="cnsEnv" aria-label="Enviar">${CNS_SEND}</button></form>
+      <p class="cns-nota">Es una inteligencia artificial: solo lee los datos, no cambia nada. Revisá los números importantes.</p>`;
+    document.body.appendChild(p);
+    document.getElementById('cnsX').addEventListener('click', consultorCerrar);
+    document.getElementById('cnsNuevo').addEventListener('click', () => { if(CNS.ocupado) return; CNS.msgs = []; consultorPintar(); });
+    document.getElementById('cnsForm').addEventListener('submit', e => { e.preventDefault(); const t = document.getElementById('cnsTxt'); const v = t.value.trim(); if(v){ t.value = ''; t.style.height = ''; consultorEnviar(v); } });
+    const t = document.getElementById('cnsTxt');
+    t.addEventListener('input', () => { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 110) + 'px'; });
+    t.addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey && window.innerWidth >= 900){ e.preventDefault(); document.getElementById('cnsForm').requestSubmit(); } });
+  }
+  b.classList.remove('oculto');
+}
+function consultorAbrir(){
+  CNS.abierto = true;
+  document.getElementById('cnsProd').textContent = 'Datos de ' + (PROD ? PROD_INFO[PROD].nombre : '');
+  document.getElementById('cnsBg').classList.add('on'); document.getElementById('cnsPanel').classList.add('on');
+  consultorPintar();
+}
+function consultorCerrar(){
+  CNS.abierto = false;
+  const bg = document.getElementById('cnsBg'), p = document.getElementById('cnsPanel');
+  if(bg) bg.classList.remove('on'); if(p) p.classList.remove('on');
+}
+function cnsMd(t){
+  const inl = x => mpEsc(x).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  const cells = l => l.trim().replace(/^\||\|$/g, '').split('|').map(x => x.trim());
+  const isRow = l => /^\s*\|.*\|\s*$/.test(l);
+  const ls = String(t || '').split('\n'); let out = '', i = 0;
+  while(i < ls.length){
+    const l = ls[i];
+    if(isRow(l) && i + 1 < ls.length && /^\s*\|[\s:|-]+\|\s*$/.test(ls[i + 1])){
+      const head = cells(l); i += 2; const rows = [];
+      while(i < ls.length && isRow(ls[i])){ rows.push(cells(ls[i])); i++; }
+      out += '<div class="cns-tab"><table><thead><tr>' + head.map(c => '<th>' + inl(c) + '</th>').join('') + '</tr></thead><tbody>' + rows.map(r => '<tr>' + r.map(c => '<td>' + inl(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+      continue;
+    }
+    if(/^\s*[-*] /.test(l)){
+      const it = []; while(i < ls.length && /^\s*[-*] /.test(ls[i])){ it.push(ls[i].replace(/^\s*[-*] /, '')); i++; }
+      out += '<ul>' + it.map(x => '<li>' + inl(x) + '</li>').join('') + '</ul>'; continue;
+    }
+    if(l.trim()) out += '<p>' + inl(l) + '</p>';
+    i++;
+  }
+  return out;
+}
+function consultorPintar(){
+  const box = document.getElementById('cnsMsgs'); if(!box) return;
+  if(CNS_EN_PROCESO){
+    box.innerHTML = '<div class="cns-ep"><b>Asistente IA en proceso</b><p>Lo estamos terminando de conectar. Muy pronto vas a poder preguntar por la materia prima ingresada, los bigbags de un día o turno, los lotes y el producto terminado, sin buscar en las pantallas.</p></div>';
+    document.getElementById('cnsChips').innerHTML = '';
+    const tx = document.getElementById('cnsTxt'), eb = document.getElementById('cnsEnv');
+    if(tx){ tx.disabled = true; tx.placeholder = 'Disponible muy pronto'; } if(eb) eb.disabled = true;
+    return;
+  }
+  box.innerHTML = CNS.msgs.map(m => m.role === 'user' ? '<div class="cns-m yo">' + mpEsc(m.content) + '</div>' : '<div class="cns-m ia' + (m.error ? ' err' : '') + '">' + cnsMd(m.content) + '</div>').join('')
+    + (CNS.ocupado ? '<div class="cns-m ia"><span class="cns-pien"><i></i><i></i><i></i></span></div>' : '');
+  const ch = document.getElementById('cnsChips');
+  ch.innerHTML = CNS.msgs.length ? '' : '<p style="width:100%;margin:2px 0 4px;font-size:13px;color:var(--text-muted)">Preguntame sobre ' + (PROD ? PROD_INFO[PROD].nombre : '') + ', por ejemplo:</p>' + CNS_SUGERENCIAS.map((q, i) => '<button type="button" data-q="' + i + '">' + mpEsc(q) + '</button>').join('');
+  ch.querySelectorAll('button').forEach(b => b.addEventListener('click', () => consultorEnviar(CNS_SUGERENCIAS[Number(b.dataset.q)])));
+  box.scrollTop = box.scrollHeight;
+}
+async function consultorEnviar(texto){
+  if(CNS.ocupado) return;
+  CNS.msgs.push({ role:'user', content:texto }); CNS.ocupado = true;
+  document.getElementById('cnsEnv').disabled = true; consultorPintar();
+  let resp = null, msgErr = null;
+  try{
+    const conv = CNS.msgs.filter(m => !m.error).slice(-12).map(m => ({ role:m.role, content:m.content }));
+    const r = await Promise.race([
+      _sbRaw.functions.invoke('consultor', { body:{ producto:PROD, mensajes:conv } }),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('tiempo')), 75000))
+    ]);
+    if(r.error){
+      let st = r.error.context && r.error.context.status;
+      let det = ''; try{ det = r.error.context && r.error.context.json ? (await r.error.context.json()).error : ''; }catch(e){}
+      msgErr = det || (st === 403 ? 'No tenés permiso para usar el consultor.' : 'No se pudo consultar. Probá de nuevo en un momento.');
+    }else if(r.data && r.data.error) msgErr = r.data.error;
+    else resp = r.data && r.data.respuesta;
+  }catch(e){
+    msgErr = e && e.message === 'tiempo' ? 'La consulta tardó demasiado. Probá con una pregunta más corta.' : 'Sin conexión: no se pudo consultar.';
+  }
+  CNS.ocupado = false;
+  CNS.msgs.push(resp ? { role:'assistant', content:resp } : { role:'assistant', content:msgErr || 'No tengo una respuesta para eso.', error:true });
+  const eb = document.getElementById('cnsEnv'); if(eb) eb.disabled = false;
+  consultorPintar();
 }
 
 
