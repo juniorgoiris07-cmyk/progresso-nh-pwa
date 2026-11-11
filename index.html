@@ -959,7 +959,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v66';
+const APP_VERSION = 'v67';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -3760,7 +3760,7 @@ async function guardarUsuario(id){
    ==  CONSULTOR (chat que responde preguntas sobre los datos del producto elegido)
    ==  Solo lee. Llama a la función segura "consultor" de Supabase, que respeta los permisos del usuario.
    ============================================================================== */
-const CNS_EN_PROCESO = true;   // true = el asistente aún no está conectado: se muestra como "en proceso". Pasar a false cuando esté la clave de la IA.
+const CNS_EN_PROCESO = false;   // true = el asistente aún no está conectado: se muestra como "en proceso". Pasar a false cuando esté la clave de la IA.
 const CNS = { msgs:[], abierto:false, ocupado:false };
 const CNS_SUGERENCIAS = ['¿Cuánta materia prima ingresó este mes?', '¿Cuántos bigbags se cargaron ayer en el turno día?', '¿Cuánto producto terminado hay?', '¿Qué lotes están en proceso?'];
 
