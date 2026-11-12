@@ -812,6 +812,9 @@
   .cns-ep{margin:auto 0;padding:22px 18px;border:1px dashed var(--accent);border-radius:14px;background:#f7f2e0;color:var(--text-primary);text-align:center;}
   .cns-ep b{display:block;font-size:16px;margin-bottom:8px;}
   .cns-ep p{margin:0;font-size:14px;line-height:1.5;color:var(--text-secondary);}
+  .cns-link{color:var(--accent-dark);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px;cursor:pointer;}
+  .cns-link::after{content:' \203A';font-weight:800;}
+  .cns-flash{outline:3px solid var(--accent);outline-offset:3px;border-radius:14px;transition:outline-color .6s;}
   .cns-tab{overflow-x:auto;margin:6px 0;}
   .cns-tab table{font-size:12.5px;border-collapse:collapse;}
   .cns-tab th,.cns-tab td{padding:5px 9px;border-bottom:1px solid var(--gridline);text-align:left;white-space:nowrap;}
@@ -959,7 +962,7 @@
    ==  CONFIGURACIÓN Y CONEXIÓN A SUPABASE
    ==  Versión de la app, URL/clave pública y cliente de base de datos.
    ============================================================================== */
-const APP_VERSION = 'v67';
+const APP_VERSION = 'v68';
 const SUPA_URL = 'https://oulrdijjdrfsmbeezolt.supabase.co';
 const SUPA_KEY = 'sb_publishable_53SLBlt-7LRqrJZSa1u9tQ_Ky3qg4Qt';
 const _sbRaw = window.supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -3779,6 +3782,7 @@ function consultorMostrar(){
       <p class="cns-nota">Es una inteligencia artificial: solo lee los datos, no cambia nada. Revisá los números importantes.</p>`;
     document.body.appendChild(p);
     document.getElementById('cnsX').addEventListener('click', consultorCerrar);
+    document.getElementById('cnsMsgs').addEventListener('click', e => { const a = e.target.closest && e.target.closest('a.cns-link'); if(!a) return; e.preventDefault(); cnsIr(a.dataset.go); });
     document.getElementById('cnsNuevo').addEventListener('click', () => { if(CNS.ocupado) return; CNS.msgs = []; consultorPintar(); });
     document.getElementById('cnsForm').addEventListener('submit', e => { e.preventDefault(); const t = document.getElementById('cnsTxt'); const v = t.value.trim(); if(v){ t.value = ''; t.style.height = ''; consultorEnviar(v); } });
     const t = document.getElementById('cnsTxt');
@@ -3786,6 +3790,29 @@ function consultorMostrar(){
     t.addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey && window.innerWidth >= 900){ e.preventDefault(); document.getElementById('cnsForm').requestSubmit(); } });
   }
   b.classList.remove('oculto');
+}
+/* Enlaces dentro de las respuestas: llevan a la pantalla (o tarjeta) donde se ve el dato. */
+function cnsEsperarHome(cb){ let n = 0; const t = setInterval(() => { n++; if((DASH.ok && document.getElementById('dcSilos')) || n > 40){ clearInterval(t); cb(); } }, 120); }
+function cnsFlash(el){ if(!el) return; el.scrollIntoView({ behavior:'smooth', block:'center' }); el.classList.add('cns-flash'); setTimeout(() => el.classList.remove('cns-flash'), 2200); }
+function cnsIr(dest){
+  const [a, b] = String(dest || '').split('/');
+  consultorCerrar();
+  const home = fn => { if(activeTab !== null) goHome(false); cnsEsperarHome(fn); };
+  switch(a){
+    case 'inicio': home(() => window.scrollTo({ top:0, behavior:'smooth' })); break;
+    case 'dias': home(() => diasAbrir(b && /^\d{4}-\d{2}$/.test(b) ? b : null)); break;
+    case 'stock': home(() => cnsFlash(document.getElementById('dcSilos'))); break;
+    case 'lotes-proceso': home(() => cnsFlash(document.getElementById('dcLotes'))); break;
+    case 'atencion': home(() => cnsFlash(document.getElementById('dcAtencion'))); break;
+    case 'recepcion': goTab('mp'); break;
+    case 'silos': goTab('silo'); break;
+    case 'lotes': goTab('lote'); break;
+    case 'carga': if(b){ try{ localStorage.setItem('nh_lote_carga', b); }catch(e){} } goTab('bigbag'); break;
+    case 'cierre': if(b){ try{ localStorage.setItem('nh_lote_cierre', b); }catch(e){} } goTab('cierre'); break;
+    case 'resumen': if(b) resumenAbrirLote(b); else goTab('resumen'); break;
+    case 'correcciones': goTab('correcciones'); break;
+    case 'usuarios': goTab('usuarios'); break;
+  }
 }
 function consultorAbrir(){
   CNS.abierto = true;
@@ -3799,7 +3826,7 @@ function consultorCerrar(){
   if(bg) bg.classList.remove('on'); if(p) p.classList.remove('on');
 }
 function cnsMd(t){
-  const inl = x => mpEsc(x).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  const inl = x => mpEsc(x).replace(/\[([^\]]+)\]\(app:([a-z-]+(?:\/[A-Za-z0-9_-]+)?)\)/g, '<a href="#" class="cns-link" data-go="$2">$1</a>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   const cells = l => l.trim().replace(/^\||\|$/g, '').split('|').map(x => x.trim());
   const isRow = l => /^\s*\|.*\|\s*$/.test(l);
   const ls = String(t || '').split('\n'); let out = '', i = 0;
